@@ -11,13 +11,13 @@ stages:
   - build
   - publish
 
-lint-package:
-  stage: build
-  before_script:
-    - rm -rf .yarn
-    - yarn install
-  script:
-    - yarn lint
+# lint-package:
+#   stage: build
+#   before_script:
+#     - rm -rf .yarn
+#     - yarn install
+#   script:
+#     - yarn lint
 
 build-package:
   stage: build
