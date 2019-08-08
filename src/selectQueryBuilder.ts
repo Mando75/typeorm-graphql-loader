@@ -112,7 +112,7 @@ export const select = (
   qb: SelectQueryBuilder<typeof BaseEntity>,
   alias: string,
   history?: Set<RelationMetadata>
-): SelectQueryBuilder => {
+): SelectQueryBuilder<typeof BaseEntity> => {
   const meta = connection.getMetadata(model);
   if (selection && selection.children) {
     // For some reason this causes the select to go into a loop and delete the actual fields I want

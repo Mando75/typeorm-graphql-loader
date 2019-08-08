@@ -239,7 +239,7 @@ export class GraphQLDatabaseLoader {
    * Process and clear the current queue.
    * @returns {Promise<void>}
    */
-  protected async processAll(): Promise<void> {
+  protected async processAll(): Promise<any> {
     // Clear and capture the current queue.
     const queue = this._queue.splice(0, this._queue.length);
     try {
@@ -253,8 +253,8 @@ export class GraphQLDatabaseLoader {
       queue.map(async q => {
         const name = typeof q.entity == "string" ? q.entity : q.entity.name;
         const alias = name;
-        let qb = entityManager
-          .getRepository(name)
+        let qb: SelectQueryBuilder<{}> = entityManager
+          .getRepository<{}>(name)
           .createQueryBuilder(alias)
           .select([]);
         //.getRepository(q.entity).createQueryBuilder();
@@ -302,10 +302,10 @@ export class GraphQLDatabaseLoader {
    * @param options
    */
   private handleQueryOptions<T>(
-    query: SelectQueryBuilder<T>,
+    query: SelectQueryBuilder<Function | string | Object>,
     alias: string,
     options: QueryOptions
-  ): SelectQueryBuilder<T> {
+  ): SelectQueryBuilder<Function | string | Object> {
     let qb = query;
     // Include any required select fields
     if (options.requiredSelectFields) {
@@ -334,10 +334,10 @@ export class GraphQLDatabaseLoader {
    * @param query
    * @param pagination
    */
-  private handlePagination<T>(
-    query: SelectQueryBuilder<T>,
+  private handlePagination(
+    query: SelectQueryBuilder<Function | string | Object>,
     pagination: QueryPagination
-  ): SelectQueryBuilder<T> {
+  ): SelectQueryBuilder<Function | string | Object> {
     let qb = query;
     qb = qb.offset(pagination.offset);
     qb = qb.limit(pagination.limit);
