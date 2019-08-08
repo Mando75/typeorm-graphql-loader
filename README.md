@@ -3,18 +3,28 @@
 A dataloader for TypeORM that makes it easy to load TypeORM relations for
 GraphQL query resolvers.
 
-## Description
+## Contents
+
+- [Description](#Description)
+- [Installation](#Installation)
+- [Usage](#Usage)
+- [API](#API)
+- [Problem](#Problem)
+- [Solution](#Solution)
+- [Acknowledgments](#Acknowledgments)
+
+## Description <a name="Description">
 
 This package provides a `GraphQLDatabaseLoader` class, which is a semi-caching
 loader that will trace through a GraphQL query info object and naively load the
 TypeORM fields and relations needed to resolve the query. For a more in-depth
 explaination, see the [Problem](#Problem) and [Solution](#Solution) sections below.
 
-## Installation
+## Installation <a name="Installation">
 
 Coming Soon to NPM :)
 
-## Usage
+## Usage <a name="Usage">
 
 You should create a new GraphQLDatabaseLoader instance in each user session,
 generally via the GraphQLContext object. This is to help with caching and
@@ -27,12 +37,11 @@ import { GraphQLDatabaseLoader } from '@mando75/typeorm-graphql-loader';
 const connection = createConnection({...}); // Create your TypeORM connection
 
 const apolloServer = new ApolloServer({
-      schema,
-      context: {
-        loader: new GraphQLDatabaseLoader(connection, {/** optional options **})
-      },
-    });
-
+  schema,
+  context: {
+    loader: new GraphQLDatabaseLoader(connection, {/** optional options **})
+  },
+});
 ```
 
 The loader will now appear in your resolver's context object:
@@ -49,7 +58,7 @@ Please note that the loader will only return back the fields and relations that
 the client requested in the query. If you need to ensure that certain fields are
 always returned, you can specify this in the QueryOptions parameter.
 
-## API
+## API <a name="API">
 
 The loader provides 4 loading methods and one cache utility methods 
 
@@ -108,18 +117,15 @@ so you can easily calculate the next pagination offset with something like the f
  * @param pagination The last offset and limit used 
  * @param totalRecordCount The total number of records to paginate through
  */
-function getOffset(
-    pagination: { offset: number; limit: number },
-    totalRecordCount: number
-  ) {
-    const nextOffset = offset + limit;
-    const recordsLeft = totalRecordCount - nextOffset;
-    const newOffset = recordsLeft < 1 ? count : nextOffset;
-    return {
-      offset: newOffset,
-      hasMore: newOffset !== count
-    };
-  }
+function getOffset(pagination: { offset: number; limit: number }, totalRecordCount: number) {
+  const nextOffset = offset + limit;
+  const recordsLeft = totalRecordCount - nextOffset;
+  const newOffset = recordsLeft < 1 ? count : nextOffset;
+  return {
+    offset: newOffset,
+    hasMore: newOffset !== count
+  };
+}
 ```
 
 Cursor pagination will be supported in a future version. 
@@ -176,8 +182,9 @@ type LoaderOptions = {
 };
 
 enum LoaderNamingStrategyEnum {
-   DEFAULT
+   CAMELCASE // default if none other specified
    SNAKECASE
+   TITLECASE
 }
 
 
@@ -194,7 +201,7 @@ type QueryOptions = {
    * included in the graphql query. e.g. you may want to always get back the 
    * id of the entity regardless of whether the client asked for it in the graphql query
    **/
-  neededSelects?: string[];
+  requiredSelectFields?: string[];
 **;
 
 /**
@@ -238,7 +245,6 @@ query bookById($id: ID!) {
             name
          }
       }
-   
    }
 }
 ```
@@ -290,14 +296,14 @@ tree, which means we can traverse it and figure out exactly which fields need to
 be selected, and which relations need to be loaded. This can then be used to
 create one SQL query that can get all of the information at once.
 
-Because the loader uses the queryBuilder API, it doesn't matter if you have all
+Because the loader uses the queryBuilder API, it does not matter if you have all
 "normal", "lazy", "eager" relations, or a mix of all of them. You give it your
 starting entity and the GraphQL query info, and it will figure out what data you
 need and give it back to you in a structured TypeORM entity. Additionally, it
 provides some caching functionality as well, which will dedupe identical query
 signatures executed in the same tick.
 
-## Acknowledgments
+## Acknowledgments <a name="Acknowledgments">
 
 This project is based on the work of [Weboptimizer's typeorm-loader
 package](https://github.com/Webtomizer/typeorm-loader). I work quite a bit with
