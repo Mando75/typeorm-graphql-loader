@@ -12,7 +12,6 @@ stages:
   - publish
 
 lint-package:
-  image: node:11.10.0
   stage: build
   before_script:
     - rm -rf .yarn
@@ -21,7 +20,6 @@ lint-package:
     - yarn lint
 
 build-package:
-  image: node:11.10.0
   stage: build
   before_script:
     - rm -rf .yarn
@@ -30,7 +28,6 @@ build-package:
     - yarn build
 
 publish-package:
-  image: node:11.10.0
   stage: publish
   script:
     - echo 'Publish package script'
