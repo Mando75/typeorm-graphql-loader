@@ -302,10 +302,10 @@ export class GraphQLDatabaseLoader {
    * @param options
    */
   private handleQueryOptions<T>(
-    query: SelectQueryBuilder<Function | string | Object>,
+    query: SelectQueryBuilder<Function | string | {}>,
     alias: string,
     options: QueryOptions
-  ): SelectQueryBuilder<Function | string | Object> {
+  ): SelectQueryBuilder<Function | string | {}> {
     let qb = query;
     // Include any required select fields
     if (options.requiredSelectFields) {
@@ -335,9 +335,9 @@ export class GraphQLDatabaseLoader {
    * @param pagination
    */
   private handlePagination(
-    query: SelectQueryBuilder<Function | string | Object>,
+    query: SelectQueryBuilder<Function | string | {}>,
     pagination: QueryPagination
-  ): SelectQueryBuilder<Function | string | Object> {
+  ): SelectQueryBuilder<Function | string | {}> {
     let qb = query;
     qb = qb.offset(pagination.offset);
     qb = qb.limit(pagination.limit);
