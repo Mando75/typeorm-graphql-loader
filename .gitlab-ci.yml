@@ -11,6 +11,15 @@ stages:
   - build
   - publish
 
+lint-package:
+  image: node:11.10.0
+  stage: build
+  before_script:
+    - rm -rf .yarn
+    - yarn install
+  script:
+    - yarn lint
+
 build-package:
   image: node:11.10.0
   stage: build

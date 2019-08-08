@@ -34,9 +34,9 @@ function parseLiteral(ast: ValueNode): any {
   }
 }
 
-function getSelections(
+const getSelections = (
   ast: OperationDefinitionNode
-): ReadonlyArray<SelectionNode> {
+): ReadonlyArray<SelectionNode> => {
   if (
     ast &&
     ast.selectionSet &&
@@ -46,25 +46,25 @@ function getSelections(
     return ast.selectionSet.selections;
   }
   return [];
-}
+};
 
-function isFragment(ast: ASTNode) {
+const isFragment = (ast: ASTNode) => {
   return ast.kind === "InlineFragment" || ast.kind === "FragmentSpread";
-}
+};
 
-function getAST(ast: ASTNode, info: GraphQLResolveInfo | FeedNodeInfo) {
+const getAST = (ast: ASTNode, info: GraphQLResolveInfo | FeedNodeInfo) => {
   if (ast.kind === "FragmentSpread") {
     const fragmentName = ast.name.value;
     return info.fragments[fragmentName];
   }
   return ast;
-}
+};
 
-function flattenAST(
+const flattenAST = (
   ast: ASTNode,
   info: GraphQLResolveInfo | FeedNodeInfo,
   obj: Hash<Selection> = {}
-): Hash<Selection> {
+): Hash<Selection> => {
   return getSelections(ast as OperationDefinitionNode).reduce(
     (flattened, n) => {
       if (isFragment(n)) {
@@ -94,25 +94,25 @@ function flattenAST(
     },
     obj
   );
-}
+};
 
-export function graphqlFields(
+export const graphqlFields = (
   info: GraphQLResolveInfo | FeedNodeInfo,
   obj: Hash<Selection> = {}
-): Selection {
+): Selection => {
   const fields = info.fieldNodes;
   //@ts-ignore
   return { children: fields.reduce((o, ast) => flattenAST(ast, info, o), obj) };
-}
+};
 
-export function select(
+export const select = (
   model: Function | string,
   selection: Selection | null,
   connection: Connection,
   qb: SelectQueryBuilder<typeof BaseEntity>,
   alias: string,
   history?: Set<RelationMetadata>
-) {
+): SelectQueryBuilder => {
   const meta = connection.getMetadata(model);
   if (selection && selection.children) {
     // For some reason this causes the select to go into a loop and delete the actual fields I want
@@ -174,4 +174,4 @@ export function select(
     });
   }
   return qb;
-}
+};

@@ -82,7 +82,7 @@ export class GraphQLDatabaseLoader {
    * @param options
    * @returns {Promise<T?[]>}
    */
-  async loadMany<T>(
+  public async loadMany<T>(
     entity: Function | string,
     where: Partial<T>,
     info: GraphQLResolveInfo | FeedNodeInfo,
@@ -239,7 +239,7 @@ export class GraphQLDatabaseLoader {
    * Process and clear the current queue.
    * @returns {Promise<void>}
    */
-  protected async processAll() {
+  protected async processAll(): Promise<void> {
     // Clear and capture the current queue.
     const queue = this._queue.splice(0, this._queue.length);
     try {
@@ -297,15 +297,16 @@ export class GraphQLDatabaseLoader {
 
   /**
    * Applies the query options to the query builder
-   * @param qb
+   * @param query
    * @param alias
    * @param options
    */
-  private handleQueryOptions(
-    qb: SelectQueryBuilder<any>,
+  private handleQueryOptions<T>(
+    query: SelectQueryBuilder<T>,
     alias: string,
     options: QueryOptions
-  ) {
+  ): SelectQueryBuilder<T> {
+    let qb = query;
     // Include any required select fields
     if (options.requiredSelectFields) {
       options.requiredSelectFields.forEach(field => {
@@ -330,13 +331,14 @@ export class GraphQLDatabaseLoader {
    * Helper to handle pagination.
    * Future version will support cursor based pagination. For now, use
    * basic offset and limit
-   * @param qb
+   * @param query
    * @param pagination
    */
-  private handlePagination(
-    qb: SelectQueryBuilder<any>,
+  private handlePagination<T>(
+    query: SelectQueryBuilder<T>,
     pagination: QueryPagination
-  ) {
+  ): SelectQueryBuilder<T> {
+    let qb = query;
     qb = qb.offset(pagination.offset);
     qb = qb.limit(pagination.limit);
     return qb;

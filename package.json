@@ -6,6 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc --declaration",
+    "lint": "tslint -c tslint.json --project tsconfig.json 'src/**/*.ts'",
     "test": "yarn run build && [ -d tests ] && NODE_ENV=test mocha $NODE_DEBUG_OPTION -r ts-node/register -r tslib tests/test_**.ts"
   },
   "repository": {
@@ -41,6 +42,8 @@
     "mocha": "^5.2.0",
     "sqlite3": "^4.0.3",
     "ts-node": "^7.0.1",
+    "tslint": "^5.18.0",
+    "tslint-config-prettier": "^1.18.0",
     "typeorm": "^0.2.8",
     "typescript": "^3.1.3"
   },
