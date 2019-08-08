@@ -24,6 +24,6 @@ publish-package:
   image: node:11.10.0
   stage: publish
   script:
-    - echo "TODO: Publish package script"
+    - echo 'Publish package script'
   only:
     - master
