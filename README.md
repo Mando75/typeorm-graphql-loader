@@ -3,6 +3,8 @@
 A dataloader for TypeORM that makes it easy to load TypeORM relations for
 GraphQL query resolvers.
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b7d245d528e34a1c977e98728ad77fa5)](https://www.codacy.com/app/Mando75/typeorm-graphql-loader?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Mando75/typeorm-graphql-loader&amp;utm_campaign=Badge_Grade)
+
 ## Contents
 
 - [Description](#Description)
