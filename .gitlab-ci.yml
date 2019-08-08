@@ -1,0 +1,29 @@
+image: node:11.10.0
+
+cache:
+  paths:
+    - node_modules/
+
+before_script:
+  - apt-get update -qq && apt-get install
+
+stages:
+  - build
+  - publish
+
+build-package:
+  image: node:11.10.0
+  stage: build
+  before_script:
+    - rm -rf .yarn
+    - yarn install
+  script:
+    - yarn build
+
+publish-package:
+  image: node:11.10.0
+  stage: publish
+  script:
+    - echo "TODO: Publish package script"
+  only:
+    - master
