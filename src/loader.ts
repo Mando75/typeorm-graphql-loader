@@ -244,46 +244,47 @@ export class GraphQLDatabaseLoader {
     const queue = this._queue.splice(0, this._queue.length);
     try {
       // Create a new QueryBuilder instance.
-      const queryRunner = this.connection.createQueryRunner();
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
-      const entityManager = queryRunner.manager;
+      return await this.connection.transaction(async entityManager => {
+        // const now = Date.now().toString(16);
+        queue.map(async q => {
+          const name = typeof q.entity == "string" ? q.entity : q.entity.name;
+          const alias = name;
+          let qb: SelectQueryBuilder<{}> = entityManager
+            .getRepository<{}>(name)
+            .createQueryBuilder(alias)
+            .select([]);
+          //.getRepository(q.entity).createQueryBuilder();
+          // qb = qb.from(name, alias);
+          qb = select(
+            name,
+            q.fields,
+            entityManager.connection,
+            qb as any,
+            alias
+          );
+          qb = qb.where(q.where);
+          // qb.orderBy(`"${alias}"."created_date"`, "ASC");
+          const options = q.options;
+          if (options) {
+            qb = this.handleQueryOptions(qb, alias, options);
+          }
+          // pagination
+          if (q.pagination) {
+            qb = this.handlePagination(qb, q.pagination);
+            // we use a different execution method, so we need to return
+            // with different logic
+            return qb
+              .getManyAndCount()
+              .then(q.resolve, q.reject)
+              .finally(async () => {
+                this._cache.delete(q.key);
+              });
+          }
 
-      // const now = Date.now().toString(16);
-      queue.map(async q => {
-        const name = typeof q.entity == "string" ? q.entity : q.entity.name;
-        const alias = name;
-        let qb: SelectQueryBuilder<{}> = entityManager
-          .getRepository<{}>(name)
-          .createQueryBuilder(alias)
-          .select([]);
-        //.getRepository(q.entity).createQueryBuilder();
-        // qb = qb.from(name, alias);
-        qb = select(name, q.fields, entityManager.connection, qb as any, alias);
-        qb = qb.where(q.where);
-        // qb.orderBy(`"${alias}"."created_date"`, "ASC");
-        const options = q.options;
-        if (options) {
-          qb = this.handleQueryOptions(qb, alias, options);
-        }
-        // pagination
-        if (q.pagination) {
-          qb = this.handlePagination(qb, q.pagination);
-          // we use a different execution method, so we need to return
-          // with different logic
-          return qb
-            .getManyAndCount()
-            .then(q.resolve, q.reject)
-            .finally(async () => {
-              this._cache.delete(q.key);
-              await queryRunner.release();
-            });
-        }
-
-        const promise = q.many ? qb.getMany() : qb.getOne();
-        return promise.then(q.resolve, q.reject).finally(async () => {
-          this._cache.delete(q.key);
-          await queryRunner.release();
+          const promise = q.many ? qb.getMany() : qb.getOne();
+          return promise.then(q.resolve, q.reject).finally(async () => {
+            this._cache.delete(q.key);
+          });
         });
       });
     } catch (e) {
