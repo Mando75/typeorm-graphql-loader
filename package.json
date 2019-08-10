@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc --declaration",
     "lint": "tslint -c tslint.json --project tsconfig.json 'src/**/*.ts'",
-    "test": "yarn run build && [ -d tests ] && NODE_ENV=test mocha $NODE_DEBUG_OPTION -r ts-node/register -r tslib tests/test_**.ts"
+    "test": "yarn run build && [ -d __tests__ ] && NODE_ENV=test mocha $NODE_DEBUG_OPTION -r ts-node/register -r tslib __tests__/test_**.ts"
   },
   "repository": {
     "type": "git",
@@ -40,6 +40,7 @@
     "graphql": "^14.0.2",
     "metanoia": "^1.0.1",
     "mocha": "^5.2.0",
+    "nyc": "^14.1.1",
     "sqlite3": "^4.0.3",
     "ts-node": "^7.0.1",
     "tslint": "^5.18.0",

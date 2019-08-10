@@ -1,5 +1,6 @@
 import { FieldNode, FragmentDefinitionNode } from "graphql";
 import { OrderByCondition } from "typeorm";
+import { LoaderNamingStrategyEnum } from "./namingStrategy";
 
 export type LoaderOptions = {
   // Time-to-live for cache.
@@ -7,12 +8,6 @@ export type LoaderOptions = {
   // Include if you are using one of the supported TypeORM custom naming strategies
   namingStrategy?: LoaderNamingStrategyEnum;
 };
-
-export enum LoaderNamingStrategyEnum {
-  CAMELCASE,
-  SNAKECASE,
-  TITLECASE
-}
 
 export type QueryOptions = {
   // How to order query results in SQL
@@ -62,6 +57,8 @@ export type Hash<T> = {
 export type Selection = {
   arguments?: Hash<{ name: string; value: any }>;
   children?: Hash<Selection>;
+  name?: any;
+  kind?: any;
 };
 
 export type FeedNodeInfo = {

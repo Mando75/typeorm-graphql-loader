@@ -1,16 +1,15 @@
-import { expect } from "chai";
-import { Chance } from "chance";
-import { graphql, GraphQLSchema } from "graphql";
-import { Connection, createConnection } from "typeorm";
-import { GraphQLDatabaseLoader } from "../src";
+import {expect} from "chai";
+import {graphql, GraphQLSchema} from "graphql";
+import {Connection, createConnection} from "typeorm";
+import {GraphQLDatabaseLoader, LoaderNamingStrategyEnum} from "../src";
 
-import { seedDatabase } from "./common/seed";
-import { Post } from "./entity/Post";
-import { User } from "./entity/User";
-import { builder } from "./schema";
+import {seedDatabase} from "./common/seed";
+import {Post} from "./entity/Post";
+import {User} from "./entity/User";
+import {builder} from "./schema";
 
 let connection: Connection;
-let Posts: Post[], Users: User[];
+let Posts: Post[], Users: User[], user: User;
 
 describe("GraphQL resolvers", function() {
   let schema: GraphQLSchema;
@@ -24,7 +23,7 @@ describe("GraphQL resolvers", function() {
       synchronize: true,
       dropSchema: true,
       entities: [Post, User],
-      logging: false
+      logging: true
     });
 
     await seedDatabase(connection);
@@ -32,8 +31,10 @@ describe("GraphQL resolvers", function() {
     Users = await connection.getRepository(User).find({ relations: ["posts"] });
     Posts = await connection.getRepository(Post).find({ relations: ["owner"] });
 
+    user = Users[0];
+
     schema = builder.build();
-    loader = new GraphQLDatabaseLoader(connection);
+    loader = new GraphQLDatabaseLoader(connection, {namingStrategy: LoaderNamingStrategyEnum.CAMELCASE});
   });
 
   it("can make a simple query", async () => {
@@ -92,5 +93,30 @@ describe("GraphQL resolvers", function() {
       expect(result).to.not.have.key("errors");
     }
     expect(results).to.deep.equal(expected);
+  });
+
+  it("can load a single entity with nested relations", async () => {
+
+
+    const result = await graphql(
+      schema,
+      `{ user(id: ${user.id}){ id firstName lastName age posts { id title content } } }`,
+      {},
+      {
+        loader
+      }
+    );
+    const expected = {
+      data: {
+        user
+      }
+    };
+
+    console.log(user.id)
+    console.log(result)
+
+    expect(result.errors || []).to.deep.equal([]);
+    expect(result).to.not.have.key("errors");
+    expect(result).to.deep.equal(expected);
   });
 });

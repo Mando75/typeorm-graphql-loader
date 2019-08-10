@@ -187,7 +187,6 @@ type LoaderOptions = {
 enum LoaderNamingStrategyEnum {
    CAMELCASE // default if none other specified
    SNAKECASE
-   TITLECASE
 }
 
 

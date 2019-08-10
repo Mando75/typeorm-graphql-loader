@@ -1,0 +1,164 @@
+import {
+  ASTNode,
+  FieldNode,
+  GraphQLResolveInfo,
+  Kind,
+  OperationDefinitionNode,
+  SelectionNode,
+  ValueNode
+} from "graphql";
+import { BaseEntity, Connection, SelectQueryBuilder } from "typeorm";
+import { FeedNodeInfo, Hash, Selection } from "./types";
+import { LoaderNamingStrategyEnum, NamingStrategy } from "./namingStrategy";
+
+export class GraphqlQueryBuilder extends NamingStrategy {
+  constructor(namingStrategy: LoaderNamingStrategyEnum) {
+    super(namingStrategy);
+  }
+
+  public static graphqlFields(
+    info: GraphQLResolveInfo | FeedNodeInfo,
+    obj: Hash<Selection> = {}
+  ): Selection {
+    const fields = info.fieldNodes;
+    return {
+      children: fields.reduce(
+        (o, ast) => GraphqlQueryBuilder.flattenAST(ast, info, o),
+        obj
+      )
+    };
+  }
+
+  public createQuery(
+    model: Function | string,
+    selection: Selection | null,
+    connection: Connection,
+    qb: SelectQueryBuilder<typeof BaseEntity>,
+    alias: string
+  ): SelectQueryBuilder<typeof BaseEntity> {
+    const meta = connection.getMetadata(model);
+    if (selection && selection.children) {
+      // For some reason this causes the select to go into a loop and delete the actual fields I want
+      // Results in all fields being selected, but that's not so bad
+      const fields = meta.columns.filter(field => {
+        return field.propertyName in selection.children!;
+      });
+      // always include the id
+      if (!fields.find(field => field.propertyName === "id")) {
+        qb = qb.addSelect(`${alias}.id`, `${alias}_id`);
+      }
+      fields.forEach(field => {
+        qb = qb.addSelect(
+          `${alias}.${field.propertyName}`,
+          this.formatAliasField(alias, field.propertyName)
+        );
+      });
+      const relations = meta.relations;
+      relations.forEach(relation => {
+        if (relation.propertyName in selection.children!) {
+          const childAlias = alias + "_" + relation.propertyName;
+          qb = qb.leftJoin(alias + "." + relation.propertyName, childAlias);
+          qb = this.createQuery(
+            relation.inverseEntityMetadata.target,
+            selection.children![relation.propertyName],
+            connection,
+            qb,
+            childAlias
+          );
+        }
+      });
+    } else if (selection === null) {
+      return qb;
+    }
+    return qb;
+  }
+
+  private static parseLiteral(ast: ValueNode): any {
+    switch (ast.kind) {
+      case Kind.STRING:
+      case Kind.BOOLEAN:
+        return ast.value;
+      case Kind.INT:
+      case Kind.FLOAT:
+        return parseFloat(ast.value);
+      case Kind.OBJECT: {
+        const value = Object.create(null);
+        ast.fields.forEach(field => {
+          value[field.name.value] = GraphqlQueryBuilder.parseLiteral(
+            field.value
+          );
+        });
+        return value;
+      }
+      case Kind.LIST:
+        return ast.values.map(GraphqlQueryBuilder.parseLiteral);
+      default:
+        return null;
+    }
+  }
+
+  private static getSelections = (
+    ast: OperationDefinitionNode
+  ): ReadonlyArray<SelectionNode> => {
+    if (
+      ast &&
+      ast.selectionSet &&
+      ast.selectionSet.selections &&
+      ast.selectionSet.selections.length
+    ) {
+      return ast.selectionSet.selections;
+    }
+    return [];
+  };
+
+  private static isFragment(ast: ASTNode) {
+    return ast.kind === "InlineFragment" || ast.kind === "FragmentSpread";
+  }
+
+  private static getAST(ast: ASTNode, info: GraphQLResolveInfo | FeedNodeInfo) {
+    if (ast.kind === "FragmentSpread") {
+      const fragmentName = ast.name.value;
+      return info.fragments[fragmentName];
+    }
+    return ast;
+  }
+
+  private static flattenAST(
+    ast: ASTNode,
+    info: GraphQLResolveInfo | FeedNodeInfo,
+    obj: Hash<Selection> = {}
+  ): Hash<Selection> {
+    return GraphqlQueryBuilder.getSelections(
+      ast as OperationDefinitionNode
+    ).reduce((flattened, n) => {
+      if (GraphqlQueryBuilder.isFragment(n)) {
+        flattened = GraphqlQueryBuilder.flattenAST(
+          GraphqlQueryBuilder.getAST(n, info),
+          info,
+          flattened
+        );
+      } else {
+        const node: FieldNode = n as FieldNode;
+        const name = (node as FieldNode).name.value;
+        if (flattened[name]) {
+          Object.assign(
+            flattened[name].children,
+            GraphqlQueryBuilder.flattenAST(node, info, flattened[name].children)
+          );
+        } else {
+          flattened[name] = {
+            arguments: node.arguments
+              ? node.arguments
+                  .map(({ name, value }) => ({
+                    [name.value]: GraphqlQueryBuilder.parseLiteral(value)
+                  }))
+                  .reduce((p, n) => ({ ...p, ...n }), {})
+              : {},
+            children: GraphqlQueryBuilder.flattenAST(node, info)
+          };
+        }
+      }
+      return flattened;
+    }, obj);
+  }
+}

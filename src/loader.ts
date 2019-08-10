@@ -1,23 +1,21 @@
 import { BaseEntity, Connection, SelectQueryBuilder } from "typeorm";
 import { GraphQLResolveInfo } from "graphql";
+import { LoaderNamingStrategyEnum, NamingStrategy } from "./namingStrategy";
 import * as crypto from "crypto";
-
-import { graphqlFields, select } from "./selectQueryBuilder";
-import { snakeCase, titleCase, camelCase } from "typeorm/util/StringUtils";
 import {
   FeedNodeInfo,
-  LoaderNamingStrategyEnum,
   LoaderOptions,
   QueryMeta,
   QueryOptions,
   QueryPagination,
   QueueItem
 } from "./types";
+import { GraphqlQueryBuilder } from "./graphqlQueryBuilder";
 
 /**
  * GraphQLDatabaseLoader is a caching loader that folds a batch of different database queries into a singular query.
  */
-export class GraphQLDatabaseLoader {
+export class GraphQLDatabaseLoader extends NamingStrategy {
   private _queue: QueueItem[] = [];
   private _cache: Map<string, Promise<any>> = new Map();
   private _immediate?: NodeJS.Immediate;
@@ -30,7 +28,9 @@ export class GraphQLDatabaseLoader {
   constructor(
     public connection: Connection,
     public options: LoaderOptions = {}
-  ) {}
+  ) {
+    super(options.namingStrategy || LoaderNamingStrategyEnum.CAMELCASE);
+  }
 
   /**
    * Load an entity from the database.
@@ -40,7 +40,7 @@ export class GraphQLDatabaseLoader {
    * @param options
    * @returns {Promise<T>}
    */
-  async loadOne<T>(
+  public async loadOne<T>(
     entity: Function | string,
     where: Partial<T>,
     info: GraphQLResolveInfo,
@@ -124,7 +124,7 @@ export class GraphQLDatabaseLoader {
    * @param pagination
    * @param options
    */
-  async loadManyPaginated<T>(
+  public async loadManyPaginated<T>(
     entity: Function | string,
     where: Partial<T>,
     info: GraphQLResolveInfo | FeedNodeInfo,
@@ -166,7 +166,7 @@ export class GraphQLDatabaseLoader {
    * @param {QueryOptions} options
    * @returns {Promise<T?[]>}
    */
-  async batchLoadMany<T>(
+  public async batchLoadMany<T>(
     entity: Function | string,
     where: Partial<T>[],
     info: GraphQLResolveInfo,
@@ -180,7 +180,7 @@ export class GraphQLDatabaseLoader {
   /**
    * Clears the loader cache.
    */
-  clear() {
+  public clear() {
     this._cache.clear();
   }
 
@@ -196,7 +196,10 @@ export class GraphQLDatabaseLoader {
     // Create a md5 hash.
     const hash = crypto.createHash("md5");
     // Get the fields queried by GraphQL.
-    const fields = info ? graphqlFields(info) : null;
+    if (!info) {
+      throw new Error("Missing info parameter");
+    }
+    const fields = GraphqlQueryBuilder.graphqlFields(info);
     // Generate a key hash from the query parameters.
     const key = hash
       .update(JSON.stringify([where, fields]))
@@ -222,19 +225,6 @@ export class GraphQLDatabaseLoader {
     };
   }
 
-  private namingStrategy(alias: string, field: string): string {
-    const appended = alias + " " + field;
-    switch (this.options.namingStrategy) {
-      case LoaderNamingStrategyEnum.SNAKECASE:
-        return snakeCase(appended);
-      case LoaderNamingStrategyEnum.TITLECASE:
-        return titleCase(appended);
-      case LoaderNamingStrategyEnum.CAMELCASE:
-      default:
-        return camelCase(appended);
-    }
-  }
-
   /**
    * Process and clear the current queue.
    * @returns {Promise<void>}
@@ -255,7 +245,10 @@ export class GraphQLDatabaseLoader {
             .select([]);
           //.getRepository(q.entity).createQueryBuilder();
           // qb = qb.from(name, alias);
-          qb = select(
+          const graphqlQueryBuilder = new GraphqlQueryBuilder(
+            this.namingStrategy
+          );
+          qb = graphqlQueryBuilder.createQuery(
             name,
             q.fields,
             entityManager.connection,
@@ -313,7 +306,7 @@ export class GraphQLDatabaseLoader {
       options.requiredSelectFields.forEach(field => {
         qb = qb.addSelect(
           `${alias}.${field}`,
-          this.namingStrategy(alias, field)
+          this.formatAliasField(alias, field)
         );
       });
     }

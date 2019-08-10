@@ -1,5 +1,15 @@
-import { GraphQLInt, GraphQLResolveInfo, GraphQLString } from "graphql";
-import { Entity, Column, ManyToOne, OneToMany, Connection } from "typeorm";
+import {
+  GraphQLInt,
+  GraphQLResolveInfo,
+  GraphQLID,
+  GraphQLString
+} from "graphql";
+import {
+  Entity,
+  PrimaryColumn,
+  Column,
+  OneToMany,
+} from "typeorm";
 import { GraphQLDatabaseLoader } from "../../src";
 import { builder } from "../schema/index";
 import { Node } from "./Node";
@@ -8,6 +18,11 @@ import { Post } from "./Post";
 @Entity()
 @builder.type()
 export class User extends Node {
+  @builder.nonNull()
+  @builder.field(GraphQLID)
+  @PrimaryColumn()
+  id!: number;
+
   @builder.nonNull()
   @builder.field(GraphQLString)
   @Column("varchar")
@@ -49,5 +64,25 @@ export class User extends Node {
     info: GraphQLResolveInfo
   ) {
     return context.loader.loadMany(User, {}, info);
+  }
+
+  @builder.query({
+    args: {id: {type: GraphQLID, defaultValue: null}},
+    returnType: {
+      type: () => User,
+      list: false,
+      nonNullItems: false,
+      nonNull: false
+    }
+  })
+  async user(
+    rootValue: any,
+    { id }: any,
+    context: { loader: GraphQLDatabaseLoader },
+    info: GraphQLResolveInfo
+  ) {
+    const user = await context.loader.loadOne(User, { id }, info);
+    console.log(user)
+    return user
   }
 }
