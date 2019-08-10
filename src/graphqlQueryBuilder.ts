@@ -22,11 +22,18 @@ export class GraphqlQueryBuilder extends NamingStrategy {
     obj: Hash<Selection> = {}
   ): Selection {
     const fields = info.fieldNodes;
+    // there are some problems here with the TypeScript
+    // compiler picking the wrong reduce overload in lib.es5.d.ts
+    // if it continues to be an issue, we may just have to dump in a
+    // compiler ignore. For now, just trying to force the correct overload
+    // by specifying the types explicitly
+    const children: Hash<Selection> = fields.reduce<Hash<Selection>>(
+      (o: Hash<Selection>, ast: FieldNode) =>
+        GraphqlQueryBuilder.flattenAST(ast, info, o) as Hash<Selection>,
+      obj as Hash<Selection>
+    );
     return {
-      children: fields.reduce(
-        (o, ast) => GraphqlQueryBuilder.flattenAST(ast, info, o),
-        obj
-      )
+      children
     };
   }
 
