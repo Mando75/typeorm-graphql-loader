@@ -20,12 +20,12 @@ export function fakeGraphqlInfo() {
               name: [Object],
               arguments: [],
               directives: [],
-              selectionSet: undefined,
+              selectionSet: null,
               loc: [Object]
             },
             {
               kind: "Field",
-              alias: undefined,
+              alias: null,
               name: [Object],
               arguments: [],
               directives: [],
