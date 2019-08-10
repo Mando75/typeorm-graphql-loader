@@ -9,13 +9,12 @@ export class NamingStrategy {
   constructor(protected namingStrategy: LoaderNamingStrategyEnum) {}
 
   protected formatAliasField(alias: string, field: string): string {
-    const appended = alias + " " + field;
     switch (this.namingStrategy) {
       case LoaderNamingStrategyEnum.SNAKECASE:
-        return snakeCase(appended);
+        return `${alias}_${snakeCase(field)}`;
       case LoaderNamingStrategyEnum.CAMELCASE:
       default:
-        return camelCase(appended);
+        return `${alias}_${camelCase(field)}`;
     }
   }
 }

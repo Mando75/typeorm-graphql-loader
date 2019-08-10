@@ -4,14 +4,9 @@ import {
   GraphQLID,
   GraphQLString
 } from "graphql";
-import {
-  Entity,
-  PrimaryColumn,
-  Column,
-  OneToMany,
-} from "typeorm";
+import { Entity, PrimaryColumn, Column, OneToMany } from "typeorm";
 import { GraphQLDatabaseLoader } from "../../src";
-import { builder } from "../schema/index";
+import { builder } from "../schema";
 import { Node } from "./Node";
 import { Post } from "./Post";
 
@@ -67,7 +62,7 @@ export class User extends Node {
   }
 
   @builder.query({
-    args: {id: {type: GraphQLID, defaultValue: null}},
+    args: { id: { type: GraphQLID, defaultValue: null } },
     returnType: {
       type: () => User,
       list: false,
@@ -81,8 +76,8 @@ export class User extends Node {
     context: { loader: GraphQLDatabaseLoader },
     info: GraphQLResolveInfo
   ) {
-    const user = await context.loader.loadOne(User, { id }, info);
-    console.log(user)
-    return user
+    return context.loader.loadOne(User, { id }, info, {
+      order: { "User__posts.id": "ASC" }
+    });
   }
 }

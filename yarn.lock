@@ -501,6 +501,14 @@ deep-eql@^3.0.1:
   dependencies:
     type-detect "^4.0.0"
 
+deep-equal-in-any-order@^1.0.18:
+  version "1.0.18"
+  resolved "https://registry.yarnpkg.com/deep-equal-in-any-order/-/deep-equal-in-any-order-1.0.18.tgz#54e8fc869c83dd17822494a169fd450e3e589fde"
+  integrity sha512-QNBIW/HdwlB2K3YIY0s02ap4849wShQkMIIDT/nu95humhyydwkmdYeGA/Jv526GoiUG9vxYhq95jr3wu5hgYQ==
+  dependencies:
+    lodash "^4.17.15"
+    sort-any "^1.1.17"
+
 deep-extend@^0.6.0:
   version "0.6.0"
   resolved "https://registry.yarnpkg.com/deep-extend/-/deep-extend-0.6.0.tgz#c4fa7c95404a17a9c3e8ca7e1537312b736330ac"
@@ -1026,7 +1034,7 @@ lodash.flattendeep@^4.4.0:
   resolved "https://registry.yarnpkg.com/lodash.flattendeep/-/lodash.flattendeep-4.4.0.tgz#fb030917f86a3134e5bc9bec0d69e0013ddfedb2"
   integrity sha1-+wMJF/hqMTTlvJvsDWngAT3f7bI=
 
-lodash@^4.17.13:
+lodash@^4.17.13, lodash@^4.17.15:
   version "4.17.15"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
   integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
@@ -1595,6 +1603,13 @@ signal-exit@^3.0.0, signal-exit@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.2.tgz#b5fdc08f1287ea1178628e415e25132b73646c6d"
   integrity sha1-tf3AjxKH6hF4Yo5BXiUTK3NkbG0=
+
+sort-any@^1.1.17:
+  version "1.1.17"
+  resolved "https://registry.yarnpkg.com/sort-any/-/sort-any-1.1.17.tgz#747d7e9395fca47a96b273bcba1ac04aa92eec87"
+  integrity sha512-Rmu+jPaRGYQMC4yn6yIlA+5GXFhaNTImQLkqxEQocFAYaw6CrZz6hdAYRi5Ea2nT5LkzeEEVwmnhgEnGSaz/WA==
+  dependencies:
+    lodash "^4.17.15"
 
 source-map-support@^0.5.6:
   version "0.5.13"

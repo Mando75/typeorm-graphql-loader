@@ -10,6 +10,7 @@ import {
 import { BaseEntity, Connection, SelectQueryBuilder } from "typeorm";
 import { FeedNodeInfo, Hash, Selection } from "./types";
 import { LoaderNamingStrategyEnum, NamingStrategy } from "./namingStrategy";
+import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
 export class GraphqlQueryBuilder extends NamingStrategy {
   constructor(namingStrategy: LoaderNamingStrategyEnum) {
@@ -34,7 +35,8 @@ export class GraphqlQueryBuilder extends NamingStrategy {
     selection: Selection | null,
     connection: Connection,
     qb: SelectQueryBuilder<typeof BaseEntity>,
-    alias: string
+    alias: string,
+    history?: Set<RelationMetadata>
   ): SelectQueryBuilder<typeof BaseEntity> {
     const meta = connection.getMetadata(model);
     if (selection && selection.children) {
@@ -56,7 +58,7 @@ export class GraphqlQueryBuilder extends NamingStrategy {
       const relations = meta.relations;
       relations.forEach(relation => {
         if (relation.propertyName in selection.children!) {
-          const childAlias = alias + "_" + relation.propertyName;
+          const childAlias = alias + "__" + relation.propertyName;
           qb = qb.leftJoin(alias + "." + relation.propertyName, childAlias);
           qb = this.createQuery(
             relation.inverseEntityMetadata.target,
@@ -68,7 +70,33 @@ export class GraphqlQueryBuilder extends NamingStrategy {
         }
       });
     } else if (selection === null) {
-      return qb;
+      history = history || new Set();
+      const relations = meta.relations;
+      relations.forEach(relation => {
+        const childAlias = `${alias}__${relation.propertyName}`;
+        if (relation.inverseRelation) {
+          if (history!.has(relation.inverseRelation)) {
+            qb = qb.addSelect(alias);
+            return;
+          }
+          history!.add(relation);
+          qb = qb.addFrom(
+            relation.inverseRelation.entityMetadata.targetName,
+            relation.inverseEntityMetadata.targetName
+          );
+          qb = qb.leftJoin(alias + "." + relation.propertyName, childAlias);
+          qb = this.createQuery(
+            relation.inverseEntityMetadata.targetName,
+            null,
+            connection,
+            qb,
+            childAlias,
+            history
+          );
+        } else {
+          qb = qb.addSelect(`${alias}.${relation.propertyName}`, childAlias);
+        }
+      });
     }
     return qb;
   }

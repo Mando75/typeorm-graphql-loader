@@ -37,6 +37,7 @@ export async function seedDatabase(connection: Connection) {
           content: chance.paragraph({
             sentences: chance.integer({ min: 1, max: 4 })
           }),
+          camelizedField: chance.sentence(),
           owner: chance.pickone(users)
         });
         posts.push(post);

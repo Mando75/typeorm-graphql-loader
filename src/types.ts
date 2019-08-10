@@ -57,8 +57,6 @@ export type Hash<T> = {
 export type Selection = {
   arguments?: Hash<{ name: string; value: any }>;
   children?: Hash<Selection>;
-  name?: any;
-  kind?: any;
 };
 
 export type FeedNodeInfo = {

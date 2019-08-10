@@ -1,7 +1,3 @@
 export { GraphQLDatabaseLoader } from "./loader";
-export {
-  LoaderOptions,
-  LoaderNamingStrategyEnum,
-  QueryOptions,
-  QueryPagination
-} from "./types";
+export { LoaderNamingStrategyEnum } from "./namingStrategy";
+export { LoaderOptions, QueryOptions, QueryPagination } from "./types";

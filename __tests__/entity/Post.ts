@@ -21,7 +21,11 @@ class PostInput {
   owner!: string | number;
 }
 
-@Entity()
+@Entity({
+  orderBy: {
+    id: "ASC"
+  }
+})
 @builder.type()
 export class Post extends Node {
   @builder.nonNull()
@@ -33,6 +37,11 @@ export class Post extends Node {
   @builder.field(GraphQLString)
   @Column("text")
   content!: string;
+
+  @builder.nonNull()
+  @builder.field(GraphQLString)
+  @Column("text")
+  camelizedField!: string;
 
   @ManyToOne(type => User, user => user.posts)
   @JoinColumn()

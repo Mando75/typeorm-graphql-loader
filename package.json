@@ -37,6 +37,7 @@
     "@types/object-path": "^0.9.29",
     "chai": "^4.2.0",
     "chance": "^1.0.16",
+    "deep-equal-in-any-order": "^1.0.18",
     "graphql": "^14.0.2",
     "metanoia": "^1.0.1",
     "mocha": "^5.2.0",
