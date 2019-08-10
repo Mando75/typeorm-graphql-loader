@@ -22,9 +22,25 @@ export class GraphqlQueryBuilder extends NamingStrategy {
     obj: Hash<Selection> = {}
   ): Selection {
     const fields = info.fieldNodes;
-    // there are some problems here with the TypeScript
-    // compiler picking the wrong reduce overload in lib.es5.d.ts
-    // if it continues to be an issue,
+    /**
+     * there are some problems here with the TS Node
+     * compiler picking the wrong reduce overload in lib.es5.d.ts
+     * if it continues to be an issue,
+     * It should be using this overload:
+     *    reduce<U>(callbackfn: (previousValue: U,
+     *                           currentValue: T,
+     *                           currentIndex: number,
+     *                           array: ReadonlyArray<T>) => U,
+     *               initialValue: U): U;
+     * But instead it uses
+     *     reduce(callbackfn: (previousValue: T,
+     *                         currentValue: T,
+     *                         currentIndex: number,
+     *                         array: ReadonlyArray<T>) => T,
+     *             initialValue: T): T;
+     *  Can't find a fix for it right now, so ignoring the warnings
+     *  since I know the function signature is correct
+     **/
     const children: Hash<Selection> = fields.reduce(
       // @ts-ignore
       (o: Hash<Selection>, ast: FieldNode) =>
