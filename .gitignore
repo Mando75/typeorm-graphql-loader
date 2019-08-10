@@ -162,3 +162,6 @@ typings/
 .idea/
 
 dist/
+
+# SQL Lite files
+*.sqllite3
