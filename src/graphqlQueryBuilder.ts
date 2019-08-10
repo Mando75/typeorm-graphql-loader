@@ -70,33 +70,34 @@ export class GraphqlQueryBuilder extends NamingStrategy {
         }
       });
     } else if (selection === null) {
-      history = history || new Set();
-      const relations = meta.relations;
-      relations.forEach(relation => {
-        const childAlias = `${alias}__${relation.propertyName}`;
-        if (relation.inverseRelation) {
-          if (history!.has(relation.inverseRelation)) {
-            qb = qb.addSelect(alias);
-            return;
-          }
-          history!.add(relation);
-          qb = qb.addFrom(
-            relation.inverseRelation.entityMetadata.targetName,
-            relation.inverseEntityMetadata.targetName
-          );
-          qb = qb.leftJoin(alias + "." + relation.propertyName, childAlias);
-          qb = this.createQuery(
-            relation.inverseEntityMetadata.targetName,
-            null,
-            connection,
-            qb,
-            childAlias,
-            history
-          );
-        } else {
-          qb = qb.addSelect(`${alias}.${relation.propertyName}`, childAlias);
-        }
-      });
+      // UNUSED may add back in at a later date
+      // history = history || new Set();
+      // const relations = meta.relations;
+      // relations.forEach(relation => {
+      //   const childAlias = `${alias}__${relation.propertyName}`;
+      //   if (relation.inverseRelation) {
+      //     if (history!.has(relation.inverseRelation)) {
+      //       qb = qb.addSelect(alias);
+      //       return;
+      //     }
+      //     history!.add(relation);
+      //     qb = qb.addFrom(
+      //       relation.inverseRelation.entityMetadata.targetName,
+      //       relation.inverseEntityMetadata.targetName
+      //     );
+      //     qb = qb.leftJoin(alias + "." + relation.propertyName, childAlias);
+      //     qb = this.createQuery(
+      //       relation.inverseEntityMetadata.targetName,
+      //       null,
+      //       connection,
+      //       qb,
+      //       childAlias,
+      //       history
+      //     );
+      //   } else {
+      //     qb = qb.addSelect(`${alias}.${relation.propertyName}`, childAlias);
+      //   }
+      // });
     }
     return qb;
   }

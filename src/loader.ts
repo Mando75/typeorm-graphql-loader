@@ -11,7 +11,6 @@ import {
   QueueItem
 } from "./types";
 import { GraphqlQueryBuilder } from "./graphqlQueryBuilder";
-import { User } from "../__tests__/entity/User";
 
 /**
  * GraphQLDatabaseLoader is a caching loader that folds a batch of different database queries into a singular query.

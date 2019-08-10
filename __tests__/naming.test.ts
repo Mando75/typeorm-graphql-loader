@@ -28,7 +28,7 @@ describe("Custom Naming strategy", () => {
       synchronize: true,
       dropSchema: true,
       entities: [Post, User],
-      logging: true,
+      logging: false,
       namingStrategy: new SnakeNamingStrategy()
     });
 

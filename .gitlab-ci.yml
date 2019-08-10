@@ -9,6 +9,7 @@ before_script:
 
 stages:
   - build
+  - test
   - publish
 
 lint-package:
@@ -26,6 +27,14 @@ build-package:
     - yarn install
   script:
     - yarn build
+
+test-package:
+  stage: test
+  before_script:
+    - rm -rf .yarn
+    - yarn install
+  script:
+    - yarn test-with-coverage
 
 publish-package:
   stage: publish

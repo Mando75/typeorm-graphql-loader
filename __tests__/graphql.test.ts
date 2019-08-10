@@ -28,7 +28,7 @@ describe("GraphQL resolvers", function() {
       synchronize: true,
       dropSchema: true,
       entities: [Post, User],
-      logging: true
+      logging: false
     });
 
     await seedDatabase(connection);
@@ -136,5 +136,29 @@ describe("GraphQL resolvers", function() {
     expect(result).to.not.have.key("errors");
     //@ts-ignore
     expect(result).to.deep.equalInAnyOrder(expected);
+  });
+
+  it("can handle fragments", async () => {
+    const result = await graphql(
+      schema,
+      `
+        query users {
+          users {
+            ...userId
+          }
+        }
+        fragment userId on User {
+          id
+        }
+      `,
+      {},
+      { loader }
+    );
+
+    expect(result.errors || []).to.deep.equal([]);
+    expect(result).to.not.have.key("errors");
+    expect(result.data).to.deep.equal({
+      users: Users.map(({ id }) => ({ id: id.toString() }))
+    });
   });
 });
