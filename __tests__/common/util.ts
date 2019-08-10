@@ -7,7 +7,7 @@ export function fakeGraphqlInfo() {
     fieldNodes: [
       {
         kind: "Field",
-        alias: undefined,
+        alias: null,
         name: { kind: "Name", value: "me", loc: [Object] },
         arguments: [],
         directives: [],
@@ -16,7 +16,7 @@ export function fakeGraphqlInfo() {
           selections: [
             {
               kind: "Field",
-              alias: undefined,
+              alias: null,
               name: [Object],
               arguments: [],
               directives: [],
