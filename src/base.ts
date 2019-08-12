@@ -1,12 +1,20 @@
 import { snakeCase, camelCase } from "typeorm/util/StringUtils";
+import { LoaderOptions } from "./types";
 
 export enum LoaderNamingStrategyEnum {
   CAMELCASE,
   SNAKECASE
 }
 
-export class NamingStrategy {
-  constructor(protected namingStrategy: LoaderNamingStrategyEnum) {}
+export class Base {
+  protected primaryKeyColumn: string;
+  protected namingStrategy: LoaderNamingStrategyEnum;
+
+  constructor(options: LoaderOptions) {
+    this.primaryKeyColumn = options.primaryKeyColumn || "id";
+    this.namingStrategy =
+      options.namingStrategy || LoaderNamingStrategyEnum.CAMELCASE;
+  }
 
   protected formatAliasField(alias: string, field: string): string {
     switch (this.namingStrategy) {

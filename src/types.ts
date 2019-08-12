@@ -1,12 +1,14 @@
 import { FieldNode, FragmentDefinitionNode } from "graphql";
 import { OrderByCondition } from "typeorm";
-import { LoaderNamingStrategyEnum } from "./namingStrategy";
+import { LoaderNamingStrategyEnum } from "./base";
 
 export type LoaderOptions = {
   // Time-to-live for cache.
   ttl?: number;
   // Include if you are using one of the supported TypeORM custom naming strategies
   namingStrategy?: LoaderNamingStrategyEnum;
+  // this column will always be loaded for every relation by the query builder.
+  primaryKeyColumn?: string;
 };
 
 export type QueryOptions = {

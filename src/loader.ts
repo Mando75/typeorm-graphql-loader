@@ -1,6 +1,6 @@
 import { BaseEntity, Connection, SelectQueryBuilder } from "typeorm";
 import { GraphQLResolveInfo } from "graphql";
-import { LoaderNamingStrategyEnum, NamingStrategy } from "./namingStrategy";
+import { Base } from "./base";
 import * as crypto from "crypto";
 import {
   FeedNodeInfo,
@@ -15,7 +15,7 @@ import { GraphqlQueryBuilder } from "./graphqlQueryBuilder";
 /**
  * GraphQLDatabaseLoader is a caching loader that folds a batch of different database queries into a singular query.
  */
-export class GraphQLDatabaseLoader extends NamingStrategy {
+export class GraphQLDatabaseLoader extends Base {
   private _queue: QueueItem[] = [];
   private _cache: Map<string, Promise<any>> = new Map();
   private _immediate?: NodeJS.Immediate;
@@ -29,7 +29,7 @@ export class GraphQLDatabaseLoader extends NamingStrategy {
     public connection: Connection,
     public options: LoaderOptions = {}
   ) {
-    super(options.namingStrategy || LoaderNamingStrategyEnum.CAMELCASE);
+    super(options);
   }
 
   /**
@@ -245,9 +245,7 @@ export class GraphQLDatabaseLoader extends NamingStrategy {
             .select([]);
           //.getRepository(q.entity).createQueryBuilder();
           // qb = qb.from(name, alias);
-          const graphqlQueryBuilder = new GraphqlQueryBuilder(
-            this.namingStrategy
-          );
+          const graphqlQueryBuilder = new GraphqlQueryBuilder(this.options);
           qb = graphqlQueryBuilder.createQuery(
             name,
             q.fields,

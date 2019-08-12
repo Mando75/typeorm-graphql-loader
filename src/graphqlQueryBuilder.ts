@@ -8,13 +8,13 @@ import {
   ValueNode
 } from "graphql";
 import { BaseEntity, Connection, SelectQueryBuilder } from "typeorm";
-import { FeedNodeInfo, Hash, Selection } from "./types";
-import { LoaderNamingStrategyEnum, NamingStrategy } from "./namingStrategy";
+import { FeedNodeInfo, Hash, LoaderOptions, Selection } from "./types";
+import { Base } from "./base";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
-export class GraphqlQueryBuilder extends NamingStrategy {
-  constructor(namingStrategy: LoaderNamingStrategyEnum) {
-    super(namingStrategy);
+export class GraphqlQueryBuilder extends Base {
+  constructor({ namingStrategy, primaryKeyColumn }: LoaderOptions) {
+    super({ namingStrategy, primaryKeyColumn });
   }
 
   public static graphqlFields(
@@ -69,9 +69,12 @@ export class GraphqlQueryBuilder extends NamingStrategy {
       const fields = meta.columns.filter(field => {
         return field.propertyName in selection.children!;
       });
-      // always include the id
-      if (!fields.find(field => field.propertyName === "id")) {
-        qb = qb.addSelect(`${alias}.id`, `${alias}_id`);
+      // always include the primary key for joins
+      if (!fields.find(field => field.propertyName === this.primaryKeyColumn)) {
+        qb = qb.addSelect(
+          `${alias}.${this.primaryKeyColumn}`,
+          `${alias}_${this.primaryKeyColumn}`
+        );
       }
       fields.forEach(field => {
         qb = qb.addSelect(
