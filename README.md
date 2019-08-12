@@ -3,7 +3,7 @@
 A dataloader for TypeORM that makes it easy to load TypeORM relations for
 GraphQL query resolvers.
 
-[![Codacy Badge Quality](https://api.codacy.com/project/badge/Grade/b7d245d528e34a1c977e98728ad77fa5)](https://www.codacy.com/app/Mando75/typeorm-graphql-loader?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Mando75/typeorm-graphql-loader&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge Quality](https://api.codacy.com/project/badge/Grade/b7d245d528e34a1c977e98728ad77fa5)](https://www.codacy.com/app/Mando75/typeorm-graphql-loader?utm_source=github.com&utm_medium=referral&utm_content=Mando75/typeorm-graphql-loader&utm_campaign=Badge_Grade)
 [![pipeline status](https://gitlab.com/Mando75/typeorm-graphql-loader/badges/master/pipeline.svg)](https://gitlab.com/Mando75/typeorm-graphql-loader/commits/master)
 [![Codacy Badge Coverage](https://api.codacy.com/project/badge/Coverage/b7d245d528e34a1c977e98728ad77fa5)](https://www.codacy.com/app/Mando75/typeorm-graphql-loader?utm_source=github.com&utm_medium=referral&utm_content=Mando75/typeorm-graphql-loader&utm_campaign=Badge_Coverage)
 
@@ -12,6 +12,8 @@ GraphQL query resolvers.
 - [Description](#Description)
 - [Installation](#Installation)
 - [Usage](#Usage)
+- [Gotchas](#Gotchas)
+- [Roadmap](#Roadmap)
 - [API](#API)
 - [Problem](#Problem)
 - [Solution](#Solution)
@@ -22,7 +24,7 @@ GraphQL query resolvers.
 This package provides a `GraphQLDatabaseLoader` class, which is a semi-caching
 loader that will trace through a GraphQL query info object and naively load the
 TypeORM fields and relations needed to resolve the query. For a more in-depth
-explaination, see the [Problem](#Problem) and [Solution](#Solution) sections below.
+explanation, see the [Problem](#Problem) and [Solution](#Solution) sections below.
 
 ## Installation <a name="Installation">
 
@@ -62,16 +64,31 @@ Please note that the loader will only return back the fields and relations that
 the client requested in the query. If you need to ensure that certain fields are
 always returned, you can specify this in the QueryOptions parameter.
 
+## Gotchas <a name="Gotchas">
+
+Because this package reads which relations and fields to load from the GraphQL query info object, the loader only works if your schema field names match your TypeORM entity field names. If it cannot find a requested GraphQL query field, it will not return it. In this case, you will need to provide a custom resolver for that field in your GraphQL resolvers file. In this case, the loader will provide the resolver function with an `object` parameter which is an entity loaded with whichever other fields your query requested. The loader will always return an object with at least the id (primary key) field loaded, so basic method calls should be possible. You can specify what your id field is called in the LoaderOptions upon loader initialization. That does require a uniform primary key naming strategy for your entire database schema. Be aware that you may need to reload the entity or provide some fields as requiredSelectFields for entity methods to work properly as not every entity database field is guaranteed to be loaded.
+
+This is not a complete replacement for Facebook's dataloader. package. While it does provide some batching, it's primary purpose is to load the relations and fields needed to resolve the query. In most cases, you will most likely not need to use dataloader when using this package. However, I have noticed in my own use that there are occasions where this may need to be combined with dataloader to remove N + 1 queries. One such case was a custom resolver for a many-to-many relation that existed in the GraphQL Schema but not on a database level. In order to completely remove the N+1 queries from that resolver, I had to wrap the TypeORM GraphQL loader in a Facebook DataLoader. If you find that you are in a situation where the TypeORM GraphQL loader is not solving the N+1 problem, please open an issue and I'll do my best to help you out with it. 
+
+## Roadmap <a name="Roadmap">
+I have not yet decided on a concrete roadmap, but here are the features I would like to include:
+
+An improved pagination system that supports the Relay Connection paradigm. This would most likely be in the form of a `loadManyRelayConnection` method that returns a Relay compliant object which can be fed to the GraphQL resolver and read directly as a connection object. 
+
+Support for loading without GraphQL info. Right now the loaders require an info object to determine which relations and fields to load. I would like to make it less reliant on it by turning it into an optional parameter that returns a single entity with all fields and no relations loaded. As of now, I haven't run into a situation where that is practical for me, but I can see that as being a future request others may have. 
+
 ## API <a name="API">
 
-The loader provides 4 loading methods and one cache utility methods 
+The loader provides 4 loading methods and one cache utility methods
 
 ### LoadOne
 
 #### Description
+
 Returns a single entity
 
 #### Signature
+
 ```ts
 /**
  * Load an entity from the database.
@@ -118,10 +135,13 @@ so you can easily calculate the next pagination offset with something like the f
 
 ```ts
 /**
- * @param pagination The last offset and limit used 
+ * @param pagination The last offset and limit used
  * @param totalRecordCount The total number of records to paginate through
  */
-function getOffset(pagination: { offset: number; limit: number }, totalRecordCount: number) {
+function getOffset(
+  pagination: { offset: number; limit: number },
+  totalRecordCount: number
+) {
   const nextOffset = offset + limit;
   const recordsLeft = totalRecordCount - nextOffset;
   const newOffset = recordsLeft < 1 ? count : nextOffset;
@@ -132,7 +152,7 @@ function getOffset(pagination: { offset: number; limit: number }, totalRecordCou
 }
 ```
 
-Cursor pagination will be supported in a future version. 
+Cursor pagination will be supported in a future version.
 
 #### Signature
 
@@ -200,8 +220,8 @@ type QueryOptions = {
   // any valid OR conditions to be inserted into the WHERE clause
   orWhere?: [any];
   /**
-   * specify any fields that you may want to select that are not necessarily 
-   * included in the graphql query. e.g. you may want to always get back the 
+   * specify any fields that you may want to select that are not necessarily
+   * included in the graphql query. e.g. you may want to always get back the
    * id of the entity regardless of whether the client asked for it in the graphql query
    **/
   requiredSelectFields?: string[];
@@ -219,8 +239,6 @@ type QueryPagination = {
 
 ```
 
-
-
 ## Problem <a name="Problem">
 
 TypeORM is a pretty powerful tool, and it gives you quite a bit of flexibility
@@ -236,35 +254,40 @@ becomes how to resolve these relations. Let's look at how an example resolver
 function might try to resolve this query:
 
 Query
+
 ```graphql
 query bookById($id: ID!) {
-   book(id: $id) {
+  book(id: $id) {
+    id
+    name
+    author {
       id
-      name
-      author {
-         id
-         user {
-            id
-            name
-         }
+      user {
+        id
+        name
       }
-   }
+    }
+  }
 }
 ```
 
 We could do something simple like this:
+
 ```ts
 function finBookById(object, args, context, info) {
-  return Book.findOne(args.id)
+  return Book.findOne(args.id);
 }
 ```
+
 but then the author and user relations won't be loaded. We can remedy that by
 specifying them in our find options like so:
+
 ```ts
 function finBookById(object, args, context, info) {
-  return Book.findOne(args.id, {relations: ['author', 'author.user']})
+  return Book.findOne(args.id, { relations: ["author", "author.user"] });
 }
 ```
+
 however, this could get really nasty if we have many relations we may need.
 Well, we could just set all of our relations to eagerly load so we don't need to
 specify them, but then we may start loading a bunch of data we may never use
@@ -278,17 +301,19 @@ Another possible, and probably intuitive solution is to use lazy relations.
 Because lazy relations return Promises, as long as we give the resolver an
 instance of our Book entity, it will call each relation and wait for the Promise
 to resolve, fixing our problem. It let's us use our original resolver function
+
 ```ts
 function finBookById(object, args, context, info) {
-  return Book.findOne(args.id)
+  return Book.findOne(args.id);
 }
 ```
+
 and ApolloServer will just automagically resolve the relation promises for us
 and return the data. Seems great right? It's not. This introduces a massive N+1
 problem. Now every time you query a subrelation, ApolloServer will inadvertently
 perform another database query to load the lazy relation. At small scale this
 isn't a problem, but the more complex your schema becomes, the harder it will
-hit your performance. 
+hit your performance.
 
 ## Solution <a name="Solution">
 
@@ -318,4 +343,4 @@ state. After several months of no response from the author, and with significant
 bug fixes/features added in my fork, I decided to just make my own package. So
 thanks to Weboptimizer for doing a lot of the ground work. If you ever stumble
 across this and would like to merge the features back into the main source repo,
-I'd be more than happy to work with you to make that happen. 
+I'd be more than happy to work with you to make that happen.
