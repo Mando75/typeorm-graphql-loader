@@ -1,6 +1,6 @@
 import { FieldNode, FragmentDefinitionNode } from "graphql";
 import { OrderByCondition } from "typeorm";
-import { LoaderNamingStrategyEnum } from "./base";
+import { LoaderNamingStrategyEnum, LoaderSearchMethod } from "./base";
 
 export type LoaderOptions = {
   // Time-to-live for cache.
@@ -9,6 +9,8 @@ export type LoaderOptions = {
   namingStrategy?: LoaderNamingStrategyEnum;
   // this column will always be loaded for every relation by the query builder.
   primaryKeyColumn?: string;
+  // Use this search method by default unless overwritten in a query option. Defaults to any position
+  defaultSearchMethod?: LoaderSearchMethod;
 };
 
 export type QueryOptions = {
@@ -23,6 +25,21 @@ export type QueryOptions = {
    * it in the graphql query
    */
   requiredSelectFields?: string[];
+  /**
+   * Include if wanting to search fields for text. Uses LIKE
+   */
+  search?: SearchOptions;
+};
+
+export type SearchOptions = {
+  // The database columns to be searched
+  searchColumns: Array<string>;
+  // The text to compare column values with
+  searchText: string;
+  // Optionally specify a search method. If not provided, default will be used (see LoaderOptions)
+  searchMethod?: LoaderSearchMethod;
+  // Whether the query is case sensitive. Default to false. Uses SQL LOWER to perform comparison
+  caseSensitive?: boolean;
 };
 
 export type QueryPagination = {
