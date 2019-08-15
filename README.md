@@ -45,7 +45,7 @@ const connection = createConnection({...}); // Create your TypeORM connection
 const apolloServer = new ApolloServer({
   schema,
   context: {
-    loader: new GraphQLDatabaseLoader(connection, {/** optional options **})
+    loader: new GraphQLDatabaseLoader(connection, {/** additional options if needed**})
   },
 });
 ```
@@ -55,7 +55,7 @@ The loader will now appear in your resolver's context object:
 ```ts
 Query: {
     getBookById(object: any, args: {id: string }, context: MyGraphQLContext, info: GraphQLResolveInfo) {
-        return context.loader.loadOne<Book>(Book, { id }, info, {/** optional options **/});
+        return context.loader.loadOne<Book>(Book, { id }, info, {/** additional options if needed **/});
     }
 }
 ```
@@ -203,12 +203,28 @@ type LoaderOptions = {
   ttl?: number;
   // Include if you are using one of the supported TypeORM custom naming strategies
   namingStrategy?: LoaderNamingStrategyEnum;
+  // Use this search method by default unless overwritten in a query option. Defaults to any position
+  defaultSearchMethod?: LoaderSearchMethod;
 };
 
 enum LoaderNamingStrategyEnum {
    CAMELCASE // default if none other specified
    SNAKECASE
 }
+
+/**
+ * Options needed to perform simple search operations.
+ **/
+type SearchOptions = {
+  // The database columns to be searched
+  searchColumns: Array<string>;
+  // The text to compare column values with
+  searchText: string;
+  // Optionally specify a search method. If not provided, default will be used (see LoaderOptions)
+  searchMethod?: LoaderSearchMethod;
+  // Whether the query is case sensitive. Default to false. Uses SQL LOWER to perform comparison
+  caseSensitive?: boolean; 
+};
 
 
 /**
@@ -225,6 +241,8 @@ type QueryOptions = {
    * id of the entity regardless of whether the client asked for it in the graphql query
    **/
   requiredSelectFields?: string[];
+  // Include if wanting to perform a search on database columns
+  search?: SearchOptions
 **;
 
 /**
