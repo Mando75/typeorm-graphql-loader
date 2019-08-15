@@ -9,6 +9,7 @@ import { GraphQLDatabaseLoader } from "../../src";
 import { builder } from "../schema";
 import { Node } from "./Node";
 import { Post } from "./Post";
+import { LoaderSearchMethod } from "../../src/base";
 
 @Entity()
 @builder.type()
@@ -78,6 +79,60 @@ export class User extends Node {
   ) {
     return context.loader.loadOne(User, { id }, info, {
       order: { "User__posts.id": "ASC" }
+    });
+  }
+
+  @builder.query({
+    args: {
+      search: { type: GraphQLString, defaultValue: null },
+      method: { type: GraphQLInt, defaultValue: 0 }
+    },
+    returnType: {
+      type: () => User,
+      list: false,
+      nonNull: false
+    }
+  })
+  async userWithSensitiveSearch(
+    rootValue: any,
+    { search, method }: { search: string; method: LoaderSearchMethod },
+    context: { loader: GraphQLDatabaseLoader },
+    info: GraphQLResolveInfo
+  ) {
+    return context.loader.loadOne(User, {}, info, {
+      search: {
+        searchColumns: ["email", "firstName", "lastName"],
+        searchText: search,
+        searchMethod: method,
+        caseSensitive: true
+      }
+    });
+  }
+
+  @builder.query({
+    args: {
+      search: { type: GraphQLString, defaultValue: null },
+      method: { type: GraphQLInt, defaultValue: 0 }
+    },
+    returnType: {
+      type: () => User,
+      list: false,
+      nonNull: false
+    }
+  })
+  async userWithInSensitiveSearch(
+    rootValue: any,
+    { search, method }: { search: string; method: LoaderSearchMethod },
+    context: { loader: GraphQLDatabaseLoader },
+    info: GraphQLResolveInfo
+  ) {
+    return context.loader.loadOne(User, {}, info, {
+      search: {
+        searchColumns: ["email", "firstName", "lastName"],
+        searchText: search,
+        searchMethod: method,
+        caseSensitive: false
+      }
     });
   }
 }
