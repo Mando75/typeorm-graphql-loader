@@ -28,7 +28,15 @@ explanation, see the [Problem](#Problem) and [Solution](#Solution) sections belo
 
 ## Installation <a name="Installation">
 
-Coming Soon to NPM :)
+```bash
+yarn add @mando75/typeorm-graphql-loader
+
+# OR
+
+npm install @mando75/typeorm-graphql-loader
+```
+
+This package requires that you have TypeORM installed as a peer dependency
 
 ## Usage <a name="Usage">
 
