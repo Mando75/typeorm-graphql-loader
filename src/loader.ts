@@ -1,6 +1,6 @@
 import { BaseEntity, Connection, SelectQueryBuilder } from "typeorm";
 import { GraphQLResolveInfo } from "graphql";
-import { Base } from "./base";
+import { Base, LoaderSearchMethod } from "./base";
 import * as crypto from "crypto";
 import {
   FeedNodeInfo,
@@ -308,12 +308,22 @@ export class GraphQLDatabaseLoader extends Base {
         );
       });
     }
+
+    // Include any search parameters
+    if (options.search) {
+      const { query, params } = this.generateSearchString(
+        alias,
+        options.search
+      );
+      qb = qb.where(query, params);
+    }
     // append any or where conditions
     if (options.orWhere && options.orWhere.length) {
       options.orWhere.forEach(where => {
         qb = qb.orWhere(where);
       });
     }
+
     // check if we must order the query
     qb = options.order ? qb.orderBy(options.order) : qb;
     return qb;

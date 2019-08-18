@@ -10,7 +10,6 @@ before_script:
 stages:
   - build
   - test
-  - publish
 
 lint-package:
   stage: build
@@ -35,10 +34,3 @@ test-package:
     - yarn install
   script:
     - yarn test-with-coverage
-
-publish-package:
-  stage: publish
-  script:
-    - echo 'Publish package script'
-  only:
-    - master

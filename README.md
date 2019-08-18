@@ -15,6 +15,7 @@ GraphQL query resolvers.
 - [Gotchas](#Gotchas)
 - [Roadmap](#Roadmap)
 - [API](#API)
+- [Contributing](#Contributing)
 - [Problem](#Problem)
 - [Solution](#Solution)
 - [Acknowledgments](#Acknowledgments)
@@ -28,7 +29,15 @@ explanation, see the [Problem](#Problem) and [Solution](#Solution) sections belo
 
 ## Installation <a name="Installation">
 
-Coming Soon to NPM :)
+```bash
+yarn add @mando75/typeorm-graphql-loader
+
+# OR
+
+npm install @mando75/typeorm-graphql-loader
+```
+
+This package requires that you have TypeORM installed as a peer dependency
 
 ## Usage <a name="Usage">
 
@@ -45,7 +54,7 @@ const connection = createConnection({...}); // Create your TypeORM connection
 const apolloServer = new ApolloServer({
   schema,
   context: {
-    loader: new GraphQLDatabaseLoader(connection, {/** optional options **})
+    loader: new GraphQLDatabaseLoader(connection, {/** additional options if needed**})
   },
 });
 ```
@@ -55,7 +64,7 @@ The loader will now appear in your resolver's context object:
 ```ts
 Query: {
     getBookById(object: any, args: {id: string }, context: MyGraphQLContext, info: GraphQLResolveInfo) {
-        return context.loader.loadOne<Book>(Book, { id }, info, {/** optional options **/});
+        return context.loader.loadOne<Book>(Book, { id }, info, {/** additional options if needed **/});
     }
 }
 ```
@@ -69,6 +78,8 @@ always returned, you can specify this in the QueryOptions parameter.
 Because this package reads which relations and fields to load from the GraphQL query info object, the loader only works if your schema field names match your TypeORM entity field names. If it cannot find a requested GraphQL query field, it will not return it. In this case, you will need to provide a custom resolver for that field in your GraphQL resolvers file. In this case, the loader will provide the resolver function with an `object` parameter which is an entity loaded with whichever other fields your query requested. The loader will always return an object with at least the id (primary key) field loaded, so basic method calls should be possible. You can specify what your id field is called in the LoaderOptions upon loader initialization. That does require a uniform primary key naming strategy for your entire database schema. Be aware that you may need to reload the entity or provide some fields as requiredSelectFields for entity methods to work properly as not every entity database field is guaranteed to be loaded.
 
 This is not a complete replacement for Facebook's dataloader. package. While it does provide some batching, it's primary purpose is to load the relations and fields needed to resolve the query. In most cases, you will most likely not need to use dataloader when using this package. However, I have noticed in my own use that there are occasions where this may need to be combined with dataloader to remove N + 1 queries. One such case was a custom resolver for a many-to-many relation that existed in the GraphQL Schema but not on a database level. In order to completely remove the N+1 queries from that resolver, I had to wrap the TypeORM GraphQL loader in a Facebook DataLoader. If you find that you are in a situation where the TypeORM GraphQL loader is not solving the N+1 problem, please open an issue and I'll do my best to help you out with it. 
+
+This package has currently only been tested with Postgresql and SQLite. In theory, everything should work with the other SQL variants that TypeORM supports, as it uses the TypeORM Query Builder API to construct the database queries. If you run into any issues with other SQL dialects, please open an issue.
 
 ## Roadmap <a name="Roadmap">
 I have not yet decided on a concrete roadmap, but here are the features I would like to include:
@@ -203,12 +214,28 @@ type LoaderOptions = {
   ttl?: number;
   // Include if you are using one of the supported TypeORM custom naming strategies
   namingStrategy?: LoaderNamingStrategyEnum;
+  // Use this search method by default unless overwritten in a query option. Defaults to any position
+  defaultSearchMethod?: LoaderSearchMethod;
 };
 
 enum LoaderNamingStrategyEnum {
    CAMELCASE // default if none other specified
    SNAKECASE
 }
+
+/**
+ * Options needed to perform simple search operations.
+ **/
+type SearchOptions = {
+  // The database columns to be searched
+  searchColumns: Array<string>;
+  // The text to compare column values with
+  searchText: string;
+  // Optionally specify a search method. If not provided, default will be used (see LoaderOptions)
+  searchMethod?: LoaderSearchMethod;
+  // Whether the query is case sensitive. Default to false. Uses SQL LOWER to perform comparison
+  caseSensitive?: boolean; 
+};
 
 
 /**
@@ -225,6 +252,8 @@ type QueryOptions = {
    * id of the entity regardless of whether the client asked for it in the graphql query
    **/
   requiredSelectFields?: string[];
+  // Include if wanting to perform a search on database columns
+  search?: SearchOptions
 **;
 
 /**
@@ -238,6 +267,21 @@ type QueryPagination = {
 };
 
 ```
+
+## Contributing <a name="Contributing">
+
+All development for this project is done on GitLab.com. However, I realize that many developers use GitHub as their primary development platform. If you do not use and do not wish to create a GitLab account, you can open an issue in the mirrored [GitHub Repository](https://github.com/Mando75/typeorm-graphql-loader). Please note that all merge requests must be done via GitLab as the GitHub repo is a read-only mirror. 
+
+When opening an issue, please include the following information:
+
+- Package Version
+- Database and version being used
+- TypeORM version
+- GraphQL library being used
+- Description of the problem
+- Example code
+
+Please open an issue before opening any Merge Requests.
 
 ## Problem <a name="Problem">
 
