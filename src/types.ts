@@ -17,14 +17,14 @@ export type QueryOptions = {
   // How to order query results in SQL
   order?: OrderByCondition;
   // any valid OR conditions to be inserted into the WHERE clause
-  orWhere?: [any];
+  orWhere?: Array<any>;
   /**
    * Specify any fields that you may want to select that are not necessarily
    * included in the graphql query. e.g. you may want to always ge back the
    * id of the entity for auditing regardless of whether the client asked for
    * it in the graphql query
    */
-  requiredSelectFields?: string[];
+  requiredSelectFields?: Array<string>;
   /**
    * Include if wanting to search fields for text. Uses LIKE
    */
