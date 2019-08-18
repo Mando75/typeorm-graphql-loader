@@ -3,9 +3,13 @@
 A dataloader for TypeORM that makes it easy to load TypeORM relations for
 GraphQL query resolvers.
 
-[![Codacy Badge Quality](https://api.codacy.com/project/badge/Grade/b7d245d528e34a1c977e98728ad77fa5)](https://www.codacy.com/app/Mando75/typeorm-graphql-loader?utm_source=github.com&utm_medium=referral&utm_content=Mando75/typeorm-graphql-loader&utm_campaign=Badge_Grade)
+
+[![npm version](https://badge.fury.io/js/%40mando75%2Ftypeorm-graphql-loader.svg)](https://badge.fury.io/js/%40mando75%2Ftypeorm-graphql-loader)
+![npm](https://img.shields.io/npm/dm/@mando75/typeorm-graphql-loader)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![pipeline status](https://gitlab.com/Mando75/typeorm-graphql-loader/badges/master/pipeline.svg)](https://gitlab.com/Mando75/typeorm-graphql-loader/commits/master)
 [![Codacy Badge Coverage](https://api.codacy.com/project/badge/Coverage/b7d245d528e34a1c977e98728ad77fa5)](https://www.codacy.com/app/Mando75/typeorm-graphql-loader?utm_source=github.com&utm_medium=referral&utm_content=Mando75/typeorm-graphql-loader&utm_campaign=Badge_Coverage)
+[![Codacy Badge Quality](https://api.codacy.com/project/badge/Grade/b7d245d528e34a1c977e98728ad77fa5)](https://www.codacy.com/app/Mando75/typeorm-graphql-loader?utm_source=github.com&utm_medium=referral&utm_content=Mando75/typeorm-graphql-loader&utm_campaign=Badge_Grade)
 
 ## Contents
 
