@@ -56,8 +56,9 @@
     "@types/chai": "^4.1.7",
     "@types/chance": "^1.0.1",
     "@types/deep-equal": "^1.0.1",
+    "@types/graphql": "^14.2.3",
     "@types/mocha": "^5.2.5",
-    "@types/node": "^12.7.1",
+    "@types/node": "^12.7.2",
     "@types/object-path": "^0.11.0",
     "chai": "^4.2.0",
     "chance": "^1.0.16",
@@ -69,7 +70,7 @@
     "mocha-lcov-reporter": "^1.3.0",
     "nyc": "^14.1.1",
     "source-map-support": "^0.5.13",
-    "sqlite3": "^4.0.3",
+    "sqlite3": "^4.1.0",
     "ts-node": "^8.3.0",
     "tslib": "^1.10.0",
     "tslint": "^5.18.0",
@@ -79,8 +80,5 @@
   },
   "peerDependencies": {
     "typeorm": ">=0.2.8"
-  },
-  "optionalDependencies": {
-    "@types/graphql": "^14.0.3"
   }
 }
