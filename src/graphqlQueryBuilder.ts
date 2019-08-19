@@ -72,13 +72,13 @@ export class GraphqlQueryBuilder extends Base {
       // always include the primary key for joins
       if (!fields.find(field => field.propertyName === this.primaryKeyColumn)) {
         qb = qb.addSelect(
-          `${alias}.${this.primaryKeyColumn}`,
-          `${alias}_${this.primaryKeyColumn}`
+          this.formatColumnSelect(alias, this.primaryKeyColumn),
+          this.formatAliasField(alias, this.primaryKeyColumn)
         );
       }
       fields.forEach(field => {
         qb = qb.addSelect(
-          `${alias}.${field.propertyName}`,
+          this.formatColumnSelect(alias, field.propertyName),
           this.formatAliasField(alias, field.propertyName)
         );
       });
@@ -86,7 +86,10 @@ export class GraphqlQueryBuilder extends Base {
       relations.forEach(relation => {
         if (relation.propertyName in selection.children!) {
           const childAlias = alias + "__" + relation.propertyName;
-          qb = qb.leftJoin(alias + "." + relation.propertyName, childAlias);
+          qb = qb.leftJoin(
+            this.formatColumnSelect(alias, relation.propertyName),
+            childAlias
+          );
           qb = this.createQuery(
             relation.inverseEntityMetadata.target,
             selection.children![relation.propertyName],

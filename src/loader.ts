@@ -303,7 +303,7 @@ export class GraphQLDatabaseLoader extends Base {
     if (options.requiredSelectFields) {
       options.requiredSelectFields.forEach(field => {
         qb = qb.addSelect(
-          `${alias}.${field}`,
+          this.formatColumnSelect(alias, field),
           this.formatAliasField(alias, field)
         );
       });

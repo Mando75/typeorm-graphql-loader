@@ -30,9 +30,14 @@ export class Base {
       case LoaderNamingStrategyEnum.SNAKECASE:
         return `${alias}_${snakeCase(field)}`;
       case LoaderNamingStrategyEnum.CAMELCASE:
+        return `${alias}_${field}`;
       default:
-        return `${alias}_${camelCase(field)}`;
+        return `${alias}_${field}`;
     }
+  }
+
+  protected formatColumnSelect(alias: string, field: string): string {
+    return `${alias}.${field}`;
   }
 
   static SearchMethodMapping = new Map<LoaderSearchMethod, Function>([
@@ -48,8 +53,8 @@ export class Base {
     const method = searchMethod || this.defaultLoaderSearchMethod;
     const likeQueryStrings = searchColumns.map(field =>
       caseSensitive
-        ? `${this.formatAliasField(alias, field)} LIKE :searchText`
-        : `LOWER(${this.formatAliasField(
+        ? `${this.formatColumnSelect(alias, field)} LIKE :searchText`
+        : `LOWER(${this.formatColumnSelect(
             alias,
             field
           )}) LIKE LOWER(:searchText)`
