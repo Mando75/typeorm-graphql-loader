@@ -315,7 +315,7 @@ export class GraphQLDatabaseLoader extends Base {
         alias,
         options.search
       );
-      qb = qb.where(query, params);
+      qb = qb.andWhere(query, params);
     }
     // append any or where conditions
     if (options.orWhere && options.orWhere.length) {
