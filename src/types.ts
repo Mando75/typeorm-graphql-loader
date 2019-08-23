@@ -32,8 +32,15 @@ export type QueryOptions = {
 };
 
 export type SearchOptions = {
-  // The database columns to be searched
-  searchColumns: Array<string>;
+  /*
+   * The database columns to be searched
+   * If columns need to be joined in an or, pass them in as a nested array.
+   * e.g. ["email", ["firstName", "lastName"]]
+   * This will produce a query like the following:
+   * `WHERE email LIKE :searchText
+   *  OR firstName || ' ' || lastName LIKE :searchText
+   **/
+  searchColumns: Array<string | Array<string>>;
   // The text to compare column values with
   searchText: string;
   // Optionally specify a search method. If not provided, default will be used (see LoaderOptions)

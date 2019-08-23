@@ -233,16 +233,22 @@ enum LoaderNamingStrategyEnum {
  * Options needed to perform simple search operations.
  **/
 type SearchOptions = {
-  // The database columns to be searched
-  searchColumns: Array<string>;
+  /*
+   * The database columns to be searched
+   * If columns need to be joined in an or, pass them in as a nested array.
+   * e.g. ["email", ["firstName", "lastName"]]
+   * This will produce a query like the following:
+   * `WHERE email LIKE :searchText
+   *  OR firstName || ' ' || lastName LIKE :searchText
+   **/
+  searchColumns: Array<string | Array<string>>;
   // The text to compare column values with
   searchText: string;
   // Optionally specify a search method. If not provided, default will be used (see LoaderOptions)
   searchMethod?: LoaderSearchMethod;
   // Whether the query is case sensitive. Default to false. Uses SQL LOWER to perform comparison
-  caseSensitive?: boolean; 
+  caseSensitive?: boolean;
 };
-
 
 /**
  * Can be used to provide additional options to any of the loader function

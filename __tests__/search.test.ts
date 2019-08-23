@@ -31,7 +31,7 @@ describe("searching", () => {
       synchronize: true,
       dropSchema: true,
       entities: [Post, User],
-      logging: false
+      logging: true
     });
 
     await seedDatabase(connection);
@@ -238,5 +238,33 @@ describe("searching", () => {
     };
     expect(result).to.not.have.key("errors");
     expect(result.data!.userWithInSensitiveSearch).to.deep.equal(expected);
+  });
+
+  it("can perform a joined search", async () => {
+    const result = await graphql(
+      schema,
+      `{
+    userWithJoinedSearch(search: "${TEST_USER_FIRST_NAME} ${TEST_USER_LAST_NAME.slice(
+        0,
+        10
+      )}", method: ${LoaderSearchMethod.ANY_POSITION}) {
+        id
+        email
+        firstName
+        lastName 
+      }
+    }`,
+      {},
+      { loader }
+    );
+
+    const expected = {
+      id: user.id.toString(),
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName
+    };
+    expect(result).to.not.have.key("errors");
+    expect(result.data!.userWithJoinedSearch).to.deep.equal(expected);
   });
 });
