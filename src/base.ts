@@ -51,14 +51,23 @@ export class Base {
     { searchText, searchColumns, searchMethod, caseSensitive }: SearchOptions
   ): { query: string; params: { searchText: string } } {
     const method = searchMethod || this.defaultLoaderSearchMethod;
-    const likeQueryStrings = searchColumns.map(field =>
-      caseSensitive
-        ? `${this.formatColumnSelect(alias, field)} LIKE :searchText`
-        : `LOWER(${this.formatColumnSelect(
-            alias,
-            field
-          )}) LIKE LOWER(:searchText)`
-    );
+    const likeQueryStrings = searchColumns.map(field => {
+      if (typeof field === "string") {
+        return caseSensitive
+          ? `${this.formatColumnSelect(alias, field)} LIKE :searchText`
+          : `LOWER(${this.formatColumnSelect(
+              alias,
+              field
+            )}) LIKE LOWER(:searchText)`;
+      } else {
+        const joinedFields = field
+          .map(item => this.formatColumnSelect(alias, item))
+          .join(" || ' ' || ");
+        return caseSensitive
+          ? `${joinedFields} LIKE :searchText`
+          : `LOWER(${joinedFields}) LIKE LOWER(:searchText)`;
+      }
+    });
     const searchTextParam = Base.SearchMethodMapping.get(method)!(searchText);
     return {
       query: likeQueryStrings.join(" OR "),

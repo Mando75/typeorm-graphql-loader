@@ -135,4 +135,31 @@ export class User extends Node {
       }
     });
   }
+
+  @builder.query({
+    args: {
+      search: { type: GraphQLString, defaultValue: null },
+      method: { type: GraphQLInt, defaultValue: 0 }
+    },
+    returnType: {
+      type: () => User,
+      list: false,
+      nonNull: false
+    }
+  })
+  async userWithJoinedSearch(
+    rootValue: any,
+    { search, method }: { search: string; method: LoaderSearchMethod },
+    context: { loader: GraphQLDatabaseLoader },
+    info: GraphQLResolveInfo
+  ) {
+    return context.loader.loadOne(User, {}, info, {
+      search: {
+        searchColumns: ["email", ["firstName", "lastName"]],
+        searchText: search,
+        searchMethod: method,
+        caseSensitive: false
+      }
+    });
+  }
 }
