@@ -45,6 +45,9 @@ export class User extends Node {
   @OneToMany(type => Post, post => post.owner)
   posts!: Post[];
 
+  @Column({ type: "boolean", default: true })
+  active!: boolean;
+
   @builder.query({
     returnType: {
       type: () => User,
@@ -153,7 +156,7 @@ export class User extends Node {
     context: { loader: GraphQLDatabaseLoader },
     info: GraphQLResolveInfo
   ) {
-    return context.loader.loadOne(User, {}, info, {
+    return context.loader.loadOne(User, { active: true }, info, {
       search: {
         searchColumns: ["email", ["firstName", "lastName"]],
         searchText: search,

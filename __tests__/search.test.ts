@@ -31,7 +31,7 @@ describe("searching", () => {
       synchronize: true,
       dropSchema: true,
       entities: [Post, User],
-      logging: true
+      logging: false
     });
 
     await seedDatabase(connection);

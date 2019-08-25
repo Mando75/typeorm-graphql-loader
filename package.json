@@ -1,6 +1,6 @@
 {
   "name": "@mando75/typeorm-graphql-loader",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "A dataloader which intelligently selects/joins the fields/relations from your TypeORM entities needed to resolve a GraphQL query",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,7 +8,7 @@
     "prepare": "yarn build",
     "build": "tsc --declaration",
     "lint": "tslint -c tslint.json --project tsconfig.json 'src/**/*.ts'",
-    "test": "yarn run build && [ -d __tests__ ] && NODE_ENV=test nyc mocha -r ts-node/register -r tslib -r source-map-support/register --full-trace --bail __tests__/**/*.test.ts",
+    "test": "yarn run build && [ -d __tests__ ] && NODE_ENV=test nyc mocha -r ts-node/register -r tslib -r source-map-support/register --full-trace --bail __tests__/**/*.test.ts --timeout 5000",
     "test-with-coverage": "yarn test && cat ./coverage/lcov.info | codacy-coverage"
   },
   "nyc": {
