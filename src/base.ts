@@ -70,7 +70,7 @@ export class Base {
     });
     const searchTextParam = Base.SearchMethodMapping.get(method)!(searchText);
     return {
-      query: likeQueryStrings.join(" OR "),
+      query: `(${likeQueryStrings.join(" OR ")})`,
       params: { searchText: searchTextParam }
     };
   }
