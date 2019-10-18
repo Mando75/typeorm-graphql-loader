@@ -85,7 +85,7 @@ export type Selection = {
   children?: Hash<Selection>;
 };
 
-export type FeedNodeInfo = {
+export type FieldNodeInfo = {
   fieldNodes: FieldNode[];
   fieldName: string;
   fragments: { [key: string]: FragmentDefinitionNode };

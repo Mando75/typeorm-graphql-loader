@@ -1,9 +1,9 @@
 import { BaseEntity, Connection, SelectQueryBuilder } from "typeorm";
 import { GraphQLResolveInfo } from "graphql";
-import { Base, LoaderSearchMethod } from "./base";
+import { Base } from "./base";
 import * as crypto from "crypto";
 import {
-  FeedNodeInfo,
+  FieldNodeInfo,
   LoaderOptions,
   QueryMeta,
   QueryOptions,
@@ -11,6 +11,7 @@ import {
   QueueItem
 } from "./types";
 import { GraphqlQueryBuilder } from "./graphqlQueryBuilder";
+import { FieldNode, SelectionNode } from "graphql";
 
 /**
  * GraphQLDatabaseLoader is a caching loader that folds a batch of different database queries into a singular query.
@@ -32,6 +33,40 @@ export class GraphQLDatabaseLoader extends Base {
     super(options);
   }
 
+  public static getFieldNodeInfo(
+    info: GraphQLResolveInfo,
+    fieldName: string
+  ): FieldNodeInfo {
+    const childFieldNode = info.fieldNodes
+      .map(node => (node.selectionSet ? node.selectionSet.selections : []))
+      .flat()
+      .find((selection: SelectionNode) =>
+        selection.kind !== "InlineFragment"
+          ? selection.name.value === fieldName
+          : false
+      ) as FieldNode;
+
+    const fieldNodes = [childFieldNode];
+    return { fieldNodes, fragments: info.fragments, fieldName };
+  }
+
+  /**
+   * Helper to handle pagination.
+   * Future version will support cursor based pagination. For now, use
+   * basic offset and limit
+   * @param query
+   * @param pagination
+   */
+  private static handlePagination(
+    query: SelectQueryBuilder<Function | string | {}>,
+    pagination: QueryPagination
+  ): SelectQueryBuilder<Function | string | {}> {
+    let qb = query;
+    qb = qb.offset(pagination.offset);
+    qb = qb.limit(pagination.limit);
+    return qb;
+  }
+
   /**
    * Load an entity from the database.
    * @param {typeof BaseEntity|string} entity The entity type to load.
@@ -43,7 +78,7 @@ export class GraphQLDatabaseLoader extends Base {
   public async loadOne<T>(
     entity: Function | string,
     where: Partial<T>,
-    info: GraphQLResolveInfo,
+    info: GraphQLResolveInfo | FieldNodeInfo,
     options?: QueryOptions
   ): Promise<T | undefined> {
     const { found, item, key, fields } = this.processQueryMeta(info, where);
@@ -85,7 +120,7 @@ export class GraphQLDatabaseLoader extends Base {
   public async loadMany<T>(
     entity: Function | string,
     where: Partial<T>,
-    info: GraphQLResolveInfo | FeedNodeInfo,
+    info: GraphQLResolveInfo | FieldNodeInfo,
     options?: QueryOptions
   ): Promise<T[]> {
     const { found, item, key, fields } = this.processQueryMeta(info, where);
@@ -127,7 +162,7 @@ export class GraphQLDatabaseLoader extends Base {
   public async loadManyPaginated<T>(
     entity: Function | string,
     where: Partial<T>,
-    info: GraphQLResolveInfo | FeedNodeInfo,
+    info: GraphQLResolveInfo | FieldNodeInfo,
     pagination: QueryPagination,
     options?: QueryOptions
   ): Promise<[T[], number]> {
@@ -169,7 +204,7 @@ export class GraphQLDatabaseLoader extends Base {
   public async batchLoadMany<T>(
     entity: Function | string,
     where: Partial<T>[],
-    info: GraphQLResolveInfo,
+    info: GraphQLResolveInfo | FieldNodeInfo,
     options?: QueryOptions
   ): Promise<(T | undefined)[]> {
     return await Promise.all(
@@ -182,47 +217,6 @@ export class GraphQLDatabaseLoader extends Base {
    */
   public clear() {
     this._cache.clear();
-  }
-
-  /**
-   * Processes the request into the cache
-   * @param info
-   * @param where
-   */
-  private processQueryMeta<T>(
-    info: GraphQLResolveInfo | FeedNodeInfo,
-    where: Partial<T>
-  ): QueryMeta {
-    // Create a md5 hash.
-    const hash = crypto.createHash("md5");
-    // Get the fields queried by GraphQL.
-    if (!info) {
-      throw new Error("Missing info parameter");
-    }
-    const fields = GraphqlQueryBuilder.graphqlFields(info);
-    // Generate a key hash from the query parameters.
-    const key = hash
-      .update(JSON.stringify([where, fields]))
-      .digest()
-      .toString("hex");
-    // If the key matches a cache entry, return it.
-    if (this._cache.has(key)) {
-      return {
-        fields,
-        key: "",
-        item: this._cache.get(key)!,
-        found: true
-      };
-    }
-    // If we have an immediate scheduled, cancel it.
-    if (this._immediate) {
-      clearImmediate(this._immediate);
-    }
-    return {
-      fields,
-      key,
-      found: false
-    };
   }
 
   /**
@@ -261,7 +255,7 @@ export class GraphQLDatabaseLoader extends Base {
           }
           // pagination
           if (q.pagination) {
-            qb = this.handlePagination(qb, q.pagination);
+            qb = GraphQLDatabaseLoader.handlePagination(qb, q.pagination);
             // we use a different execution method, so we need to return
             // with different logic
             return qb
@@ -285,6 +279,47 @@ export class GraphQLDatabaseLoader extends Base {
         this._cache.delete(q.key);
       });
     }
+  }
+
+  /**
+   * Processes the request into the cache
+   * @param info
+   * @param where
+   */
+  private processQueryMeta<T>(
+    info: GraphQLResolveInfo | FieldNodeInfo,
+    where: Partial<T>
+  ): QueryMeta {
+    // Create a md5 hash.
+    const hash = crypto.createHash("md5");
+    // Get the fields queried by GraphQL.
+    if (!info) {
+      throw new Error("Missing info parameter");
+    }
+    const fields = GraphqlQueryBuilder.graphqlFields(info);
+    // Generate a key hash from the query parameters.
+    const key = hash
+      .update(JSON.stringify([where, fields]))
+      .digest()
+      .toString("hex");
+    // If the key matches a cache entry, return it.
+    if (this._cache.has(key)) {
+      return {
+        fields,
+        key: "",
+        item: this._cache.get(key)!,
+        found: true
+      };
+    }
+    // If we have an immediate scheduled, cancel it.
+    if (this._immediate) {
+      clearImmediate(this._immediate);
+    }
+    return {
+      fields,
+      key,
+      found: false
+    };
   }
 
   /**
@@ -326,23 +361,6 @@ export class GraphQLDatabaseLoader extends Base {
 
     // check if we must order the query
     qb = options.order ? qb.orderBy(options.order) : qb;
-    return qb;
-  }
-
-  /**
-   * Helper to handle pagination.
-   * Future version will support cursor based pagination. For now, use
-   * basic offset and limit
-   * @param query
-   * @param pagination
-   */
-  private handlePagination(
-    query: SelectQueryBuilder<Function | string | {}>,
-    pagination: QueryPagination
-  ): SelectQueryBuilder<Function | string | {}> {
-    let qb = query;
-    qb = qb.offset(pagination.offset);
-    qb = qb.limit(pagination.limit);
     return qb;
   }
 }
