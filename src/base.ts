@@ -13,6 +13,12 @@ export enum LoaderSearchMethod {
 }
 
 export class Base {
+  static SearchMethodMapping = new Map<LoaderSearchMethod, Function>([
+    [LoaderSearchMethod.ANY_POSITION, (text: string) => `%${text}%`],
+    [LoaderSearchMethod.STARTS_WITH, (text: string) => `${text}%`],
+    [LoaderSearchMethod.ENDS_WITH, (text: string) => `%${text}`]
+  ]);
+
   protected primaryKeyColumn: string;
   protected namingStrategy: LoaderNamingStrategyEnum;
   protected defaultLoaderSearchMethod: LoaderSearchMethod;
@@ -39,12 +45,6 @@ export class Base {
   protected formatColumnSelect(alias: string, field: string): string {
     return `${alias}.${field}`;
   }
-
-  static SearchMethodMapping = new Map<LoaderSearchMethod, Function>([
-    [LoaderSearchMethod.ANY_POSITION, (text: string) => `%${text}%`],
-    [LoaderSearchMethod.STARTS_WITH, (text: string) => `${text}%`],
-    [LoaderSearchMethod.ENDS_WITH, (text: string) => `%${text}`]
-  ]);
 
   protected generateSearchString(
     alias: string,

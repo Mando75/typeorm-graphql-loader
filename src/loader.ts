@@ -185,47 +185,6 @@ export class GraphQLDatabaseLoader extends Base {
   }
 
   /**
-   * Processes the request into the cache
-   * @param info
-   * @param where
-   */
-  private processQueryMeta<T>(
-    info: GraphQLResolveInfo | FeedNodeInfo,
-    where: Partial<T>
-  ): QueryMeta {
-    // Create a md5 hash.
-    const hash = crypto.createHash("md5");
-    // Get the fields queried by GraphQL.
-    if (!info) {
-      throw new Error("Missing info parameter");
-    }
-    const fields = GraphqlQueryBuilder.graphqlFields(info);
-    // Generate a key hash from the query parameters.
-    const key = hash
-      .update(JSON.stringify([where, fields]))
-      .digest()
-      .toString("hex");
-    // If the key matches a cache entry, return it.
-    if (this._cache.has(key)) {
-      return {
-        fields,
-        key: "",
-        item: this._cache.get(key)!,
-        found: true
-      };
-    }
-    // If we have an immediate scheduled, cancel it.
-    if (this._immediate) {
-      clearImmediate(this._immediate);
-    }
-    return {
-      fields,
-      key,
-      found: false
-    };
-  }
-
-  /**
    * Process and clear the current queue.
    * @returns {Promise<void>}
    */
@@ -285,6 +244,47 @@ export class GraphQLDatabaseLoader extends Base {
         this._cache.delete(q.key);
       });
     }
+  }
+
+  /**
+   * Processes the request into the cache
+   * @param info
+   * @param where
+   */
+  private processQueryMeta<T>(
+    info: GraphQLResolveInfo | FeedNodeInfo,
+    where: Partial<T>
+  ): QueryMeta {
+    // Create a md5 hash.
+    const hash = crypto.createHash("md5");
+    // Get the fields queried by GraphQL.
+    if (!info) {
+      throw new Error("Missing info parameter");
+    }
+    const fields = GraphqlQueryBuilder.graphqlFields(info);
+    // Generate a key hash from the query parameters.
+    const key = hash
+      .update(JSON.stringify([where, fields]))
+      .digest()
+      .toString("hex");
+    // If the key matches a cache entry, return it.
+    if (this._cache.has(key)) {
+      return {
+        fields,
+        key: "",
+        item: this._cache.get(key)!,
+        found: true
+      };
+    }
+    // If we have an immediate scheduled, cancel it.
+    if (this._immediate) {
+      clearImmediate(this._immediate);
+    }
+    return {
+      fields,
+      key,
+      found: false
+    };
   }
 
   /**

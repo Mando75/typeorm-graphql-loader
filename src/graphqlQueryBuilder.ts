@@ -54,84 +54,6 @@ export class GraphqlQueryBuilder extends Base {
     };
   }
 
-  public createQuery(
-    model: Function | string,
-    selection: Selection | null,
-    connection: Connection,
-    qb: SelectQueryBuilder<typeof BaseEntity>,
-    alias: string,
-    history?: Set<RelationMetadata>
-  ): SelectQueryBuilder<typeof BaseEntity> {
-    const meta = connection.getMetadata(model);
-    if (selection && selection.children) {
-      // For some reason this causes the select to go into a loop and delete the actual fields I want
-      // Results in all fields being selected, but that's not so bad
-      const fields = meta.columns.filter(field => {
-        return field.propertyName in selection.children!;
-      });
-      // always include the primary key for joins
-      if (!fields.find(field => field.propertyName === this.primaryKeyColumn)) {
-        qb = qb.addSelect(
-          this.formatColumnSelect(alias, this.primaryKeyColumn),
-          this.formatAliasField(alias, this.primaryKeyColumn)
-        );
-      }
-      fields.forEach(field => {
-        qb = qb.addSelect(
-          this.formatColumnSelect(alias, field.propertyName),
-          this.formatAliasField(alias, field.propertyName)
-        );
-      });
-      const relations = meta.relations;
-      relations.forEach(relation => {
-        if (relation.propertyName in selection.children!) {
-          const childAlias = alias + "__" + relation.propertyName;
-          qb = qb.leftJoin(
-            this.formatColumnSelect(alias, relation.propertyName),
-            childAlias
-          );
-          qb = this.createQuery(
-            relation.inverseEntityMetadata.target,
-            selection.children![relation.propertyName],
-            connection,
-            qb,
-            childAlias
-          );
-        }
-      });
-    } else if (selection === null) {
-      // UNUSED may add back in at a later date
-      // history = history || new Set();
-      // const relations = meta.relations;
-      // relations.forEach(relation => {
-      //   const childAlias = `${alias}__${relation.propertyName}`;
-      //   if (relation.inverseRelation) {
-      //     if (history!.has(relation.inverseRelation)) {
-      //       qb = qb.addSelect(alias);
-      //       return;
-      //     }
-      //     history!.add(relation);
-      //     qb = qb.addFrom(
-      //       relation.inverseRelation.entityMetadata.targetName,
-      //       relation.inverseEntityMetadata.targetName
-      //     );
-      //     qb = qb.leftJoin(alias + "." + relation.propertyName, childAlias);
-      //     qb = this.createQuery(
-      //       relation.inverseEntityMetadata.targetName,
-      //       null,
-      //       connection,
-      //       qb,
-      //       childAlias,
-      //       history
-      //     );
-      //   } else {
-      //     qb = qb.addSelect(`${alias}.${relation.propertyName}`, childAlias);
-      //   }
-      // });
-    }
-    return qb;
-  }
-
   private static parseLiteral(ast: ValueNode): any {
     switch (ast.kind) {
       case Kind.STRING:
@@ -219,5 +141,83 @@ export class GraphqlQueryBuilder extends Base {
       }
       return flattened;
     }, obj);
+  }
+
+  public createQuery(
+    model: Function | string,
+    selection: Selection | null,
+    connection: Connection,
+    qb: SelectQueryBuilder<typeof BaseEntity>,
+    alias: string,
+    history?: Set<RelationMetadata>
+  ): SelectQueryBuilder<typeof BaseEntity> {
+    const meta = connection.getMetadata(model);
+    if (selection && selection.children) {
+      // For some reason this causes the select to go into a loop and delete the actual fields I want
+      // Results in all fields being selected, but that's not so bad
+      const fields = meta.columns.filter(field => {
+        return field.propertyName in selection.children!;
+      });
+      // always include the primary key for joins
+      if (!fields.find(field => field.propertyName === this.primaryKeyColumn)) {
+        qb = qb.addSelect(
+          this.formatColumnSelect(alias, this.primaryKeyColumn),
+          this.formatAliasField(alias, this.primaryKeyColumn)
+        );
+      }
+      fields.forEach(field => {
+        qb = qb.addSelect(
+          this.formatColumnSelect(alias, field.propertyName),
+          this.formatAliasField(alias, field.propertyName)
+        );
+      });
+      const relations = meta.relations;
+      relations.forEach(relation => {
+        if (relation.propertyName in selection.children!) {
+          const childAlias = alias + "__" + relation.propertyName;
+          qb = qb.leftJoin(
+            this.formatColumnSelect(alias, relation.propertyName),
+            childAlias
+          );
+          qb = this.createQuery(
+            relation.inverseEntityMetadata.target,
+            selection.children![relation.propertyName],
+            connection,
+            qb,
+            childAlias
+          );
+        }
+      });
+    } else if (selection === null) {
+      // UNUSED may add back in at a later date
+      // history = history || new Set();
+      // const relations = meta.relations;
+      // relations.forEach(relation => {
+      //   const childAlias = `${alias}__${relation.propertyName}`;
+      //   if (relation.inverseRelation) {
+      //     if (history!.has(relation.inverseRelation)) {
+      //       qb = qb.addSelect(alias);
+      //       return;
+      //     }
+      //     history!.add(relation);
+      //     qb = qb.addFrom(
+      //       relation.inverseRelation.entityMetadata.targetName,
+      //       relation.inverseEntityMetadata.targetName
+      //     );
+      //     qb = qb.leftJoin(alias + "." + relation.propertyName, childAlias);
+      //     qb = this.createQuery(
+      //       relation.inverseEntityMetadata.targetName,
+      //       null,
+      //       connection,
+      //       qb,
+      //       childAlias,
+      //       history
+      //     );
+      //   } else {
+      //     qb = qb.addSelect(`${alias}.${relation.propertyName}`, childAlias);
+      //   }
+      // });
+    }
+    return qb;
   }
 }
