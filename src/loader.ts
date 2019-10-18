@@ -1,6 +1,6 @@
 import { BaseEntity, Connection, SelectQueryBuilder } from "typeorm";
 import { GraphQLResolveInfo } from "graphql";
-import { Base, LoaderSearchMethod } from "./base";
+import { Base } from "./base";
 import * as crypto from "crypto";
 import {
   FeedNodeInfo,

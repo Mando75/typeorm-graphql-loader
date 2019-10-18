@@ -1,4 +1,4 @@
-import { snakeCase, camelCase } from "typeorm/util/StringUtils";
+import { snakeCase } from "typeorm/util/StringUtils";
 import { LoaderOptions, SearchOptions } from "./types";
 
 export enum LoaderNamingStrategyEnum {
