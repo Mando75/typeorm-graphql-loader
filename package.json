@@ -1,6 +1,6 @@
 {
   "name": "@mando75/typeorm-graphql-loader",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "description": "A dataloader which intelligently selects/joins the fields/relations from your TypeORM entities needed to resolve a GraphQL query",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
