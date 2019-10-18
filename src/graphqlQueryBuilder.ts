@@ -8,7 +8,7 @@ import {
   ValueNode
 } from "graphql";
 import { BaseEntity, Connection, SelectQueryBuilder } from "typeorm";
-import { FeedNodeInfo, Hash, LoaderOptions, Selection } from "./types";
+import { FieldNodeInfo, Hash, LoaderOptions, Selection } from "./types";
 import { Base } from "./base";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
@@ -18,7 +18,7 @@ export class GraphqlQueryBuilder extends Base {
   }
 
   public static graphqlFields(
-    info: GraphQLResolveInfo | FeedNodeInfo,
+    info: GraphQLResolveInfo | FieldNodeInfo,
     obj: Hash<Selection> = {}
   ): Selection {
     const fields = info.fieldNodes;
@@ -96,7 +96,10 @@ export class GraphqlQueryBuilder extends Base {
     return ast.kind === "InlineFragment" || ast.kind === "FragmentSpread";
   }
 
-  private static getAST(ast: ASTNode, info: GraphQLResolveInfo | FeedNodeInfo) {
+  private static getAST(
+    ast: ASTNode,
+    info: GraphQLResolveInfo | FieldNodeInfo
+  ) {
     if (ast.kind === "FragmentSpread") {
       const fragmentName = ast.name.value;
       return info.fragments[fragmentName];
@@ -106,7 +109,7 @@ export class GraphqlQueryBuilder extends Base {
 
   private static flattenAST(
     ast: ASTNode,
-    info: GraphQLResolveInfo | FeedNodeInfo,
+    info: GraphQLResolveInfo | FieldNodeInfo,
     obj: Hash<Selection> = {}
   ): Hash<Selection> {
     return GraphqlQueryBuilder.getSelections(

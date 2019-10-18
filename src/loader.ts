@@ -3,7 +3,7 @@ import { GraphQLResolveInfo } from "graphql";
 import { Base } from "./base";
 import * as crypto from "crypto";
 import {
-  FeedNodeInfo,
+  FieldNodeInfo,
   LoaderOptions,
   QueryMeta,
   QueryOptions,
@@ -11,6 +11,7 @@ import {
   QueueItem
 } from "./types";
 import { GraphqlQueryBuilder } from "./graphqlQueryBuilder";
+import { FieldNode, SelectionNode } from "graphql";
 
 /**
  * GraphQLDatabaseLoader is a caching loader that folds a batch of different database queries into a singular query.
@@ -30,6 +31,23 @@ export class GraphQLDatabaseLoader extends Base {
     public options: LoaderOptions = {}
   ) {
     super(options);
+  }
+
+  public static getFieldNodeInfo(
+    info: GraphQLResolveInfo,
+    fieldName: string
+  ): FieldNodeInfo {
+    const childFieldNode = info.fieldNodes
+      .map(node => (node.selectionSet ? node.selectionSet.selections : []))
+      .flat()
+      .find((selection: SelectionNode) =>
+        selection.kind !== "InlineFragment"
+          ? selection.name.value === fieldName
+          : false
+      ) as FieldNode;
+
+    const fieldNodes = [childFieldNode];
+    return { fieldNodes, fragments: info.fragments, fieldName };
   }
 
   /**
@@ -60,7 +78,7 @@ export class GraphQLDatabaseLoader extends Base {
   public async loadOne<T>(
     entity: Function | string,
     where: Partial<T>,
-    info: GraphQLResolveInfo,
+    info: GraphQLResolveInfo | FieldNodeInfo,
     options?: QueryOptions
   ): Promise<T | undefined> {
     const { found, item, key, fields } = this.processQueryMeta(info, where);
@@ -102,7 +120,7 @@ export class GraphQLDatabaseLoader extends Base {
   public async loadMany<T>(
     entity: Function | string,
     where: Partial<T>,
-    info: GraphQLResolveInfo | FeedNodeInfo,
+    info: GraphQLResolveInfo | FieldNodeInfo,
     options?: QueryOptions
   ): Promise<T[]> {
     const { found, item, key, fields } = this.processQueryMeta(info, where);
@@ -144,7 +162,7 @@ export class GraphQLDatabaseLoader extends Base {
   public async loadManyPaginated<T>(
     entity: Function | string,
     where: Partial<T>,
-    info: GraphQLResolveInfo | FeedNodeInfo,
+    info: GraphQLResolveInfo | FieldNodeInfo,
     pagination: QueryPagination,
     options?: QueryOptions
   ): Promise<[T[], number]> {
@@ -186,7 +204,7 @@ export class GraphQLDatabaseLoader extends Base {
   public async batchLoadMany<T>(
     entity: Function | string,
     where: Partial<T>[],
-    info: GraphQLResolveInfo,
+    info: GraphQLResolveInfo | FieldNodeInfo,
     options?: QueryOptions
   ): Promise<(T | undefined)[]> {
     return await Promise.all(
@@ -269,7 +287,7 @@ export class GraphQLDatabaseLoader extends Base {
    * @param where
    */
   private processQueryMeta<T>(
-    info: GraphQLResolveInfo | FeedNodeInfo,
+    info: GraphQLResolveInfo | FieldNodeInfo,
     where: Partial<T>
   ): QueryMeta {
     // Create a md5 hash.
