@@ -33,6 +33,23 @@ export class GraphQLDatabaseLoader extends Base {
   }
 
   /**
+   * Helper to handle pagination.
+   * Future version will support cursor based pagination. For now, use
+   * basic offset and limit
+   * @param query
+   * @param pagination
+   */
+  private static handlePagination(
+    query: SelectQueryBuilder<Function | string | {}>,
+    pagination: QueryPagination
+  ): SelectQueryBuilder<Function | string | {}> {
+    let qb = query;
+    qb = qb.offset(pagination.offset);
+    qb = qb.limit(pagination.limit);
+    return qb;
+  }
+
+  /**
    * Load an entity from the database.
    * @param {typeof BaseEntity|string} entity The entity type to load.
    * @param where Query conditions.
@@ -220,7 +237,7 @@ export class GraphQLDatabaseLoader extends Base {
           }
           // pagination
           if (q.pagination) {
-            qb = this.handlePagination(qb, q.pagination);
+            qb = GraphQLDatabaseLoader.handlePagination(qb, q.pagination);
             // we use a different execution method, so we need to return
             // with different logic
             return qb
@@ -326,23 +343,6 @@ export class GraphQLDatabaseLoader extends Base {
 
     // check if we must order the query
     qb = options.order ? qb.orderBy(options.order) : qb;
-    return qb;
-  }
-
-  /**
-   * Helper to handle pagination.
-   * Future version will support cursor based pagination. For now, use
-   * basic offset and limit
-   * @param query
-   * @param pagination
-   */
-  private handlePagination(
-    query: SelectQueryBuilder<Function | string | {}>,
-    pagination: QueryPagination
-  ): SelectQueryBuilder<Function | string | {}> {
-    let qb = query;
-    qb = qb.offset(pagination.offset);
-    qb = qb.limit(pagination.limit);
     return qb;
   }
 }
