@@ -100,4 +100,34 @@ describe("pagination", () => {
       posts: Posts.map(({ id }) => ({ id: id.toString() })).slice(15, 30)
     });
   });
+
+  it("can query arbitrary fields", async () => {
+    const result = await graphql(
+      schema,
+      `
+        {
+          paginatedPosts(pagination: { offset: 0, limit: 15 }) {
+            hasMore
+            offset
+            posts {
+              id
+              title
+            }
+          }
+        }
+      `,
+      {},
+      {
+        loader
+      }
+    );
+
+    expect(result).to.not.have.key("errors");
+    expect(result.data!.paginatedPosts.posts).to.have.length(15);
+    expect(result.data!.paginatedPosts).to.deep.equal({
+      hasMore: true,
+      offset: 15,
+      posts: Posts.map(({ id, title }) => ({ id: id.toString(), title: title.toString() })).slice(0, 15)
+    });
+  });
 });
