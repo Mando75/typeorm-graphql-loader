@@ -1,16 +1,7 @@
 import { snakeCase } from "typeorm/util/StringUtils";
 import { LoaderOptions, SearchOptions } from "./types";
-
-export enum LoaderNamingStrategyEnum {
-  CAMELCASE,
-  SNAKECASE
-}
-
-export enum LoaderSearchMethod {
-  ANY_POSITION, // LIKE '%mysearch%'
-  STARTS_WITH, // LIKE 'mysearch%';
-  ENDS_WITH // LIKE '%mysearch';
-}
+import { LoaderNamingStrategyEnum } from "./chaining/enums/LoaderNamingStrategy";
+import { LoaderSearchMethod } from "./chaining/enums/LoaderSearchMethod";
 
 export class Base {
   static SearchMethodMapping = new Map<LoaderSearchMethod, Function>([

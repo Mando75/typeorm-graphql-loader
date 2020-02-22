@@ -6,7 +6,7 @@ import { Post } from "./entity/Post";
 import { User } from "./entity/User";
 import { builder } from "./schema";
 import * as chai from "chai";
-import { LoaderSearchMethod } from "../src/base";
+import { LoaderSearchMethod } from "../src/chaining/enums/LoaderSearchMethod";
 const deepEqualInAnyOrder = require("deep-equal-in-any-order");
 
 chai.use(deepEqualInAnyOrder);

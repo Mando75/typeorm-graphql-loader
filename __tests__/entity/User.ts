@@ -9,7 +9,7 @@ import { GraphQLDatabaseLoader } from "../../src";
 import { builder } from "../schema";
 import { Node } from "./Node";
 import { Post } from "./Post";
-import { LoaderSearchMethod } from "../../src/base";
+import { LoaderSearchMethod } from "../../src/chaining/enums/LoaderSearchMethod";
 
 @Entity()
 @builder.type()

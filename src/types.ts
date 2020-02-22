@@ -1,6 +1,7 @@
 import { FieldNode, FragmentDefinitionNode } from "graphql";
 import { OrderByCondition } from "typeorm";
-import { LoaderNamingStrategyEnum, LoaderSearchMethod } from "./base";
+import { LoaderNamingStrategyEnum } from "./chaining/enums/LoaderNamingStrategy";
+import { LoaderSearchMethod } from "./chaining/enums/LoaderSearchMethod";
 
 export type LoaderOptions = {
   // Time-to-live for cache.

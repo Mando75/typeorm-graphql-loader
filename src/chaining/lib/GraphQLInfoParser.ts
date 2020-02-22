@@ -10,6 +10,12 @@ import {
 import { FieldNodeInfo, Hash, Selection } from "../../types";
 
 export class GraphQLInfoParser {
+  /**
+   * Parses a GraphQLResolveInfo object and returns
+   * the selection of fields being requested
+   * @param info
+   * @param obj
+   */
   public graphqlFields(
     info: GraphQLResolveInfo | FieldNodeInfo,
     obj: Hash<Selection> = {}
@@ -87,6 +93,11 @@ export class GraphQLInfoParser {
     return ast;
   }
 
+  /**
+   * Utility function for converting ast values based on their
+   * GraphQL type
+   * @param ast
+   */
   private parseLiteral(ast: ValueNode): any {
     switch (ast.kind) {
       case Kind.STRING:
