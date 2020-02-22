@@ -76,8 +76,6 @@
     "sqlite3": "^4.1.0",
     "ts-node": "^8.4.1",
     "tslib": "^1.10.0",
-    "tslint": "^6.0.0",
-    "tslint-config-prettier": "^1.18.0",
     "typeorm": "^0.2.19",
     "typescript": "^3.6.4"
   },

@@ -1,7 +1,12 @@
 import { FieldNode, FragmentDefinitionNode } from "graphql";
-import { OrderByCondition } from "typeorm";
+import { ObjectLiteral, OrderByCondition } from "typeorm";
 import { LoaderNamingStrategyEnum } from "./chaining/enums/LoaderNamingStrategy";
 import { LoaderSearchMethod } from "./chaining/enums/LoaderSearchMethod";
+
+export type ChainableWhereArgument =
+  | string
+  | ObjectLiteral
+  | Array<ObjectLiteral>;
 
 export type LoaderOptions = {
   // Time-to-live for cache.
@@ -68,6 +73,17 @@ export type QueueItem = {
   entity: Function | string;
   pagination?: QueryPagination;
   options?: QueryOptions;
+};
+
+export type ChainableQueueItem = {
+  many: boolean;
+  key: string;
+  fields: Selection | null;
+  andWhere: Array<ChainableWhereArgument>;
+  orWhere: Array<ChainableWhereArgument>;
+  resolve: Function;
+  reject: Function;
+  entity: Function | string;
 };
 
 export type QueryMeta = {
