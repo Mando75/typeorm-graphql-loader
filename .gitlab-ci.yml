@@ -33,7 +33,7 @@ test-package:
     - rm -rf .yarn
     - yarn install
   script:
-    - yarn test-with-coverage
+    - yarn test
   artifacts:
     name: coverage
     paths:
