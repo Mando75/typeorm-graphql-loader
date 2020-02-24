@@ -1,4 +1,4 @@
-image: node:11.10.0
+image: node:11.10.1
 
 cache:
   paths:
