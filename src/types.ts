@@ -1,12 +1,25 @@
 import { FieldNode, FragmentDefinitionNode } from "graphql";
-import { ObjectLiteral, OrderByCondition } from "typeorm";
+import { ObjectLiteral, OrderByCondition, Brackets } from "typeorm";
 import { LoaderNamingStrategyEnum } from "./chaining/enums/LoaderNamingStrategy";
 import { LoaderSearchMethod } from "./chaining/enums/LoaderSearchMethod";
 
 export type ChainableWhereArgument =
   | string
+  | Brackets
   | ObjectLiteral
   | Array<ObjectLiteral>;
+
+export type ChainableWhereExpression =
+  | LoaderWhereExpression
+  | Brackets
+  | ObjectLiteral
+  | Array<ObjectLiteral>;
+
+export type LoaderWhereExpression = {
+  isLoaderWhereExpression: boolean;
+  condition: string;
+  params?: ObjectLiteral;
+};
 
 export type LoaderOptions = {
   // Time-to-live for cache.
@@ -79,10 +92,10 @@ export type ChainableQueueItem = {
   many: boolean;
   key: string;
   fields: Selection | null;
-  andWhere: Array<ChainableWhereArgument>;
-  orWhere: Array<ChainableWhereArgument>;
-  resolve: Function;
-  reject: Function;
+  andWhere: Array<ChainableWhereExpression>;
+  orWhere: Array<ChainableWhereExpression>;
+  resolve: (value?: any) => any;
+  reject: (reason: any) => void;
   entity: Function | string;
 };
 

@@ -8,7 +8,7 @@
     "prepare": "yarn build",
     "build": "tsc --declaration",
     "lint": "eslint 'src/**/*.ts'",
-    "test": "yarn run build && [ -d __tests__ ] && NODE_ENV=test nyc mocha -r ts-node/register -r tslib -r source-map-support/register --full-trace --bail __tests__/**/*.test.ts --timeout 5000",
+    "test": "yarn run build && [ -d src/__tests__ ] && NODE_ENV=test nyc mocha -r ts-node/register -r tslib -r source-map-support/register --full-trace --bail src/__tests__/**/*.test.ts --timeout 5000",
     "test-with-coverage": "yarn test && cat ./coverage/lcov.info | codacy-coverage"
   },
   "nyc": {
