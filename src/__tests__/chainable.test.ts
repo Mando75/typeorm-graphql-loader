@@ -17,7 +17,7 @@ chai.use(deepEqualInAnyOrder);
 
 const { expect } = chai;
 
-describe("GraphQL resolvers", function() {
+describe("Chainable API", function() {
   let schema: GraphQLSchema;
   let loader: GraphQLDatabaseLoader;
 
@@ -47,7 +47,7 @@ describe("GraphQL resolvers", function() {
     });
   });
 
-  it("can load a single entity with nested relations", async () => {
+  it("can load a single entity with nested relations via the chainable api", async () => {
     const result = await graphql(
       schema,
       `{ chainableUser(id: ${user.id}){ id email firstName lastName age posts { id title content } } }`,
