@@ -34,3 +34,7 @@ test-package:
     - yarn install
   script:
     - yarn test-with-coverage
+  artifacts:
+    name: coverage
+    paths:
+      - coverage/
