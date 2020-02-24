@@ -1,12 +1,12 @@
 import { Connection, createConnection } from "typeorm";
-import { GraphQLDatabaseLoader, LoaderNamingStrategyEnum } from "../src";
+import { GraphQLDatabaseLoader } from "../";
 import { seedDatabase } from "./common/seed";
 import { GraphQLSchema, graphql } from "graphql";
 import { Post } from "./entity/Post";
 import { User } from "./entity/User";
 import { builder } from "./schema";
 import * as chai from "chai";
-import { LoaderSearchMethod } from "../src/chaining/enums/LoaderSearchMethod";
+import { LoaderSearchMethod } from "../chaining/enums/LoaderSearchMethod";
 const deepEqualInAnyOrder = require("deep-equal-in-any-order");
 
 chai.use(deepEqualInAnyOrder);
@@ -36,7 +36,7 @@ describe("searching", () => {
 
     await seedDatabase(connection);
 
-    user = await connection.getRepository(User).create({
+    user = connection.getRepository(User).create({
       email: TEST_USER_EMAIL,
       firstName: TEST_USER_FIRST_NAME,
       lastName: TEST_USER_LAST_NAME,

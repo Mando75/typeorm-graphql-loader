@@ -1,7 +1,7 @@
 import * as chai from "chai";
 import { graphql, GraphQLSchema } from "graphql";
 import { Connection, createConnection } from "typeorm";
-import { GraphQLDatabaseLoader, LoaderNamingStrategyEnum } from "../src";
+import { GraphQLDatabaseLoader, LoaderNamingStrategyEnum } from "../";
 
 import { seedDatabase } from "./common/seed";
 import { Post } from "./entity/Post";

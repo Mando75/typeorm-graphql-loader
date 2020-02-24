@@ -1,5 +1,5 @@
 import { Connection, createConnection } from "typeorm";
-import { GraphQLDatabaseLoader, LoaderNamingStrategyEnum } from "../src";
+import { GraphQLDatabaseLoader, LoaderNamingStrategyEnum } from "../";
 import { seedDatabase } from "./common/seed";
 import { GraphQLSchema, graphql } from "graphql";
 import { Post } from "./entity/Post";

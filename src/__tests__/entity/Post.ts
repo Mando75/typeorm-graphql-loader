@@ -6,7 +6,7 @@ import {
   GraphQLString
 } from "graphql";
 import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
-import { GraphQLDatabaseLoader } from "../../src";
+import { GraphQLDatabaseLoader } from "../../";
 import { builder } from "../schema";
 
 import { Node } from "./Node";
@@ -70,7 +70,10 @@ export class Post extends Node {
   @Column("text")
   camelizedField!: string;
 
-  @ManyToOne(type => User, user => user.posts)
+  @ManyToOne(
+    type => User,
+    user => user.posts
+  )
   @JoinColumn()
   @builder.nonNull()
   @builder.field(() => User)

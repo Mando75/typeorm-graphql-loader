@@ -5,11 +5,12 @@ import {
   GraphQLString
 } from "graphql";
 import { Entity, PrimaryColumn, Column, OneToMany } from "typeorm";
-import { GraphQLDatabaseLoader } from "../../src";
+import { GraphQLDatabaseLoader } from "../../";
+import { GraphQLDatabaseLoader as ChainableLoader } from "../../chaining";
 import { builder } from "../schema";
 import { Node } from "./Node";
 import { Post } from "./Post";
-import { LoaderSearchMethod } from "../../src/chaining/enums/LoaderSearchMethod";
+import { LoaderSearchMethod } from "../../chaining/enums/LoaderSearchMethod";
 
 @Entity()
 @builder.type()
@@ -42,7 +43,10 @@ export class User extends Node {
   @builder.nonNull()
   @builder.nonNullItems()
   @builder.list(() => Post)
-  @OneToMany(type => Post, post => post.owner)
+  @OneToMany(
+    type => Post,
+    post => post.owner
+  )
   posts!: Post[];
 
   @Column({ type: "boolean", default: true })
@@ -63,6 +67,27 @@ export class User extends Node {
     info: GraphQLResolveInfo
   ) {
     return context.loader.loadMany(User, {}, info);
+  }
+
+  @builder.query({
+    args: { id: { type: GraphQLID, defaultValue: null } },
+    returnType: {
+      type: () => User,
+      list: false,
+      nonNull: false
+    }
+  })
+  async chainableUser(
+    rootValue: any,
+    { id }: any,
+    context: { chainable: ChainableLoader },
+    info: GraphQLResolveInfo
+  ) {
+    return context.chainable
+      .loadEntity(User)
+      .info(info)
+      .where({ id })
+      .loadOne();
   }
 
   @builder.query({
