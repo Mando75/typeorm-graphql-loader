@@ -4,3 +4,8 @@ node_modules/
 build/
 tmp/
 temp/
+*.sqlite3
+.nyc_output/
+coverage/
+dist/
+yarn-error.log
