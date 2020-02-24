@@ -38,3 +38,4 @@ test-package:
     name: coverage
     paths:
       - coverage/
+    expire_in: 30 days
