@@ -70,6 +70,27 @@ export class User extends Node {
   }
 
   @builder.query({
+    returnType: {
+      type: () => User,
+      list: true,
+      nonNull: true,
+      nonNullItems: true
+    }
+  })
+  async chainableUsers(
+    rootValue: any,
+    args: any,
+    context: { chainable: ChainableLoader },
+    info: GraphQLResolveInfo
+  ) {
+    return context.chainable
+      .loadEntity(User)
+      .where({})
+      .info(info)
+      .loadMany();
+  }
+
+  @builder.query({
     args: { id: { type: GraphQLID, defaultValue: null } },
     returnType: {
       type: () => User,

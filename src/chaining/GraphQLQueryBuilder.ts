@@ -114,6 +114,35 @@ export class GraphQLQueryBuilder {
     return promise;
   }
 
+  public async loadMany<T>(): Promise<T[] | undefined> {
+    // we need to validate an info object
+    this.validateInfo();
+    const { fields, found, key, item } = this._manager.processQueryMeta(
+      this._info!,
+      this._andWhereExpressions
+    );
+
+    if (found && item) {
+      return item;
+    }
+
+    const promise = new Promise<T[] | undefined>((resolve, reject) => {
+      this._manager.addQueueItem({
+        many: true,
+        key,
+        fields,
+        andWhere: this._andWhereExpressions,
+        orWhere: this._orWhereExpressions,
+        resolve,
+        reject,
+        entity: this._entity
+      });
+    });
+
+    this._manager.addCacheItem(key, promise);
+    return promise;
+  }
+
   /**
    * Throw an error if the info object has not been defined for this query
    */

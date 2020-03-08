@@ -80,4 +80,21 @@ describe("Chainable API", function() {
     //@ts-ignore
     expect(result).to.deep.equalInAnyOrder(expected);
   });
+
+  it("can make a simple query", async () => {
+    // const loader = new GraphQLDatabaseLoader(connection);
+    const result = await graphql(
+      schema,
+      "{ chainableUsers { id } }",
+      {},
+      {
+        chainable: loader
+      }
+    );
+    expect(result.errors || []).to.deep.equal([]);
+    expect(result).to.not.have.key("errors");
+    expect(result.data).to.deep.equal({
+      chainableUsers: Users.map(({ id }) => ({ id: id.toString() }))
+    });
+  });
 });
