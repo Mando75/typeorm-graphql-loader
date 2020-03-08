@@ -88,12 +88,17 @@ export type QueueItem = {
   options?: QueryOptions;
 };
 
+export type QueryPredicates = {
+  andWhere: Array<ChainableWhereExpression>;
+  orWhere: Array<ChainableWhereExpression>;
+  search: Array<SearchOptions>;
+};
+
 export type ChainableQueueItem = {
   many: boolean;
   key: string;
   fields: Selection | null;
-  andWhere: Array<ChainableWhereExpression>;
-  orWhere: Array<ChainableWhereExpression>;
+  predicates: QueryPredicates;
   resolve: (value?: any) => any;
   reject: (reason: any) => void;
   entity: Function | string;

@@ -2,7 +2,9 @@ import { GraphQLResolveInfo } from "graphql";
 import {
   ChainableWhereArgument,
   ChainableWhereExpression,
-  FieldNodeInfo
+  FieldNodeInfo,
+  QueryPredicates,
+  SearchOptions
 } from "../types";
 import { GraphQLQueryManager } from "./GraphQLQueryManager";
 import { ObjectLiteral } from "typeorm";
@@ -11,6 +13,7 @@ export class GraphQLQueryBuilder {
   private _info: GraphQLResolveInfo | FieldNodeInfo | null = null;
   private _andWhereExpressions: Array<ChainableWhereExpression> = [];
   private _orWhereExpressions: Array<ChainableWhereExpression> = [];
+  private _searchExpressions: Array<SearchOptions> = [];
 
   constructor(
     private _manager: GraphQLQueryManager,
@@ -76,7 +79,8 @@ export class GraphQLQueryBuilder {
     return this;
   }
 
-  public search(args: any): GraphQLQueryBuilder {
+  public search(searchOptions: SearchOptions): GraphQLQueryBuilder {
+    this._searchExpressions.push(searchOptions);
     return this;
   }
 
@@ -88,7 +92,7 @@ export class GraphQLQueryBuilder {
    */
   public async loadOne<T>(): Promise<T | undefined> {
     // We need to have an info object to parse
-    this.validateInfo();
+    this._validateInfo();
 
     // Get's the queried fields and checks if we already have this query cached
     const { fields, found, key, item } = this._manager.processQueryMeta(
@@ -106,8 +110,7 @@ export class GraphQLQueryBuilder {
         many: false,
         key,
         fields,
-        andWhere: this._andWhereExpressions,
-        orWhere: this._orWhereExpressions,
+        predicates: this._getQueryPredicates(),
         resolve,
         reject,
         entity: this._entity
@@ -120,7 +123,7 @@ export class GraphQLQueryBuilder {
 
   public async loadMany<T>(): Promise<T[] | undefined> {
     // we need to validate an info object
-    this.validateInfo();
+    this._validateInfo();
     const { fields, found, key, item } = this._manager.processQueryMeta(
       this._info!,
       this._andWhereExpressions
@@ -135,8 +138,7 @@ export class GraphQLQueryBuilder {
         many: true,
         key,
         fields,
-        andWhere: this._andWhereExpressions,
-        orWhere: this._orWhereExpressions,
+        predicates: this._getQueryPredicates(),
         resolve,
         reject,
         entity: this._entity
@@ -150,7 +152,7 @@ export class GraphQLQueryBuilder {
   /**
    * Throw an error if the info object has not been defined for this query
    */
-  private validateInfo() {
+  private _validateInfo() {
     if (this._info) {
       return true;
     } else {
@@ -158,5 +160,13 @@ export class GraphQLQueryBuilder {
         "Missing GraphQL Resolve info. Please invoke `.info()` before calling this method"
       );
     }
+  }
+
+  private _getQueryPredicates(): QueryPredicates {
+    return {
+      search: this._searchExpressions,
+      andWhere: this._andWhereExpressions,
+      orWhere: this._orWhereExpressions
+    };
   }
 }

@@ -5,7 +5,8 @@ import {
   FieldNodeInfo,
   LoaderOptions,
   LoaderWhereExpression,
-  QueryMeta
+  QueryMeta,
+  SearchOptions
 } from "../types";
 import { LoaderSearchMethod } from "./enums/LoaderSearchMethod";
 import { GraphQLInfoParser } from "./lib/GraphQLInfoParser";
@@ -18,6 +19,8 @@ import {
   SelectQueryBuilder
 } from "typeorm";
 import { GraphQLQueryResolver } from "./GraphQLQueryResolver";
+import { Formatter } from "./lib/Formatter";
+import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
 
 export class GraphQLQueryManager {
   private _queue: ChainableQueueItem[] = [];
@@ -26,6 +29,7 @@ export class GraphQLQueryManager {
   private _defaultLoaderSearchMethod: LoaderSearchMethod;
   private _parser: GraphQLInfoParser = new GraphQLInfoParser();
   private _resolver: GraphQLQueryResolver;
+  private _formatter: Formatter;
 
   constructor(private _connection: Connection, options: LoaderOptions = {}) {
     const { defaultSearchMethod } = options;
@@ -33,6 +37,9 @@ export class GraphQLQueryManager {
       defaultSearchMethod ?? LoaderSearchMethod.ANY_POSITION;
 
     this._resolver = new GraphQLQueryResolver(options);
+    this._formatter = new Formatter(
+      options.namingStrategy ?? LoaderNamingStrategyEnum.CAMELCASE
+    );
   }
 
   private static createTypeORMQueryBuilder(
@@ -43,6 +50,24 @@ export class GraphQLQueryManager {
       .getRepository<{}>(name)
       .createQueryBuilder(name)
       .select([]);
+  }
+
+  /**
+   * Takes a condition and formats into a type that TypeORM can
+   * read
+   * @param where
+   * @private
+   */
+  private static _breakDownWhereExpression(where: ChainableWhereExpression) {
+    if ((where as LoaderWhereExpression).isLoaderWhereExpression) {
+      const asExpression = where as LoaderWhereExpression;
+      return { where: asExpression.condition, params: asExpression.params };
+    } else {
+      // TypeScript weirdness here. Casting as brackets but it doesn't matter
+      // because the only incompatible type is handled in the if statement above
+      // Just casting this so that TypeORM behaves nicely
+      return { where: where as Brackets, params: undefined };
+    }
   }
 
   public processQueryMeta(
@@ -104,7 +129,12 @@ export class GraphQLQueryManager {
       return await this._connection.transaction(async entityManager => {
         queue.map(this._resolveQueueItem(entityManager));
       });
-    } catch (e) {}
+    } catch (e) {
+      queue.forEach(q => {
+        q.reject(e);
+        this._cache.delete(q.key);
+      });
+    }
   }
 
   /**
@@ -125,8 +155,19 @@ export class GraphQLQueryManager {
         queryBuilder,
         name
       );
-      queryBuilder = this._addAndWhereConditions(queryBuilder, item.andWhere);
-      queryBuilder = this._addOrWhereConditions(queryBuilder, item.orWhere);
+      queryBuilder = this._addAndWhereConditions(
+        queryBuilder,
+        item.predicates.andWhere
+      );
+      queryBuilder = this._addOrWhereConditions(
+        queryBuilder,
+        item.predicates.orWhere
+      );
+      queryBuilder = this._addSearchConditions(
+        queryBuilder,
+        name,
+        item.predicates.search
+      );
 
       const promise = item.many
         ? queryBuilder.getMany()
@@ -153,11 +194,15 @@ export class GraphQLQueryManager {
     const initialWhere = conditions.shift();
     if (!initialWhere) return qb;
 
-    const { where, params } = this._breakDownWhereExpression(initialWhere);
+    const { where, params } = GraphQLQueryManager._breakDownWhereExpression(
+      initialWhere
+    );
     qb = qb.where(where, params);
 
     conditions.forEach(condition => {
-      const { where, params } = this._breakDownWhereExpression(condition);
+      const { where, params } = GraphQLQueryManager._breakDownWhereExpression(
+        condition
+      );
       qb = qb.andWhere(where, params);
     });
     return qb;
@@ -175,27 +220,71 @@ export class GraphQLQueryManager {
     conditions: Array<ChainableWhereExpression>
   ): SelectQueryBuilder<{}> {
     conditions.forEach(condition => {
-      const { where, params } = this._breakDownWhereExpression(condition);
+      const { where, params } = GraphQLQueryManager._breakDownWhereExpression(
+        condition
+      );
       qb = qb.orWhere(where, params);
     });
     return qb;
   }
 
   /**
-   * Takes a condition and formats into a type that TypeORM can
-   * read
-   * @param where
+   * Given a list of search conditions, adds them to the query builder.
+   * If multiple sets of search conditions are passed, the will be ANDed together
+   * @param qb
+   * @param alias
+   * @param searchConditions
    * @private
    */
-  private _breakDownWhereExpression(where: ChainableWhereExpression) {
-    if ((where as LoaderWhereExpression).isLoaderWhereExpression) {
-      const asExpression = where as LoaderWhereExpression;
-      return { where: asExpression.condition, params: asExpression.params };
-    } else {
-      // TypeScript weirdness here. Casting as brackets but it doesn't matter
-      // because the only incompatible type is handled in the if statement above
-      // Just casting this so that TypeORM behaves nicely
-      return { where: where as Brackets, params: undefined };
-    }
+  private _addSearchConditions(
+    qb: SelectQueryBuilder<{}>,
+    alias: string,
+    searchConditions: Array<SearchOptions>
+  ): SelectQueryBuilder<{}> {
+    // Add an andWhere for each formatted search condition
+    this._formatSearchConditions(searchConditions, alias).forEach(
+      ({ query, params }) => {
+        qb = qb.andWhere(query, params);
+      }
+    );
+    return qb;
+  }
+
+  /**
+   * Maps over a list of given search conditions and formats them into
+   * a query and param object to be added to a query builder.
+   * @param conditions
+   * @param alias
+   * @private
+   */
+  private _formatSearchConditions(
+    conditions: Array<SearchOptions>,
+    alias: string
+  ) {
+    return conditions.map(
+      ({ searchColumns, searchMethod, searchText, caseSensitive }) => {
+        // Determine which search method we should use (can be customized per request)
+        const method = searchMethod || this._defaultLoaderSearchMethod;
+        // Generates a list of 'column LIKE :searchText' in accordance with the
+        // SearchOptions type definition
+        const likeQueryStrings = this._formatter.formatSearchColumns(
+          searchColumns,
+          alias,
+          caseSensitive
+        );
+        // Depending on our search method, we need to place our wild card
+        // in a different part of the string. This handles that.
+        const searchTextParam = this._formatter.getSearchMethodMapping(
+          method,
+          searchText
+        );
+        // Returns this structure so they can be safely added
+        // to the query builder without providing for SQL injection
+        return {
+          query: `(${likeQueryStrings.join(" OR ")})`,
+          params: { searchText: searchTextParam }
+        };
+      }
+    );
   }
 }
