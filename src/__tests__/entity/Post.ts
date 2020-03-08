@@ -7,6 +7,7 @@ import {
 } from "graphql";
 import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
 import { GraphQLDatabaseLoader } from "../../";
+import { GraphQLDatabaseLoader as ChainableLoader } from "../../chaining";
 import { builder } from "../schema";
 
 import { Node } from "./Node";
@@ -100,6 +101,33 @@ export class Post extends Node {
     info: GraphQLResolveInfo
   ) {
     return context.loader.loadMany(Post, args.where, info);
+  }
+
+  @builder.query({
+    returnType: {
+      type: () => Post,
+      list: true,
+      nonNullItems: true,
+      nonNull: true
+    },
+    args: {
+      where: {
+        type: () => PostInput,
+        defaultValue: {}
+      }
+    }
+  })
+  async chainablePosts(
+    rootValue: any,
+    args: any,
+    context: { chainable: ChainableLoader },
+    info: GraphQLResolveInfo
+  ) {
+    return context.chainable
+      .loadEntity(Post)
+      .where(args.where)
+      .info(info)
+      .loadMany();
   }
 
   @builder.query({

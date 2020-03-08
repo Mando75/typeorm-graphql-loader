@@ -130,4 +130,63 @@ describe("Chainable API", function() {
     expect(result).to.not.have.key("errors");
     expect(result.data).to.deep.equal(expected);
   });
+
+  it("can batch multiple queries", async () => {
+    // Best way to look for caching is to enable logging and view
+    // the db queries called
+    const results = await Promise.all([
+      graphql(
+        schema,
+        "{ chainableUsers { id } }",
+        {},
+        {
+          chainable: loader
+        }
+      ),
+      graphql(
+        schema,
+        "{ chainableUsers { id } }",
+        {},
+        {
+          chainable: loader
+        }
+      ),
+      graphql(
+        schema,
+        "{ chainablePosts { id, owner { id } } }",
+        {},
+        {
+          chainable: loader
+        }
+      ),
+      graphql(
+        schema,
+        "{ chainablePosts { id, owner { id } } }",
+        {},
+        {
+          chainable: loader
+        }
+      )
+    ]);
+    const userData = {
+      data: {
+        chainableUsers: Users.map(({ id }) => ({ id: id.toString() }))
+      }
+    };
+
+    const postData = {
+      data: {
+        chainablePosts: Posts.map(({ id, owner }) => ({
+          id: id.toString(),
+          owner: { id: owner.id.toString() }
+        }))
+      }
+    };
+    const expected = [userData, userData, postData, postData];
+    for (let result of results) {
+      expect(result.errors || []).to.deep.equal([]);
+      expect(result).to.not.have.key("errors");
+    }
+    expect(results).to.deep.equal(expected);
+  });
 });
