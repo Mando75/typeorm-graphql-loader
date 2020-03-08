@@ -6,8 +6,7 @@ import {
   GraphQLString
 } from "graphql";
 import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
-import { GraphQLDatabaseLoader } from "../../";
-import { GraphQLDatabaseLoader as ChainableLoader } from "../../chaining";
+import { GraphQLDatabaseLoader } from "../../chaining";
 import { builder } from "../schema";
 
 import { Node } from "./Node";
@@ -100,30 +99,7 @@ export class Post extends Node {
     context: { loader: GraphQLDatabaseLoader },
     info: GraphQLResolveInfo
   ) {
-    return context.loader.loadMany(Post, args.where, info);
-  }
-
-  @builder.query({
-    returnType: {
-      type: () => Post,
-      list: true,
-      nonNullItems: true,
-      nonNull: true
-    },
-    args: {
-      where: {
-        type: () => PostInput,
-        defaultValue: {}
-      }
-    }
-  })
-  async chainablePosts(
-    rootValue: any,
-    args: any,
-    context: { chainable: ChainableLoader },
-    info: GraphQLResolveInfo
-  ) {
-    return context.chainable
+    return context.loader
       .loadEntity(Post)
       .where(args.where)
       .info(info)
@@ -153,12 +129,13 @@ export class Post extends Node {
     context: { loader: GraphQLDatabaseLoader },
     info: GraphQLResolveInfo
   ) {
-    const [posts, totalCount] = await context.loader.loadManyPaginated(
-      Post,
-      args.where,
-      info,
-      args.pagination
-    );
+    return [];
+    // const [posts, totalCount] = await context.loader.loadManyPaginated(
+    //   Post,
+    //   args.where,
+    //   info,
+    //   args.pagination
+    // );
     // Note: this is just an example of a simple pagination system that does
     // not check if the end of the list is reached when calculating the next offset
     // It is advised that a more robust/standardized implementation is used. As
@@ -166,11 +143,11 @@ export class Post extends Node {
     // a robust offset calculation is relevant to testing the actual functionality which
     // revolves around whether or not the paginated method returns the records with the correct
     // limits and offset
-    const { offset, limit } = args.pagination;
-    return {
-      hasMore: offset + limit < totalCount,
-      offset: offset + limit,
-      posts
-    };
+    // const { offset, limit } = args.pagination;
+    // return {
+    //   hasMore: offset + limit < totalCount,
+    //   offset: offset + limit,
+    //   posts
+    // };
   }
 }

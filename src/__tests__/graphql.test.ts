@@ -1,7 +1,8 @@
 import * as chai from "chai";
 import { graphql, GraphQLSchema } from "graphql";
-import { Connection, createConnection } from "typeorm";
-import { GraphQLDatabaseLoader, LoaderNamingStrategyEnum } from "../";
+import { Connection, createConnection, getConnectionOptions } from "typeorm";
+import { LoaderNamingStrategyEnum } from "../";
+import { GraphQLDatabaseLoader } from "../chaining";
 
 import { seedDatabase } from "./common/seed";
 import { Post } from "./entity/Post";
@@ -16,7 +17,7 @@ chai.use(deepEqualInAnyOrder);
 
 const { expect } = chai;
 
-describe("GraphQL resolvers", function() {
+describe("GraphQL API", function() {
   let schema: GraphQLSchema;
   let loader: GraphQLDatabaseLoader;
 
@@ -46,65 +47,7 @@ describe("GraphQL resolvers", function() {
     });
   });
 
-  it("can make a simple query", async () => {
-    // const loader = new GraphQLDatabaseLoader(connection);
-    const result = await graphql(
-      schema,
-      "{ users { id } }",
-      {},
-      {
-        loader
-      }
-    );
-    expect(result.errors || []).to.deep.equal([]);
-    expect(result).to.not.have.key("errors");
-    expect(result.data).to.deep.equal({
-      users: Users.map(({ id }) => ({ id: id.toString() }))
-    });
-  });
-
-  it("can batch multiple queries", async () => {
-    const results = await Promise.all([
-      graphql(
-        schema,
-        "{ users { id } }",
-        {},
-        {
-          loader
-        }
-      ),
-      graphql(
-        schema,
-        "{ posts { id, owner { id } } }",
-        {},
-        {
-          loader
-        }
-      )
-    ]);
-    const expected = [
-      {
-        data: {
-          users: Users.map(({ id }) => ({ id: id.toString() }))
-        }
-      },
-      {
-        data: {
-          posts: Posts.map(({ id, owner }) => ({
-            id: id.toString(),
-            owner: { id: owner.id.toString() }
-          }))
-        }
-      }
-    ];
-    for (let result of results) {
-      expect(result.errors || []).to.deep.equal([]);
-      expect(result).to.not.have.key("errors");
-    }
-    expect(results).to.deep.equal(expected);
-  });
-
-  it("can load a single entity with nested relations", async () => {
+  it("can load a single entity with nested relations via the loader api", async () => {
     const result = await graphql(
       schema,
       `{ user(id: ${user.id}){ id email firstName lastName age posts { id title content } } }`,
@@ -138,17 +81,132 @@ describe("GraphQL resolvers", function() {
     expect(result).to.deep.equalInAnyOrder(expected);
   });
 
+  it("can make a simple query for multiple records", async () => {
+    // const loader = new GraphQLDatabaseLoader(connection);
+    const result = await graphql(
+      schema,
+      "{ users { id } }",
+      {},
+      {
+        loader
+      }
+    );
+    expect(result.errors || []).to.deep.equal([]);
+    expect(result).to.not.have.key("errors");
+    expect(result.data).to.deep.equal({
+      users: Users.map(({ id }) => ({ id: id.toString() }))
+    });
+  });
+
+  it("can make a simple query for multiple records and subrecords", async () => {
+    // const loader = new GraphQLDatabaseLoader(connection);
+    const result = await graphql(
+      schema,
+      "{ users { id email firstName lastName age posts { id title content } } }",
+      {},
+      {
+        loader
+      }
+    );
+
+    const expected = {
+      users: Users.map(({ id, firstName, lastName, email, age, posts }) => ({
+        id: id.toString(),
+        firstName,
+        lastName,
+        email,
+        age,
+        posts: posts.map(p => ({
+          id: p.id.toString(),
+          title: p.title,
+          content: p.content
+        }))
+      }))
+    };
+
+    expect(result.errors || []).to.deep.equal([]);
+    expect(result).to.not.have.key("errors");
+    expect(result.data).to.deep.equal(expected);
+  });
+
+  it("can batch multiple queries", async () => {
+    // Best way to look for caching is to enable logging and view
+    // the db queries called
+    const results = await Promise.all([
+      graphql(
+        schema,
+        "{ users { id } }",
+        {},
+        {
+          loader
+        }
+      ),
+      graphql(
+        schema,
+        "{ users { id } }",
+        {},
+        {
+          loader
+        }
+      ),
+      graphql(
+        schema,
+        "{ posts { id, owner { id } } }",
+        {},
+        {
+          loader
+        }
+      ),
+      graphql(
+        schema,
+        "{ posts { id, owner { id } } }",
+        {},
+        {
+          loader
+        }
+      )
+    ]);
+    const userData = {
+      data: {
+        users: Users.map(({ id }) => ({ id: id.toString() }))
+      }
+    };
+
+    const postData = {
+      data: {
+        posts: Posts.map(({ id, owner }) => ({
+          id: id.toString(),
+          owner: { id: owner.id.toString() }
+        }))
+      }
+    };
+    const expected = [userData, userData, postData, postData];
+    for (let result of results) {
+      expect(result.errors || []).to.deep.equal([]);
+      expect(result).to.not.have.key("errors");
+    }
+    expect(results).to.deep.equal(expected);
+  });
+
   it("can handle fragments", async () => {
     const result = await graphql(
       schema,
       `
         query users {
           users {
-            ...userId
+            ...userFragment
+            posts {
+              ...postFragment
+            }
           }
         }
-        fragment userId on User {
+        fragment postFragment on Post {
           id
+          title
+        }
+        fragment userFragment on User {
+          id
+          firstName
         }
       `,
       {},
@@ -158,7 +216,11 @@ describe("GraphQL resolvers", function() {
     expect(result.errors || []).to.deep.equal([]);
     expect(result).to.not.have.key("errors");
     expect(result.data).to.deep.equal({
-      users: Users.map(({ id }) => ({ id: id.toString() }))
+      users: Users.map(({ id, firstName, posts }) => ({
+        id: id.toString(),
+        firstName,
+        posts: posts.map(({ id, title }) => ({ id: id.toString(), title }))
+      }))
     });
   });
 });

@@ -5,8 +5,7 @@ import {
   GraphQLString
 } from "graphql";
 import { Entity, PrimaryColumn, Column, OneToMany } from "typeorm";
-import { GraphQLDatabaseLoader } from "../../";
-import { GraphQLDatabaseLoader as ChainableLoader } from "../../chaining";
+import { GraphQLDatabaseLoader } from "../../chaining";
 import { builder } from "../schema";
 import { Node } from "./Node";
 import { Post } from "./Post";
@@ -56,8 +55,8 @@ export class User extends Node {
     returnType: {
       type: () => User,
       list: true,
-      nonNullItems: true,
-      nonNull: true
+      nonNull: true,
+      nonNullItems: true
     }
   })
   async users(
@@ -66,24 +65,7 @@ export class User extends Node {
     context: { loader: GraphQLDatabaseLoader },
     info: GraphQLResolveInfo
   ) {
-    return context.loader.loadMany(User, {}, info);
-  }
-
-  @builder.query({
-    returnType: {
-      type: () => User,
-      list: true,
-      nonNull: true,
-      nonNullItems: true
-    }
-  })
-  async chainableUsers(
-    rootValue: any,
-    args: any,
-    context: { chainable: ChainableLoader },
-    info: GraphQLResolveInfo
-  ) {
-    return context.chainable
+    return context.loader
       .loadEntity(User)
       .where({})
       .info(info)
@@ -98,37 +80,17 @@ export class User extends Node {
       nonNull: false
     }
   })
-  async chainableUser(
-    rootValue: any,
-    { id }: any,
-    context: { chainable: ChainableLoader },
-    info: GraphQLResolveInfo
-  ) {
-    return context.chainable
-      .loadEntity(User)
-      .info(info)
-      .where({ id })
-      .loadOne();
-  }
-
-  @builder.query({
-    args: { id: { type: GraphQLID, defaultValue: null } },
-    returnType: {
-      type: () => User,
-      list: false,
-      nonNullItems: false,
-      nonNull: false
-    }
-  })
   async user(
     rootValue: any,
     { id }: any,
     context: { loader: GraphQLDatabaseLoader },
     info: GraphQLResolveInfo
   ) {
-    return context.loader.loadOne(User, { id }, info, {
-      order: { "User__posts.id": "ASC" }
-    });
+    return context.loader
+      .loadEntity(User)
+      .info(info)
+      .where({ id })
+      .loadOne();
   }
 
   @builder.query({
@@ -148,14 +110,17 @@ export class User extends Node {
     context: { loader: GraphQLDatabaseLoader },
     info: GraphQLResolveInfo
   ) {
-    return context.loader.loadOne(User, {}, info, {
-      search: {
+    return context.loader
+      .loadEntity(User)
+      .where({})
+      .info(info)
+      .search({
         searchColumns: ["email", "firstName", "lastName"],
         searchText: search,
         searchMethod: method,
         caseSensitive: true
-      }
-    });
+      })
+      .loadOne();
   }
 
   @builder.query({
@@ -175,14 +140,16 @@ export class User extends Node {
     context: { loader: GraphQLDatabaseLoader },
     info: GraphQLResolveInfo
   ) {
-    return context.loader.loadOne(User, {}, info, {
-      search: {
+    return context.loader
+      .loadEntity(User)
+      .where({})
+      .info(info)
+      .search({
         searchColumns: ["email", "firstName", "lastName"],
         searchText: search,
         searchMethod: method,
         caseSensitive: false
-      }
-    });
+      });
   }
 
   @builder.query({
@@ -202,13 +169,15 @@ export class User extends Node {
     context: { loader: GraphQLDatabaseLoader },
     info: GraphQLResolveInfo
   ) {
-    return context.loader.loadOne(User, { active: true }, info, {
-      search: {
+    return context.loader
+      .loadEntity(User)
+      .where({})
+      .info(info)
+      .search({
         searchColumns: ["email", ["firstName", "lastName"]],
         searchText: search,
         searchMethod: method,
         caseSensitive: false
-      }
-    });
+      });
   }
 }

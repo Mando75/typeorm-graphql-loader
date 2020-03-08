@@ -76,6 +76,10 @@ export class GraphQLQueryBuilder {
     return this;
   }
 
+  public search(args: any): GraphQLQueryBuilder {
+    return this;
+  }
+
   /**
    * Load one record from the database. This record will also join all the relations queried
    * for in the given GraphQL Resolve Info object. If you have not provided the query builder
