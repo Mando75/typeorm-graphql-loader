@@ -81,7 +81,7 @@ describe("Chainable API", function() {
     expect(result).to.deep.equalInAnyOrder(expected);
   });
 
-  it("can make a simple query", async () => {
+  it("can make a simple query for multiple records", async () => {
     // const loader = new GraphQLDatabaseLoader(connection);
     const result = await graphql(
       schema,
@@ -96,5 +96,38 @@ describe("Chainable API", function() {
     expect(result.data).to.deep.equal({
       chainableUsers: Users.map(({ id }) => ({ id: id.toString() }))
     });
+  });
+
+  it("can make a simple query for multiple records and subrecords", async () => {
+    // const loader = new GraphQLDatabaseLoader(connection);
+    const result = await graphql(
+      schema,
+      "{ chainableUsers { id email firstName lastName age posts { id title content } } }",
+      {},
+      {
+        chainable: loader
+      }
+    );
+
+    const expected = {
+      chainableUsers: Users.map(
+        ({ id, firstName, lastName, email, age, posts }) => ({
+          id: id.toString(),
+          firstName,
+          lastName,
+          email,
+          age,
+          posts: posts.map(p => ({
+            id: p.id.toString(),
+            title: p.title,
+            content: p.content
+          }))
+        })
+      )
+    };
+
+    expect(result.errors || []).to.deep.equal([]);
+    expect(result).to.not.have.key("errors");
+    expect(result.data).to.deep.equal(expected);
   });
 });
