@@ -149,7 +149,8 @@ export class User extends Node {
         searchText: search,
         searchMethod: method,
         caseSensitive: false
-      });
+      })
+      .loadOne();
   }
 
   @builder.query({
@@ -178,6 +179,7 @@ export class User extends Node {
         searchText: search,
         searchMethod: method,
         caseSensitive: false
-      });
+      })
+      .loadOne();
   }
 }
