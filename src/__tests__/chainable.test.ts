@@ -189,4 +189,40 @@ describe("Chainable API", function() {
     }
     expect(results).to.deep.equal(expected);
   });
+
+  it("can handle fragments", async () => {
+    const result = await graphql(
+      schema,
+      `
+        query chainableUsers {
+          chainableUsers {
+            ...userFragment
+            posts {
+              ...postFragment
+            }
+          }
+        }
+        fragment postFragment on Post {
+          id
+          title
+        }
+        fragment userFragment on User {
+          id
+          firstName
+        }
+      `,
+      {},
+      { chainable: loader }
+    );
+
+    expect(result.errors || []).to.deep.equal([]);
+    expect(result).to.not.have.key("errors");
+    expect(result.data).to.deep.equal({
+      chainableUsers: Users.map(({ id, firstName, posts }) => ({
+        id: id.toString(),
+        firstName,
+        posts: posts.map(({ id, title }) => ({ id: id.toString(), title }))
+      }))
+    });
+  });
 });
