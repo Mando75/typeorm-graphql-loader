@@ -31,6 +31,28 @@ export class GraphQLInfoParser {
     };
   }
 
+  /**
+   * Finds a single node in the GraphQL AST to return the feed info for
+   * @param info
+   * @param fieldName
+   */
+  public getFieldNode(
+    info: GraphQLResolveInfo,
+    fieldName: string
+  ): FieldNodeInfo {
+    const childFieldNode = info.fieldNodes
+      .map(node => (node.selectionSet ? node.selectionSet.selections : []))
+      .flat()
+      .find((selection: SelectionNode) =>
+        selection.kind !== "InlineFragment"
+          ? selection.name.value === fieldName
+          : false
+      ) as FieldNode;
+
+    const fieldNodes = [childFieldNode];
+    return { fieldNodes, fragments: info.fragments, fieldName };
+  }
+
   private flattenAST(
     ast: ASTNode,
     info: GraphQLResolveInfo | FieldNodeInfo,

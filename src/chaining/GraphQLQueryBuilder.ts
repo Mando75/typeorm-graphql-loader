@@ -8,12 +8,14 @@ import {
 } from "../types";
 import { GraphQLQueryManager } from "./GraphQLQueryManager";
 import { ObjectLiteral } from "typeorm";
+import { GraphQLInfoParser } from "./lib/GraphQLInfoParser";
 
 export class GraphQLQueryBuilder {
   private _info: GraphQLResolveInfo | FieldNodeInfo | null = null;
   private _andWhereExpressions: Array<ChainableWhereExpression> = [];
   private _orWhereExpressions: Array<ChainableWhereExpression> = [];
   private _searchExpressions: Array<SearchOptions> = [];
+  private _parser: GraphQLInfoParser = new GraphQLInfoParser();
 
   constructor(
     private _manager: GraphQLQueryManager,
@@ -24,10 +26,18 @@ export class GraphQLQueryBuilder {
    * Provide the query builder with the GraphQL Query info you would like to resolve
    * It is required to call this method before you can invoke any of the `load` methods
    * @param info
+   * @param fieldName - Optional parameter to specify a subfield in the query to load
    * @returns GraphQLQueryBuilder
    */
-  public info(info: GraphQLResolveInfo | FieldNodeInfo): GraphQLQueryBuilder {
-    this._info = info;
+  public info(
+    info: GraphQLResolveInfo,
+    fieldName?: string
+  ): GraphQLQueryBuilder {
+    if (fieldName) {
+      this._info = this._parser.getFieldNode(info, fieldName);
+    } else {
+      this._info = info;
+    }
     return this;
   }
 
