@@ -3,6 +3,7 @@ import {
   ChainableWhereArgument,
   ChainableWhereExpression,
   FieldNodeInfo,
+  QueryPagination,
   QueryPredicates,
   SearchOptions
 } from "../types";
@@ -15,6 +16,7 @@ export class GraphQLQueryBuilder {
   private _andWhereExpressions: Array<ChainableWhereExpression> = [];
   private _orWhereExpressions: Array<ChainableWhereExpression> = [];
   private _searchExpressions: Array<SearchOptions> = [];
+  private _pagination: QueryPagination | undefined = undefined;
   private _parser: GraphQLInfoParser = new GraphQLInfoParser();
 
   constructor(
@@ -94,6 +96,11 @@ export class GraphQLQueryBuilder {
     return this;
   }
 
+  public paginate(pagination: QueryPagination): GraphQLQueryBuilder {
+    this._pagination = pagination;
+    return this;
+  }
+
   /**
    * Load one record from the database. This record will also join all the relations queried
    * for in the given GraphQL Resolve Info object. If you have not provided the query builder
@@ -152,6 +159,39 @@ export class GraphQLQueryBuilder {
         resolve,
         reject,
         entity: this._entity
+      });
+    });
+
+    this._manager.addCacheItem(key, promise);
+    return promise;
+  }
+
+  public async loadPaginated<T>(): Promise<[T[], number]> {
+    this._validateInfo();
+    if (!this._pagination) {
+      throw new Error(
+        "Must provide pagination object before calling load paginated"
+      );
+    }
+    const { fields, found, key, item } = this._manager.processQueryMeta(
+      this._info!,
+      this._andWhereExpressions
+    );
+
+    if (found && item) {
+      return item;
+    }
+
+    const promise = new Promise<[T[], number]>((resolve, reject) => {
+      this._manager.addQueueItem({
+        many: true,
+        key,
+        fields,
+        predicates: this._getQueryPredicates(),
+        resolve,
+        reject,
+        entity: this._entity,
+        pagination: this._pagination
       });
     });
 

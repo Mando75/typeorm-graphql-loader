@@ -102,6 +102,7 @@ export type ChainableQueueItem = {
   resolve: (value?: any) => any;
   reject: (reason: any) => void;
   entity: Function | string;
+  pagination?: QueryPagination;
 };
 
 export type QueryMeta = {

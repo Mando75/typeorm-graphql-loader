@@ -6,6 +6,7 @@ import {
   LoaderOptions,
   LoaderWhereExpression,
   QueryMeta,
+  QueryPagination,
   SearchOptions
 } from "../types";
 import { LoaderSearchMethod } from "./enums/LoaderSearchMethod";
@@ -169,10 +170,16 @@ export class GraphQLQueryManager {
         item.predicates.search
       );
 
-      const promise = item.many
-        ? queryBuilder.getMany()
-        : queryBuilder.getOne();
+      queryBuilder = this._addPagination(queryBuilder, item.pagination);
 
+      let promise;
+      if (item.pagination) {
+        promise = queryBuilder.getManyAndCount();
+      } else if (item.many) {
+        promise = queryBuilder.getMany();
+      } else {
+        promise = queryBuilder.getOne();
+      }
       return promise
         .then(item.resolve, item.reject)
         .finally(() => this._cache.delete(item.key));
@@ -286,5 +293,16 @@ export class GraphQLQueryManager {
         };
       }
     );
+  }
+
+  private _addPagination(
+    queryBuilder: SelectQueryBuilder<{}>,
+    pagination: QueryPagination | undefined
+  ): SelectQueryBuilder<{}> {
+    if (pagination) {
+      queryBuilder = queryBuilder.offset(pagination.offset);
+      queryBuilder = queryBuilder.limit(pagination.limit);
+    }
+    return queryBuilder;
   }
 }
