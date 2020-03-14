@@ -129,13 +129,12 @@ export class Post extends Node {
     context: { loader: GraphQLDatabaseLoader },
     info: GraphQLResolveInfo
   ) {
-    return [];
-    // const [posts, totalCount] = await context.loader.loadManyPaginated(
-    //   Post,
-    //   args.where,
-    //   info,
-    //   args.pagination
-    // );
+    const [posts, totalCount] = await context.loader
+      .loadEntity(Post)
+      .where(args.where)
+      .info(info, "posts")
+      .paginate(args.pagination)
+      .loadPaginated();
     // Note: this is just an example of a simple pagination system that does
     // not check if the end of the list is reached when calculating the next offset
     // It is advised that a more robust/standardized implementation is used. As
@@ -143,11 +142,11 @@ export class Post extends Node {
     // a robust offset calculation is relevant to testing the actual functionality which
     // revolves around whether or not the paginated method returns the records with the correct
     // limits and offset
-    // const { offset, limit } = args.pagination;
-    // return {
-    //   hasMore: offset + limit < totalCount,
-    //   offset: offset + limit,
-    //   posts
-    // };
+    const { offset, limit } = args.pagination;
+    return {
+      hasMore: offset + limit < totalCount,
+      offset: offset + limit,
+      posts
+    };
   }
 }
