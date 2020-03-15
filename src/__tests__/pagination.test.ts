@@ -5,6 +5,7 @@ import { seedDatabase } from "./common/seed";
 import { GraphQLSchema, graphql } from "graphql";
 import { Post } from "./entity/Post";
 import { User } from "./entity/User";
+import { ErrorLog } from "./entity/ErrorLog";
 import { SnakeNamingStrategy } from "./common/snakeCaseNaming";
 import { builder } from "./schema";
 import * as chai from "chai";
@@ -27,7 +28,7 @@ describe("pagination", () => {
       database: "test_pagination.sqlite3",
       synchronize: true,
       dropSchema: true,
-      entities: [Post, User],
+      entities: [Post, User, ErrorLog],
       logging: false,
       namingStrategy: new SnakeNamingStrategy()
     });

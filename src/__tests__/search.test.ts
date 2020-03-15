@@ -4,6 +4,7 @@ import { seedDatabase } from "./common/seed";
 import { GraphQLSchema, graphql } from "graphql";
 import { Post } from "./entity/Post";
 import { User } from "./entity/User";
+import { ErrorLog } from "./entity/ErrorLog";
 import { builder } from "./schema";
 import * as chai from "chai";
 import { LoaderSearchMethod } from "../chaining/enums/LoaderSearchMethod";
@@ -30,8 +31,8 @@ describe("searching", () => {
       database: "test_search.sqlite3",
       synchronize: true,
       dropSchema: true,
-      entities: [Post, User],
-      logging: true
+      entities: [Post, User, ErrorLog],
+      logging: false
     });
 
     await seedDatabase(connection);
@@ -248,7 +249,6 @@ describe("searching", () => {
         0,
         10
       )}", method: ${LoaderSearchMethod.ANY_POSITION}) {
-        id
         email
         firstName
         lastName 
@@ -259,7 +259,6 @@ describe("searching", () => {
     );
 
     const expected = {
-      id: user.id.toString(),
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName

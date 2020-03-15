@@ -2,15 +2,18 @@ import { Chance } from "chance";
 import { Connection } from "typeorm";
 import { Post } from "../entity/Post";
 import { User } from "../entity/User";
+import { ErrorLog } from "../entity/ErrorLog";
 
 export async function seedDatabase(connection: Connection) {
   let UserRepo = connection.getRepository(User);
   let PostRepo = connection.getRepository(Post);
+  let ErrorLogRepo = connection.getRepository(ErrorLog);
 
   const chance = new Chance();
 
   let users: User[] = [];
   let posts: Post[] = [];
+  let errorLogs: ErrorLog[] = [];
 
   if ((await UserRepo.count()) === 0) {
     await connection.transaction(async entityManager => {
@@ -43,6 +46,21 @@ export async function seedDatabase(connection: Connection) {
         posts.push(post);
       }
       await entityManager.save(posts);
+    });
+  }
+
+  if ((await ErrorLogRepo.count()) === 0) {
+    await connection.transaction(async entityManager => {
+      ErrorLogRepo = entityManager.getRepository(ErrorLog);
+      for (let i = 0; i < 1000; i++) {
+        const log = ErrorLogRepo.create({
+          message: chance.sentence(),
+          code: chance.word(),
+          user: chance.pickone(users)
+        });
+        errorLogs.push(log);
+      }
+      await entityManager.save(errorLogs);
     });
   }
 }

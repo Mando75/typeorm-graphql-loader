@@ -22,8 +22,6 @@ export type LoaderWhereExpression = {
 };
 
 export type LoaderOptions = {
-  // Time-to-live for cache.
-  ttl?: number;
   // Include if you are using one of the supported TypeORM custom naming strategies
   namingStrategy?: LoaderNamingStrategyEnum;
   // this column will always be loaded for every relation by the query builder.

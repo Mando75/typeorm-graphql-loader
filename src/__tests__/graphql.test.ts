@@ -7,6 +7,7 @@ import { GraphQLDatabaseLoader } from "../chaining";
 import { seedDatabase } from "./common/seed";
 import { Post } from "./entity/Post";
 import { User } from "./entity/User";
+import { ErrorLog } from "./entity/ErrorLog";
 import { builder } from "./schema";
 const deepEqualInAnyOrder = require("deep-equal-in-any-order");
 
@@ -28,7 +29,7 @@ describe("GraphQL API", function() {
       database: "test_graphql.sqlite3",
       synchronize: true,
       dropSchema: true,
-      entities: [Post, User],
+      entities: [Post, User, ErrorLog],
       logging: false
     });
 
