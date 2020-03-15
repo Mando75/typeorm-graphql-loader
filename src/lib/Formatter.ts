@@ -1,4 +1,4 @@
-import { LoaderNamingStrategyEnum } from "../..";
+import { LoaderNamingStrategyEnum } from "../index";
 import { snakeCase } from "typeorm/util/StringUtils";
 import { LoaderSearchMethod } from "../enums/LoaderSearchMethod";
 

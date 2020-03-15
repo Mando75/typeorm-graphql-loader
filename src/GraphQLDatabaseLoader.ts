@@ -1,4 +1,4 @@
-import { LoaderOptions } from "../types";
+import { LoaderOptions } from "./types";
 import { Connection } from "typeorm";
 import { GraphQLQueryBuilder } from "./GraphQLQueryBuilder";
 import { GraphQLQueryManager } from "./GraphQLQueryManager";

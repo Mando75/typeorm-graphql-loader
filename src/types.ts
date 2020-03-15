@@ -1,7 +1,7 @@
 import { FieldNode, FragmentDefinitionNode } from "graphql";
 import { ObjectLiteral, OrderByCondition, Brackets } from "typeorm";
-import { LoaderNamingStrategyEnum } from "./chaining/enums/LoaderNamingStrategy";
-import { LoaderSearchMethod } from "./chaining/enums/LoaderSearchMethod";
+import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
+import { LoaderSearchMethod } from "./enums/LoaderSearchMethod";
 
 export type ChainableWhereArgument =
   | string

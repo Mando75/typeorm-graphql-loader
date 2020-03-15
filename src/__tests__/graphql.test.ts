@@ -2,7 +2,7 @@ import * as chai from "chai";
 import { graphql, GraphQLSchema } from "graphql";
 import { Connection, createConnection, getConnectionOptions } from "typeorm";
 import { LoaderNamingStrategyEnum } from "../";
-import { GraphQLDatabaseLoader } from "../chaining";
+import { GraphQLDatabaseLoader } from "../";
 
 import { seedDatabase } from "./common/seed";
 import { Post } from "./entity/Post";

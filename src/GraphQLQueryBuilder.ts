@@ -6,7 +6,7 @@ import {
   QueryPagination,
   QueryPredicates,
   SearchOptions
-} from "../types";
+} from "./types";
 import { GraphQLQueryManager } from "./GraphQLQueryManager";
 import { ObjectLiteral } from "typeorm";
 import { GraphQLInfoParser } from "./lib/GraphQLInfoParser";

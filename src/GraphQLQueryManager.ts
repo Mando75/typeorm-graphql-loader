@@ -8,7 +8,7 @@ import {
   QueryMeta,
   QueryPagination,
   SearchOptions
-} from "../types";
+} from "./types";
 import { LoaderSearchMethod } from "./enums/LoaderSearchMethod";
 import { GraphQLInfoParser } from "./lib/GraphQLInfoParser";
 import { GraphQLResolveInfo } from "graphql";

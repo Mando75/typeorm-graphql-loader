@@ -3,7 +3,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { builder } from "../schema";
 import { User } from "./User";
 import { GraphQLID, GraphQLString, GraphQLResolveInfo } from "graphql";
-import { GraphQLDatabaseLoader } from "../../chaining";
+import { GraphQLDatabaseLoader } from "../../";
 
 @builder.type()
 @Entity()

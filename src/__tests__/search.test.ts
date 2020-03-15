@@ -1,5 +1,5 @@
 import { Connection, createConnection } from "typeorm";
-import { GraphQLDatabaseLoader } from "../chaining";
+import { GraphQLDatabaseLoader, LoaderSearchMethod } from "../";
 import { seedDatabase } from "./common/seed";
 import { GraphQLSchema, graphql } from "graphql";
 import { Post } from "./entity/Post";
@@ -7,7 +7,6 @@ import { User } from "./entity/User";
 import { ErrorLog } from "./entity/ErrorLog";
 import { builder } from "./schema";
 import * as chai from "chai";
-import { LoaderSearchMethod } from "../chaining/enums/LoaderSearchMethod";
 const deepEqualInAnyOrder = require("deep-equal-in-any-order");
 
 chai.use(deepEqualInAnyOrder);

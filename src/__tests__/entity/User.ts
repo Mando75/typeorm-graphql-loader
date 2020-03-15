@@ -5,11 +5,10 @@ import {
   GraphQLString
 } from "graphql";
 import { Entity, PrimaryColumn, Column, OneToMany } from "typeorm";
-import { GraphQLDatabaseLoader } from "../../chaining";
+import { GraphQLDatabaseLoader, LoaderSearchMethod } from "../../";
 import { builder } from "../schema";
 import { Node } from "./Node";
 import { Post } from "./Post";
-import { LoaderSearchMethod } from "../../chaining/enums/LoaderSearchMethod";
 
 @Entity()
 @builder.type()

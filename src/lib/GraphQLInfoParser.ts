@@ -7,7 +7,7 @@ import {
   SelectionNode,
   ValueNode
 } from "graphql";
-import { FieldNodeInfo, Hash, Selection } from "../../types";
+import { FieldNodeInfo, Hash, Selection } from "../types";
 
 export class GraphQLInfoParser {
   /**

@@ -6,7 +6,7 @@ import {
   GraphQLString
 } from "graphql";
 import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
-import { GraphQLDatabaseLoader } from "../../chaining";
+import { GraphQLDatabaseLoader } from "../../";
 import { builder } from "../schema";
 
 import { Node } from "./Node";

@@ -1,4 +1,4 @@
-import { Hash, LoaderOptions, Selection } from "../types";
+import { Hash, LoaderOptions, Selection } from "./types";
 import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
 import { Connection, SelectQueryBuilder } from "typeorm";
 import { Formatter } from "./lib/Formatter";
