@@ -108,37 +108,28 @@ export class GraphQLQueryBuilder {
    * @throws Error Missing info argument
    */
   public async loadOne<T>(): Promise<T | undefined> {
-    // We need to have an info object to parse
-    this._validateInfo();
-
-    // Get's the queried fields and checks if we already have this query cached
-    const { fields, found, key, item } = this._manager.processQueryMeta(
-      this._info!,
-      this._andWhereExpressions
-    );
-
-    // If the item was found, just return it
-    if (found && item) {
-      return item;
-    }
-
-    const promise = new Promise<T | undefined>((resolve, reject) => {
-      this._manager.addQueueItem({
-        many: false,
-        key,
-        fields,
-        predicates: this._getQueryPredicates(),
-        resolve,
-        reject,
-        entity: this._entity
-      });
-    });
-
-    this._manager.addCacheItem(key, promise);
-    return promise;
+    return this._genericLoad<T, false, false>(false, false);
   }
 
   public async loadMany<T>(): Promise<T[] | undefined> {
+    return this._genericLoad<T, true, false>(true, false);
+  }
+
+  public async loadPaginated<T>(): Promise<[T[], number]> {
+    if (!this._pagination) {
+      throw new Error(
+        "Must provide pagination object before calling load paginated"
+      );
+    }
+    return this._genericLoad<T, true, true>(true, true);
+  }
+
+  private async _genericLoad<T, U extends boolean, V extends boolean>(
+    many: U,
+    paginate: V
+  ): Promise<
+    V extends true ? [T[], number] : U extends true ? T[] : T | undefined
+  > {
     // we need to validate an info object
     this._validateInfo();
     const { fields, found, key, item } = this._manager.processQueryMeta(
@@ -150,50 +141,23 @@ export class GraphQLQueryBuilder {
       return item;
     }
 
-    const promise = new Promise<T[] | undefined>((resolve, reject) => {
+    const executor = (
+      resolve: (value?: any) => void,
+      reject: (reason?: any) => void
+    ) => {
       this._manager.addQueueItem({
-        many: true,
-        key,
-        fields,
-        predicates: this._getQueryPredicates(),
-        resolve,
-        reject,
-        entity: this._entity
-      });
-    });
-
-    this._manager.addCacheItem(key, promise);
-    return promise;
-  }
-
-  public async loadPaginated<T>(): Promise<[T[], number]> {
-    this._validateInfo();
-    if (!this._pagination) {
-      throw new Error(
-        "Must provide pagination object before calling load paginated"
-      );
-    }
-    const { fields, found, key, item } = this._manager.processQueryMeta(
-      this._info!,
-      this._andWhereExpressions
-    );
-
-    if (found && item) {
-      return item;
-    }
-
-    const promise = new Promise<[T[], number]>((resolve, reject) => {
-      this._manager.addQueueItem({
-        many: true,
+        many,
         key,
         fields,
         predicates: this._getQueryPredicates(),
         resolve,
         reject,
         entity: this._entity,
-        pagination: this._pagination
+        pagination: paginate ? this._pagination : undefined
       });
-    });
+    };
+
+    const promise = new Promise(executor);
 
     this._manager.addCacheItem(key, promise);
     return promise;
