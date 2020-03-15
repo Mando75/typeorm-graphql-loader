@@ -31,10 +31,6 @@ export type LoaderOptions = {
 };
 
 export type QueryOptions = {
-  // How to order query results in SQL
-  order?: OrderByCondition;
-  // any valid OR conditions to be inserted into the WHERE clause
-  orWhere?: Array<any>;
   /**
    * Specify any fields that you may want to select that are not necessarily
    * included in the graphql query. e.g. you may want to always ge back the
@@ -90,6 +86,7 @@ export type QueryPredicates = {
   andWhere: Array<ChainableWhereExpression>;
   orWhere: Array<ChainableWhereExpression>;
   search: Array<SearchOptions>;
+  order: OrderByCondition;
 };
 
 export type ChainableQueueItem = {

@@ -8,7 +8,7 @@ import {
   SearchOptions
 } from "./types";
 import { GraphQLQueryManager } from "./GraphQLQueryManager";
-import { ObjectLiteral } from "typeorm";
+import { ObjectLiteral, OrderByCondition } from "typeorm";
 import { GraphQLInfoParser } from "./lib/GraphQLInfoParser";
 
 export class GraphQLQueryBuilder {
@@ -16,7 +16,8 @@ export class GraphQLQueryBuilder {
   private _andWhereExpressions: Array<ChainableWhereExpression> = [];
   private _orWhereExpressions: Array<ChainableWhereExpression> = [];
   private _searchExpressions: Array<SearchOptions> = [];
-  private _pagination: QueryPagination | undefined = undefined;
+  private _order: OrderByCondition = {};
+  private _pagination?: QueryPagination;
   private _parser: GraphQLInfoParser = new GraphQLInfoParser();
 
   constructor(
@@ -93,6 +94,11 @@ export class GraphQLQueryBuilder {
 
   public search(searchOptions: SearchOptions): GraphQLQueryBuilder {
     this._searchExpressions.push(searchOptions);
+    return this;
+  }
+
+  public order(order: OrderByCondition): GraphQLQueryBuilder {
+    this._order = { ...this._order, ...order };
     return this;
   }
 
@@ -180,7 +186,8 @@ export class GraphQLQueryBuilder {
     return {
       search: this._searchExpressions,
       andWhere: this._andWhereExpressions,
-      orWhere: this._orWhereExpressions
+      orWhere: this._orWhereExpressions,
+      order: this._order
     };
   }
 }

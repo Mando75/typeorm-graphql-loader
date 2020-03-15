@@ -24,7 +24,7 @@ GraphQL query resolvers.
 
 ## Description <a name="Description">
 
-This package provides a `GraphQLDatabaseLoader` class, which is a semi-caching
+This package provides a `GraphQLDatabaseLoader` class, which is a caching
 loader that will trace through a GraphQL query info object and naively load the
 TypeORM fields and relations needed to resolve the query. For a more in-depth
 explanation, see the [Problem](#Problem) and [Solution](#Solution) sections below.
@@ -66,7 +66,11 @@ The loader will now appear in your resolver's context object:
 ```ts
 Query: {
     getBookById(object: any, args: {id: string }, context: MyGraphQLContext, info: GraphQLResolveInfo) {
-        return context.loader.loadOne<Book>(Book, { id }, info, {/** additional options if needed **/});
+        return context.loader
+            .loadEntity(Book)
+            .where({id})
+            .info(info)
+            .loadOne();
     }
 }
 ```

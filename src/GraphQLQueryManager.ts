@@ -17,6 +17,7 @@ import {
   Brackets,
   Connection,
   EntityManager,
+  OrderByCondition,
   SelectQueryBuilder
 } from "typeorm";
 import { GraphQLQueryResolver } from "./GraphQLQueryResolver";
@@ -169,6 +170,10 @@ export class GraphQLQueryManager {
         name,
         item.predicates.search
       );
+      queryBuilder = this._addOrderByCondition(
+        queryBuilder,
+        item.predicates.order
+      );
 
       queryBuilder = this._addPagination(queryBuilder, item.pagination);
 
@@ -304,5 +309,12 @@ export class GraphQLQueryManager {
       queryBuilder = queryBuilder.limit(pagination.limit);
     }
     return queryBuilder;
+  }
+
+  private _addOrderByCondition(
+    queryBuilder: SelectQueryBuilder<{}>,
+    order: OrderByCondition
+  ): SelectQueryBuilder<{}> {
+    return queryBuilder.orderBy(order);
   }
 }

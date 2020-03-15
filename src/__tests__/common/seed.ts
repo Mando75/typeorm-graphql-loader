@@ -11,56 +11,70 @@ export async function seedDatabase(connection: Connection) {
 
   const chance = new Chance();
 
-  let users: User[] = [];
-  let posts: Post[] = [];
-  let errorLogs: ErrorLog[] = [];
+  let users: Array<Partial<User>> = [];
+  let posts: Array<Partial<Post>> = [];
+  let errorLogs: Array<Partial<ErrorLog>> = [];
+  let Users: User[] = [];
 
   if ((await UserRepo.count()) === 0) {
     await connection.transaction(async entityManager => {
-      UserRepo = entityManager.getRepository(User);
-      for (let i = 0; i < 50; i++) {
-        const user = UserRepo.create({
+      for (let i = 0; i < 25; i++) {
+        const user = {
           email: chance.email(),
           firstName: chance.first(),
           lastName: chance.last(),
           age: chance.age()
-        });
+        };
         users.push(user);
-        users = await entityManager.save(users);
       }
+      await entityManager
+        .createQueryBuilder()
+        .insert()
+        .into(User)
+        .values(users)
+        .execute();
+      Users = await entityManager.getRepository(User).find();
     });
   }
 
   if ((await PostRepo.count()) === 0) {
     await connection.transaction(async entityManager => {
-      PostRepo = entityManager.getRepository(Post);
-      for (let i = 0; i < 1000; i++) {
-        const post = PostRepo.create({
+      for (let i = 0; i < 100; i++) {
+        const post: Partial<Post> = {
           title: chance.sentence(),
           content: chance.paragraph({
             sentences: chance.integer({ min: 1, max: 4 })
           }),
           camelizedField: chance.sentence(),
-          owner: chance.pickone(users)
-        });
+          owner: chance.pickone(Users)
+        };
         posts.push(post);
       }
-      await entityManager.save(posts);
+      await entityManager
+        .createQueryBuilder()
+        .insert()
+        .into(Post)
+        .values(posts)
+        .execute();
     });
   }
 
   if ((await ErrorLogRepo.count()) === 0) {
     await connection.transaction(async entityManager => {
-      ErrorLogRepo = entityManager.getRepository(ErrorLog);
-      for (let i = 0; i < 1000; i++) {
-        const log = ErrorLogRepo.create({
+      for (let i = 0; i < 50; i++) {
+        const log = {
           message: chance.sentence(),
           code: chance.word(),
-          user: chance.pickone(users)
-        });
+          user: chance.pickone(Users)
+        };
         errorLogs.push(log);
       }
-      await entityManager.save(errorLogs);
+      await entityManager
+        .createQueryBuilder()
+        .insert()
+        .into(ErrorLog)
+        .values(errorLogs)
+        .execute();
     });
   }
 }
