@@ -1,7 +1,7 @@
 {
   "inputFiles": ["./src/", "./md/"],
   "mode": "file",
-  "out": "doc",
+  "out": "public",
   "exclude": ["**/*+(index|.spec|.e2e).ts", "**/__tests__/**/*.ts"],
   "excludeExternals": true,
   "includeDeclarations": true,
