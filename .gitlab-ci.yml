@@ -10,6 +10,7 @@ before_script:
 stages:
   - build
   - test
+  - deploy
 
 lint-package:
   stage: build
@@ -39,3 +40,14 @@ test-package:
     paths:
       - coverage/
     expire_in: 30 days
+
+pages:
+  stage: deploy
+  before_script:
+    - rm -rf .yarn
+    - yarn install
+  script:
+    - yarn publish:docs
+  artifacts:
+    paths:
+      - public
