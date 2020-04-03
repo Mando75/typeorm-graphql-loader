@@ -91,7 +91,7 @@ For help with pagination, first read [Pagination Advice](https://gitlab.com/Mand
 
 ## API <a name="API"> 
 
-Please see the documentation at TBD
+Documentation for the Public API
 
 ## Contributing <a name="Contributing">
 
