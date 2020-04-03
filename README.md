@@ -87,9 +87,9 @@ This is not a complete replacement for Facebook's dataloader. package. While it 
 
 This package has currently only been tested with Postgresql and SQLite. In theory, everything should work with the other SQL variants that TypeORM supports, as it uses the TypeORM Query Builder API to construct the database queries. If you run into any issues with other SQL dialects, please open an issue.
 
-## API <a name="API"> 
+For help with pagination, first read [Pagination Advice](https://gitlab.com/Mando75/typeorm-graphql-loader/-/blob/master/md/pagination.md)
 
-// TODO
+## API <a name="API"> 
 
 Please see the documentation at TBD
 

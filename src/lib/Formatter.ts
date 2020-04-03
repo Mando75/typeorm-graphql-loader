@@ -2,6 +2,10 @@ import { LoaderNamingStrategyEnum } from "../index";
 import { snakeCase } from "typeorm/util/StringUtils";
 import { LoaderSearchMethod } from "../enums/LoaderSearchMethod";
 
+/**
+ * A helper class for formatting various sql strings used by the loader
+ * @hidden
+ */
 export class Formatter {
   private readonly _searchMethodMapping = new Map<LoaderSearchMethod, Function>(
     [

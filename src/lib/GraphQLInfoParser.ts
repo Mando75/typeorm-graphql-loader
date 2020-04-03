@@ -9,6 +9,11 @@ import {
 } from "graphql";
 import { FieldNodeInfo, Hash, Selection } from "../types";
 
+/**
+ * A helper class to parse he GraphQLResolve Info object
+ * and extract the data needed to build a query resolution selection
+ * @hidden
+ */
 export class GraphQLInfoParser {
   /**
    * Parses a GraphQLResolveInfo object and returns

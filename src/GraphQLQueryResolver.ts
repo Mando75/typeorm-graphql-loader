@@ -5,6 +5,12 @@ import { Formatter } from "./lib/Formatter";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
+/**
+ * Internal only class
+ * Used for recursively traversing the GraphQL request and adding
+ * the required selects and joins
+ * @hidden
+ */
 export class GraphQLQueryResolver {
   private readonly _primaryKeyColumn: string;
   private readonly _namingStrategy: LoaderNamingStrategyEnum;
@@ -29,6 +35,15 @@ export class GraphQLQueryResolver {
     return field.propertyName;
   }
 
+  /**
+   * Given a model and queryBuilder, will add the selected fields and
+   * relations required by a graphql field selection
+   * @param model
+   * @param selection
+   * @param connection
+   * @param queryBuilder
+   * @param alias
+   */
   public createQuery(
     model: Function | string,
     selection: Selection | null,
@@ -54,6 +69,14 @@ export class GraphQLQueryResolver {
     return queryBuilder;
   }
 
+  /**
+   * Given a set of fields, adds them as a select to the
+   * query builder if they exist on the entity.
+   * @param queryBuilder
+   * @param fields
+   * @param alias
+   * @private
+   */
   private _selectFields(
     queryBuilder: SelectQueryBuilder<{}>,
     fields: Array<ColumnMetadata>,
@@ -105,6 +128,17 @@ export class GraphQLQueryResolver {
     }
   }
 
+  /**
+   * Joins any relations required to resolve the GraphQL selection.
+   * will recursively call createQuery for each relation joined with
+   * the subselection of fields required for that branch of the request.
+   * @param queryBuilder
+   * @param children
+   * @param relations
+   * @param alias
+   * @param connection
+   * @private
+   */
   private _selectRelations(
     queryBuilder: SelectQueryBuilder<{}>,
     children: Hash<Selection>,

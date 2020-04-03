@@ -55,6 +55,9 @@ export interface QueryPagination {
   offset: number;
 }
 
+/**
+ * @hidden
+ */
 export interface QueryPredicates {
   andWhere: Array<WhereExpression>;
   orWhere: Array<WhereExpression>;
@@ -63,6 +66,9 @@ export interface QueryPredicates {
   selectFields: Array<string>;
 }
 
+/**
+ * @hidden
+ */
 export interface QueueItem {
   many: boolean;
   key: string;
@@ -74,6 +80,9 @@ export interface QueueItem {
   pagination?: QueryPagination;
 }
 
+/**
+ * @hidden
+ */
 export interface QueryMeta {
   key: string;
   fields: Selection | null;
@@ -81,15 +90,24 @@ export interface QueryMeta {
   item?: Promise<any>;
 }
 
+/**
+ * @hidden
+ */
 export interface Hash<T> {
   [key: string]: T;
 }
 
+/**
+ * @hidden
+ */
 export interface Selection {
   arguments?: Hash<{ name: string; value: any }>;
   children?: Hash<Selection>;
 }
 
+/**
+ * @hidden
+ */
 export interface FieldNodeInfo {
   fieldNodes: FieldNode[];
   fieldName: string;

@@ -24,11 +24,16 @@ import { GraphQLQueryResolver } from "./GraphQLQueryResolver";
 import { Formatter } from "./lib/Formatter";
 import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
 
+/**
+ * The query manager for the loader. Is an internal class
+ * that should not be used by anything except the loader
+ * @hidden
+ */
 export class GraphQLQueryManager {
   private _queue: QueueItem[] = [];
   private _cache: Map<string, Promise<any>> = new Map();
   private _immediate?: NodeJS.Immediate;
-  private _defaultLoaderSearchMethod: LoaderSearchMethod;
+  private readonly _defaultLoaderSearchMethod: LoaderSearchMethod;
   private _parser: GraphQLInfoParser = new GraphQLInfoParser();
   private _resolver: GraphQLQueryResolver;
   private _formatter: Formatter;
@@ -44,6 +49,11 @@ export class GraphQLQueryManager {
     );
   }
 
+  /**
+   * Helper method to generate a TypeORM query builder
+   * @param entityManager
+   * @param name
+   */
   private static createTypeORMQueryBuilder(
     entityManager: EntityManager,
     name: string
@@ -72,6 +82,12 @@ export class GraphQLQueryManager {
     }
   }
 
+  /**
+   * Looks up a query in the cache and returns
+   * the existing promise if found.
+   * @param info
+   * @param where
+   */
   public processQueryMeta(
     info: GraphQLResolveInfo | FieldNodeInfo,
     where: Array<WhereArgument>
@@ -111,19 +127,38 @@ export class GraphQLQueryManager {
     };
   }
 
+  /**
+   * Pushes a new item to the queue and sets a new immediate
+   * @param item
+   */
   public addQueueItem(item: QueueItem) {
     this._queue.push(item);
     this._setImmediate();
   }
 
+  /**
+   * Adds a new promise to the cache. It can now be looked up by processQueryMeta
+   * if an identical request comes through
+   * @param key
+   * @param value
+   */
   public addCacheItem<T>(key: string, value: Promise<T | undefined>) {
     this._cache.set(key, value);
   }
 
+  /**
+   * Helper to set an immediate that will process the queue
+   * @private
+   */
   private _setImmediate() {
     this._immediate = setImmediate(() => this._processQueue());
   }
 
+  /**
+   * Where the magic happens
+   * Goes through the queue and resoles each query
+   * @private
+   */
   private async _processQueue(): Promise<any> {
     // Clear and capture the current queue
     const queue = this._queue.splice(0, this._queue.length);
@@ -140,6 +175,8 @@ export class GraphQLQueryManager {
   }
 
   /**
+   * Returns a closure that will be used to resolve
+   * a query from the cache
    * @param entityManager
    */
   private _resolveQueueItem(entityManager: EntityManager) {
@@ -305,6 +342,12 @@ export class GraphQLQueryManager {
     );
   }
 
+  /**
+   * Adds pagination to the query builder
+   * @param queryBuilder
+   * @param pagination
+   * @private
+   */
   private _addPagination(
     queryBuilder: SelectQueryBuilder<{}>,
     pagination: QueryPagination | undefined
@@ -316,6 +359,12 @@ export class GraphQLQueryManager {
     return queryBuilder;
   }
 
+  /**
+   * Adds OrderBy condition to the query builder
+   * @param queryBuilder
+   * @param order
+   * @private
+   */
   private _addOrderByCondition(
     queryBuilder: SelectQueryBuilder<{}>,
     order: OrderByCondition
@@ -323,6 +372,14 @@ export class GraphQLQueryManager {
     return queryBuilder.orderBy(order);
   }
 
+  /**
+   * makes sure given fields are selected
+   * by the query builder
+   * @param queryBuilder
+   * @param name
+   * @param selectFields
+   * @private
+   */
   private _addSelectFields(
     queryBuilder: SelectQueryBuilder<{}>,
     name: string,

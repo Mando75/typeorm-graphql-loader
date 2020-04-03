@@ -9,7 +9,7 @@ import { GraphQLQueryManager } from "./GraphQLQueryManager";
  * for every request to prevent data leaking.
  *
  * @example
- * ```
+ * ```typescript
  * import { GraphQLDatabaseLoader } from '@mando75/typeorm-graphql-loader';
  * const connection = createConnection({...}); // Create your TypeORM connection
  *
@@ -41,7 +41,7 @@ export class GraphQLDatabaseLoader {
    * method works
    *
    * @example
-   * ```
+   * ```typescript
    * const userLoader = context.loader.loadEntity(User)
    * ```
    *

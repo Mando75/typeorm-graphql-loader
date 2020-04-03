@@ -1,5 +1,5 @@
 {
-  "inputFiles": ["./src"],
+  "inputFiles": ["./src/", "./md/"],
   "mode": "file",
   "out": "doc",
   "exclude": ["**/*+(index|.spec|.e2e).ts", "**/__tests__/**/*.ts"],
