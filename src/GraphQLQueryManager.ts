@@ -1,7 +1,7 @@
 import {
-  ChainableQueueItem,
-  ChainableWhereArgument,
-  ChainableWhereExpression,
+  QueueItem,
+  WhereArgument,
+  WhereExpression,
   FieldNodeInfo,
   LoaderOptions,
   LoaderWhereExpression,
@@ -25,7 +25,7 @@ import { Formatter } from "./lib/Formatter";
 import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
 
 export class GraphQLQueryManager {
-  private _queue: ChainableQueueItem[] = [];
+  private _queue: QueueItem[] = [];
   private _cache: Map<string, Promise<any>> = new Map();
   private _immediate?: NodeJS.Immediate;
   private _defaultLoaderSearchMethod: LoaderSearchMethod;
@@ -60,7 +60,7 @@ export class GraphQLQueryManager {
    * @param where
    * @private
    */
-  private static _breakDownWhereExpression(where: ChainableWhereExpression) {
+  private static _breakDownWhereExpression(where: WhereExpression) {
     if ((where as LoaderWhereExpression).isLoaderWhereExpression) {
       const asExpression = where as LoaderWhereExpression;
       return { where: asExpression.condition, params: asExpression.params };
@@ -74,7 +74,7 @@ export class GraphQLQueryManager {
 
   public processQueryMeta(
     info: GraphQLResolveInfo | FieldNodeInfo,
-    where: Array<ChainableWhereArgument>
+    where: Array<WhereArgument>
   ): QueryMeta {
     // Create a new md5 hash function
     const hash = crypto.createHash("md5");
@@ -111,7 +111,7 @@ export class GraphQLQueryManager {
     };
   }
 
-  public addQueueItem(item: ChainableQueueItem) {
+  public addQueueItem(item: QueueItem) {
     this._queue.push(item);
     this._setImmediate();
   }
@@ -143,7 +143,7 @@ export class GraphQLQueryManager {
    * @param entityManager
    */
   private _resolveQueueItem(entityManager: EntityManager) {
-    return async (item: ChainableQueueItem) => {
+    return async (item: QueueItem) => {
       const name =
         typeof item.entity == "string" ? item.entity : item.entity.name;
       let queryBuilder: SelectQueryBuilder<{}> = GraphQLQueryManager.createTypeORMQueryBuilder(
@@ -156,6 +156,11 @@ export class GraphQLQueryManager {
         entityManager.connection,
         queryBuilder,
         name
+      );
+      queryBuilder = this._addSelectFields(
+        queryBuilder,
+        name,
+        item.predicates.selectFields
       );
       queryBuilder = this._addAndWhereConditions(
         queryBuilder,
@@ -201,7 +206,7 @@ export class GraphQLQueryManager {
    */
   private _addAndWhereConditions(
     qb: SelectQueryBuilder<{}>,
-    conditions: Array<ChainableWhereExpression>
+    conditions: Array<WhereExpression>
   ): SelectQueryBuilder<{}> {
     const initialWhere = conditions.shift();
     if (!initialWhere) return qb;
@@ -229,7 +234,7 @@ export class GraphQLQueryManager {
    */
   private _addOrWhereConditions(
     qb: SelectQueryBuilder<{}>,
-    conditions: Array<ChainableWhereExpression>
+    conditions: Array<WhereExpression>
   ): SelectQueryBuilder<{}> {
     conditions.forEach(condition => {
       const { where, params } = GraphQLQueryManager._breakDownWhereExpression(
@@ -316,5 +321,19 @@ export class GraphQLQueryManager {
     order: OrderByCondition
   ): SelectQueryBuilder<{}> {
     return queryBuilder.orderBy(order);
+  }
+
+  private _addSelectFields(
+    queryBuilder: SelectQueryBuilder<{}>,
+    name: string,
+    selectFields: Array<string>
+  ): SelectQueryBuilder<{}> {
+    selectFields.forEach(field => {
+      queryBuilder = queryBuilder.addSelect(
+        this._formatter.columnSelection(name, field),
+        this._formatter.aliasField(name, field)
+      );
+    });
+    return queryBuilder;
   }
 }

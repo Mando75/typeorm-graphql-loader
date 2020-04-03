@@ -3,48 +3,34 @@ import { ObjectLiteral, OrderByCondition, Brackets } from "typeorm";
 import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
 import { LoaderSearchMethod } from "./enums/LoaderSearchMethod";
 
-export type ChainableWhereArgument =
+export type WhereArgument =
   | string
   | Brackets
   | ObjectLiteral
   | Array<ObjectLiteral>;
 
-export type ChainableWhereExpression =
+export type WhereExpression =
   | LoaderWhereExpression
   | Brackets
   | ObjectLiteral
   | Array<ObjectLiteral>;
 
-export type LoaderWhereExpression = {
+export interface LoaderWhereExpression {
   isLoaderWhereExpression: boolean;
   condition: string;
   params?: ObjectLiteral;
-};
+}
 
-export type LoaderOptions = {
+export interface LoaderOptions {
   // Include if you are using one of the supported TypeORM custom naming strategies
   namingStrategy?: LoaderNamingStrategyEnum;
   // this column will always be loaded for every relation by the query builder.
   primaryKeyColumn?: string;
   // Use this search method by default unless overwritten in a query option. Defaults to any position
   defaultSearchMethod?: LoaderSearchMethod;
-};
+}
 
-export type QueryOptions = {
-  /**
-   * Specify any fields that you may want to select that are not necessarily
-   * included in the graphql query. e.g. you may want to always ge back the
-   * id of the entity for auditing regardless of whether the client asked for
-   * it in the graphql query
-   */
-  requiredSelectFields?: Array<string>;
-  /**
-   * Include if wanting to search fields for text. Uses LIKE
-   */
-  search?: SearchOptions;
-};
-
-export type SearchOptions = {
+export interface SearchOptions {
   /*
    * The database columns to be searched
    * If columns need to be joined in an or, pass them in as a nested array.
@@ -60,36 +46,24 @@ export type SearchOptions = {
   searchMethod?: LoaderSearchMethod;
   // Whether the query is case sensitive. Default to false. Uses SQL LOWER to perform comparison
   caseSensitive?: boolean;
-};
+}
 
-export type QueryPagination = {
+export interface QueryPagination {
   // the max number of records to return
   limit: number;
   // the offset from where to return records
   offset: number;
-};
+}
 
-export type QueueItem = {
-  many: boolean;
-  key: string;
-  batchIdx: number;
-  fields: Selection | null;
-  where: any;
-  resolve: (value?: any) => any;
-  reject: (reason: any) => void;
-  entity: Function | string;
-  pagination?: QueryPagination;
-  options?: QueryOptions;
-};
-
-export type QueryPredicates = {
-  andWhere: Array<ChainableWhereExpression>;
-  orWhere: Array<ChainableWhereExpression>;
+export interface QueryPredicates {
+  andWhere: Array<WhereExpression>;
+  orWhere: Array<WhereExpression>;
   search: Array<SearchOptions>;
   order: OrderByCondition;
-};
+  selectFields: Array<string>;
+}
 
-export type ChainableQueueItem = {
+export interface QueueItem {
   many: boolean;
   key: string;
   fields: Selection | null;
@@ -98,26 +72,26 @@ export type ChainableQueueItem = {
   reject: (reason: any) => void;
   entity: Function | string;
   pagination?: QueryPagination;
-};
+}
 
-export type QueryMeta = {
+export interface QueryMeta {
   key: string;
   fields: Selection | null;
   found: boolean;
   item?: Promise<any>;
-};
+}
 
-export type Hash<T> = {
+export interface Hash<T> {
   [key: string]: T;
-};
+}
 
-export type Selection = {
+export interface Selection {
   arguments?: Hash<{ name: string; value: any }>;
   children?: Hash<Selection>;
-};
+}
 
-export type FieldNodeInfo = {
+export interface FieldNodeInfo {
   fieldNodes: FieldNode[];
   fieldName: string;
   fragments: { [key: string]: FragmentDefinitionNode };
-};
+}

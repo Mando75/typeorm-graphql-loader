@@ -1,7 +1,7 @@
 import { GraphQLResolveInfo } from "graphql";
 import {
-  ChainableWhereArgument,
-  ChainableWhereExpression,
+  WhereArgument,
+  WhereExpression,
   FieldNodeInfo,
   QueryPagination,
   QueryPredicates,
@@ -13,10 +13,11 @@ import { GraphQLInfoParser } from "./lib/GraphQLInfoParser";
 
 export class GraphQLQueryBuilder {
   private _info: GraphQLResolveInfo | FieldNodeInfo | null = null;
-  private _andWhereExpressions: Array<ChainableWhereExpression> = [];
-  private _orWhereExpressions: Array<ChainableWhereExpression> = [];
+  private _andWhereExpressions: Array<WhereExpression> = [];
+  private _orWhereExpressions: Array<WhereExpression> = [];
   private _searchExpressions: Array<SearchOptions> = [];
   private _order: OrderByCondition = {};
+  private _selectFields: Array<string | Array<string>> = [];
   private _pagination?: QueryPagination;
   private _parser: GraphQLInfoParser = new GraphQLInfoParser();
 
@@ -53,7 +54,7 @@ export class GraphQLQueryBuilder {
    * @returns GraphQLQueryBuilder
    */
   public where(
-    where: ChainableWhereArgument,
+    where: WhereArgument,
     params?: ObjectLiteral
   ): GraphQLQueryBuilder {
     if (typeof where === "string") {
@@ -77,7 +78,7 @@ export class GraphQLQueryBuilder {
    * @returns GraphQLQueryBuilder
    */
   public orWhere(
-    where: ChainableWhereArgument,
+    where: WhereArgument,
     params?: ObjectLiteral
   ): GraphQLQueryBuilder {
     if (typeof where === "string") {
@@ -99,6 +100,11 @@ export class GraphQLQueryBuilder {
 
   public order(order: OrderByCondition): GraphQLQueryBuilder {
     this._order = { ...this._order, ...order };
+    return this;
+  }
+
+  public selectFields(fields: string | Array<string>): GraphQLQueryBuilder {
+    this._selectFields.push(fields);
     return this;
   }
 
@@ -187,7 +193,8 @@ export class GraphQLQueryBuilder {
       search: this._searchExpressions,
       andWhere: this._andWhereExpressions,
       orWhere: this._orWhereExpressions,
-      order: this._order
+      order: this._order,
+      selectFields: this._selectFields.flat()
     };
   }
 }
