@@ -2,9 +2,19 @@ import { Node } from "./Node";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { builder } from "../schema";
 import { User } from "./User";
-import { GraphQLID, GraphQLString, GraphQLResolveInfo } from "graphql";
+import {
+  GraphQLID,
+  GraphQLBoolean,
+  GraphQLString,
+  GraphQLResolveInfo
+} from "graphql";
 import { GraphQLDatabaseLoader } from "../../";
 
+/**
+ * A helper entity to test all the various options
+ * and stuff. Will probably clean this up at some point
+ * For right now it works
+ */
 @builder.type()
 @Entity()
 export class ErrorLog extends Node {
@@ -24,6 +34,35 @@ export class ErrorLog extends Node {
   @builder.field(() => User)
   @ManyToOne(type => User)
   user!: User;
+
+  @builder.field(GraphQLString)
+  combinedCodeAndMessage() {
+    return this.code + this.message;
+  }
+
+  @builder.query({
+    returnType: () => ErrorLog,
+    args: {
+      useSelectFields: {
+        type: GraphQLBoolean,
+        defaultValue: true
+      }
+    }
+  })
+  async requiredSelectFields(
+    _: any,
+    { useSelectFields }: { useSelectFields: boolean },
+    context: { loader: GraphQLDatabaseLoader },
+    info: GraphQLResolveInfo
+  ) {
+    // If useSelectFields is not included, the fields will not be loaded
+    // so we can test this returns null
+    let loader = context.loader.loadEntity(ErrorLog).info(info);
+    if (useSelectFields) {
+      loader = loader.selectFields(["code", "message"]);
+    }
+    return loader.loadOne();
+  }
 
   @builder.query({
     returnType: () => ErrorLog
