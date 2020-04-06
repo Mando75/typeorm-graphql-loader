@@ -37,6 +37,12 @@ export interface LoaderOptions {
    * Use this search method by default unless overwritten in a query option. Defaults to any position
    */
   defaultSearchMethod?: LoaderSearchMethod;
+  /**
+   * Allows you to set a maximum query depth. This can be useful
+   * in preventing malicious queries from locking up your database.
+   * Defaults to Infinity
+   */
+  maxQueryDepth?: number;
 }
 
 export interface SearchOptions {

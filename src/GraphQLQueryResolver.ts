@@ -15,10 +15,16 @@ export class GraphQLQueryResolver {
   private readonly _primaryKeyColumn: string;
   private readonly _namingStrategy: LoaderNamingStrategyEnum;
   private _formatter: Formatter;
-  constructor({ primaryKeyColumn, namingStrategy }: LoaderOptions) {
+  private readonly _maxDepth: number;
+  constructor({
+    primaryKeyColumn,
+    namingStrategy,
+    maxQueryDepth
+  }: LoaderOptions) {
     this._namingStrategy = namingStrategy ?? LoaderNamingStrategyEnum.CAMELCASE;
     this._primaryKeyColumn = primaryKeyColumn ?? "id";
     this._formatter = new Formatter(this._namingStrategy);
+    this._maxDepth = maxQueryDepth ?? Infinity;
   }
 
   /**
@@ -43,13 +49,15 @@ export class GraphQLQueryResolver {
    * @param connection
    * @param queryBuilder
    * @param alias
+   * @param depth
    */
   public createQuery(
     model: Function | string,
     selection: Selection | null,
     connection: Connection,
     queryBuilder: SelectQueryBuilder<{}>,
-    alias: string
+    alias: string,
+    depth = 0
   ): SelectQueryBuilder<{}> {
     const meta = connection.getMetadata(model);
     if (selection && selection.children) {
@@ -58,13 +66,16 @@ export class GraphQLQueryResolver {
       );
 
       queryBuilder = this._selectFields(queryBuilder, fields, alias);
-      queryBuilder = this._selectRelations(
-        queryBuilder,
-        selection.children,
-        meta.relations,
-        alias,
-        connection
-      );
+      if (depth < this._maxDepth) {
+        queryBuilder = this._selectRelations(
+          queryBuilder,
+          selection.children,
+          meta.relations,
+          alias,
+          connection,
+          depth
+        );
+      }
     }
     return queryBuilder;
   }
@@ -144,7 +155,8 @@ export class GraphQLQueryResolver {
     children: Hash<Selection>,
     relations: Array<RelationMetadata>,
     alias: string,
-    connection: Connection
+    connection: Connection,
+    depth: number
   ): SelectQueryBuilder<{}> {
     relations.forEach(relation => {
       // Join each relation that was queried
@@ -161,7 +173,8 @@ export class GraphQLQueryResolver {
           children[relation.propertyName],
           connection,
           queryBuilder,
-          childAlias
+          childAlias,
+          depth + 1
         );
       }
     });
