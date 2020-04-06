@@ -15,6 +15,9 @@ export type WhereExpression =
   | ObjectLiteral
   | Array<ObjectLiteral>;
 
+/**
+ * @hidden
+ */
 export interface LoaderWhereExpression {
   isLoaderWhereExpression: boolean;
   condition: string;
@@ -22,36 +25,52 @@ export interface LoaderWhereExpression {
 }
 
 export interface LoaderOptions {
-  // Include if you are using one of the supported TypeORM custom naming strategies
+  /**
+   * Include if you are using one of the supported TypeORM custom naming strategies
+   */
   namingStrategy?: LoaderNamingStrategyEnum;
-  // this column will always be loaded for every relation by the query builder.
+  /**
+   * This column will always be loaded for every relation by the query builder.
+   */
   primaryKeyColumn?: string;
-  // Use this search method by default unless overwritten in a query option. Defaults to any position
+  /**
+   * Use this search method by default unless overwritten in a query option. Defaults to any position
+   */
   defaultSearchMethod?: LoaderSearchMethod;
 }
 
 export interface SearchOptions {
-  /*
+  /**
    * The database columns to be searched
    * If columns need to be joined in an or, pass them in as a nested array.
    * e.g. ["email", ["firstName", "lastName"]]
    * This will produce a query like the following:
    * `WHERE email LIKE :searchText
    *  OR firstName || ' ' || lastName LIKE :searchText
-   **/
+   */
   searchColumns: Array<string | Array<string>>;
-  // The text to compare column values with
+  /**
+   * The text to be searched for
+   */
   searchText: string;
-  // Optionally specify a search method. If not provided, default will be used (see LoaderOptions)
+  /**
+   * Optionally specify a search method. If not provided, default will be used (see LoaderOptions)
+   */
   searchMethod?: LoaderSearchMethod;
-  // Whether the query is case sensitive. Default to false. Uses SQL LOWER to perform comparison
+  /**
+   * Whether the query is case sensitive. Default to false. Uses SQL LOWER to perform comparison
+   */
   caseSensitive?: boolean;
 }
 
 export interface QueryPagination {
-  // the max number of records to return
+  /**
+   * the max number of records to return
+   */
   limit: number;
-  // the offset from where to return records
+  /**
+   * the offset from where to return records
+   */
   offset: number;
 }
 

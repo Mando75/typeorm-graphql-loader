@@ -1,5 +1,14 @@
 export enum LoaderSearchMethod {
-  ANY_POSITION, // LIKE '%mysearch%'
-  STARTS_WITH, // LIKE 'mysearch%';
-  ENDS_WITH // LIKE '%mysearch';
+  /**
+   * Uses `LIKE '%mysearch%'`
+   */
+  ANY_POSITION,
+  /**
+   * Uses `LIKE 'mysearch%'`
+   */
+  STARTS_WITH,
+  /**
+   * Uses `LIKE '%mysearch'`
+   */
+  ENDS_WITH
 }
