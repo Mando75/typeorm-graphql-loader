@@ -120,4 +120,32 @@ export class ErrorLog extends Node {
       .order({ id: order })
       .loadMany();
   }
+
+  @builder.query({
+    returnType: {
+      type: () => ErrorLog,
+      list: true,
+      nonNullItems: true,
+      nonNull: true
+    },
+    args: {
+      id: {
+        type: GraphQLID,
+        defaultValue: "2"
+      }
+    }
+  })
+  async orWhereIdIsOne(
+    _: any,
+    { id }: { id: string },
+    context: { loader: GraphQLDatabaseLoader },
+    info: GraphQLResolveInfo
+  ) {
+    return context.loader
+      .loadEntity(ErrorLog)
+      .info(info)
+      .where({ id })
+      .orWhere("ErrorLog.id = 1")
+      .loadMany();
+  }
 }

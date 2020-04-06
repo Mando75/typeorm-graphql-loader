@@ -114,19 +114,8 @@ export class GraphQLQueryBuilder {
    * Provide the query builder with an OR WHERE condition. Multiple conditions can be added
    * by re-invoking the method (they get added to a list). Any where conditions added via this
    * method will be grouped in an OR expression. Should only be used after an initial WHERE condition.
-   * @example
-   * ```
-   * // using object literal syntax
-   * function resolve(obj, args, context, info) {
-   *   return context
-   *    .loader
-   *    .loadEntity(Book)
-   *    .info(info)
-   *    .where({authorId: args.authorId})
-   *    .orWhere({isPublicDomain: args.publicDomain})
-   *    .loadMany()
-   * }
-   * ```
+   * Please note that TypeORM's internal `.orWhere` does not support object literal syntax, hence the loader
+   * must use the string, parameters syntax as seen in the example below
    * @example
    * ```
    * // using custom SQL
@@ -134,27 +123,19 @@ export class GraphQLQueryBuilder {
    *    .loadEntity(Book)
    *    .info(info)
    *    .where({authorId: args.authorId})
-   *    // You can use strings with bound values to unlock the full power of SQL
    *    .orWhere("book.isPublicDomain = :includePublicDomain", {includePublicDomain: args.publicDomain})
    *    .loadMany()
    *```
-   * @param where - the {@link WhereArgument} you would like applied to the query
+   * @param where - the condition you would like applied to the query
    * @param params - An optional parameter you can use to bind values for your where condition. See {@link https://github.com/typeorm/typeorm/blob/master/docs/select-query-builder.md#adding-where-expression|TypeORM docs}
    * @returns GraphQLQueryBuilder
    */
-  public orWhere(
-    where: WhereArgument,
-    params?: ObjectLiteral
-  ): GraphQLQueryBuilder {
-    if (typeof where === "string") {
-      this._orWhereExpressions.push({
-        condition: where,
-        params,
-        isLoaderWhereExpression: true
-      });
-    } else {
-      this._orWhereExpressions.push(where);
-    }
+  public orWhere(where: string, params?: ObjectLiteral): GraphQLQueryBuilder {
+    this._orWhereExpressions.push({
+      condition: where,
+      params,
+      isLoaderWhereExpression: true
+    });
     return this;
   }
 

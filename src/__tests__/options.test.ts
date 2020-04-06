@@ -115,34 +115,61 @@ describe("options", () => {
       expect(result).to.not.have.key("errors");
       expect(result.data!.orderById).to.deep.equal(expected);
     });
+
+    it("applies desc order correctly", async () => {
+      const logsPromise = connection
+        .getRepository(ErrorLog)
+        .createQueryBuilder()
+        .orderBy({ id: "DESC" })
+        .getMany();
+      const resultPromise = graphql(
+        schema,
+        `
+          {
+            orderById(order: "DESC") {
+              id
+              code
+            }
+          }
+        `,
+        {},
+        { loader }
+      );
+      const [logs, result] = await Promise.all([logsPromise, resultPromise]);
+
+      const expected = logs.map((log: ErrorLog) => ({
+        id: log.id.toString(),
+        code: log.code
+      }));
+      expect(result).to.not.have.key("errors");
+      expect(result.data!.orderById).to.deep.equal(expected);
+    });
   });
 
-  it("applies desc order correctly", async () => {
-    const logsPromise = connection
-      .getRepository(ErrorLog)
-      .createQueryBuilder()
-      .orderBy({ id: "DESC" })
-      .getMany();
-    const resultPromise = graphql(
-      schema,
-      `
-        {
-          orderById(order: "DESC") {
-            id
-            code
+  describe("orWhere", () => {
+    it("can apply an orWhere condition", async () => {
+      const resultP = graphql(
+        schema,
+        `
+          {
+            orWhereIdIsOne(id: 2) {
+              id
+            }
           }
-        }
-      `,
-      {},
-      { loader }
-    );
-    const [logs, result] = await Promise.all([logsPromise, resultPromise]);
-
-    const expected = logs.map((log: ErrorLog) => ({
-      id: log.id.toString(),
-      code: log.code
-    }));
-    expect(result).to.not.have.key("errors");
-    expect(result.data!.orderById).to.deep.equal(expected);
+        `,
+        {},
+        { loader }
+      );
+      const logsP = connection
+        .getRepository(ErrorLog)
+        .createQueryBuilder("log")
+        .where({ id: 2 })
+        .orWhere("log.id = 1")
+        .getMany();
+      const [logs, result] = await Promise.all([logsP, resultP]);
+      const expected = logs.map(log => ({ id: log.id.toString() }));
+      expect(result).to.not.have.key("errors");
+      expect(result.data!.orWhereIdIsOne).to.deep.equal(expected);
+    });
   });
 });
