@@ -9,3 +9,4 @@ temp/
 coverage/
 dist/
 yarn-error.log
+public/
