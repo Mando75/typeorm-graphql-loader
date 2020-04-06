@@ -38,51 +38,111 @@ describe("options", () => {
     loader = new GraphQLDatabaseLoader(connection);
   });
 
-  it("applies selectFields correctly", async () => {
-    const result = await graphql(
+  describe("selectFields", () => {
+    it("applies selectFields correctly", async () => {
+      const result = await graphql(
+        schema,
+        `
+          {
+            requiredSelectFields(useSelectFields: true) {
+              id
+              combinedCodeAndMessage
+            }
+          }
+        `,
+        {},
+        { loader }
+      );
+
+      const expected = {
+        id: Log.id.toString(),
+        combinedCodeAndMessage: Log.combinedCodeAndMessage()
+      };
+      expect(result).to.not.have.key("errors");
+      expect(result.data!.requiredSelectFields).to.deep.equal(expected);
+    });
+
+    it("is only selecting the fields it can find in the query", async () => {
+      const result = await graphql(
+        schema,
+        `
+          {
+            requiredSelectFields(useSelectFields: false) {
+              id
+              combinedCodeAndMessage
+            }
+          }
+        `,
+        {},
+        { loader }
+      );
+
+      const expected = {
+        id: Log.id.toString(),
+        combinedCodeAndMessage: null
+      };
+      expect(result).to.not.have.key("errors");
+      expect(result.data!.requiredSelectFields).to.deep.equal(expected);
+    });
+  });
+
+  describe("order", () => {
+    it("applies asc order correctly", async () => {
+      const logsPromise = connection
+        .getRepository(ErrorLog)
+        .createQueryBuilder()
+        .orderBy({ id: "ASC" })
+        .getMany();
+      const resultPromise = graphql(
+        schema,
+        `
+          {
+            orderById(order: "ASC") {
+              id
+              code
+            }
+          }
+        `,
+        {},
+        { loader }
+      );
+      const [logs, result] = await Promise.all([logsPromise, resultPromise]);
+
+      const expected = logs.map((log: ErrorLog) => ({
+        id: log.id.toString(),
+        code: log.code
+      }));
+      expect(result).to.not.have.key("errors");
+      expect(result.data!.orderById).to.deep.equal(expected);
+    });
+  });
+
+  it("applies desc order correctly", async () => {
+    const logsPromise = connection
+      .getRepository(ErrorLog)
+      .createQueryBuilder()
+      .orderBy({ id: "DESC" })
+      .getMany();
+    const resultPromise = graphql(
       schema,
       `
         {
-          requiredSelectFields(useSelectFields: true) {
+          orderById(order: "DESC") {
             id
-            combinedCodeAndMessage
+            code
           }
         }
       `,
       {},
       { loader }
     );
+    const [logs, result] = await Promise.all([logsPromise, resultPromise]);
 
-    const expected = {
-      id: Log.id.toString(),
-      combinedCodeAndMessage: Log.combinedCodeAndMessage()
-    };
+    const expected = logs.map((log: ErrorLog) => ({
+      id: log.id.toString(),
+      code: log.code
+    }));
     expect(result).to.not.have.key("errors");
-    expect(result.data!.requiredSelectFields).to.deep.equal(expected);
+    expect(result.data!.orderById).to.deep.equal(expected);
   });
-
-  it("is only selecting the fields it can find in the query", async () => {
-    const result = await graphql(
-      schema,
-      `
-        {
-          requiredSelectFields(useSelectFields: false) {
-            id
-            combinedCodeAndMessage
-          }
-        }
-      `,
-      {},
-      { loader }
-    );
-
-    const expected = {
-      id: Log.id.toString(),
-      combinedCodeAndMessage: null
-    };
-    expect(result).to.not.have.key("errors");
-    expect(result.data!.requiredSelectFields).to.deep.equal(expected);
-  });
-
-  it("applies SQL ordering correctly", () => {});
 });

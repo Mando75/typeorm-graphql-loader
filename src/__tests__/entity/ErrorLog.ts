@@ -93,4 +93,31 @@ export class ErrorLog extends Node {
       .info(info)
       .loadPaginated();
   }
+
+  @builder.query({
+    returnType: {
+      type: () => ErrorLog,
+      list: true,
+      nonNull: true,
+      nonNullItems: true
+    },
+    args: {
+      order: {
+        type: GraphQLString,
+        defaultValue: "ASC"
+      }
+    }
+  })
+  async orderById(
+    _: any,
+    { order }: { order: "ASC" | "DESC" },
+    context: { loader: GraphQLDatabaseLoader },
+    info: GraphQLResolveInfo
+  ) {
+    return context.loader
+      .loadEntity(ErrorLog)
+      .info(info)
+      .order({ id: order })
+      .loadMany();
+  }
 }
