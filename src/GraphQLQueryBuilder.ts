@@ -11,7 +11,7 @@ import { GraphQLQueryManager } from "./GraphQLQueryManager";
 import { ObjectLiteral, OrderByCondition } from "typeorm";
 import { GraphQLInfoParser } from "./lib/GraphQLInfoParser";
 
-export class GraphQLQueryBuilder {
+export class GraphQLQueryBuilder<T> {
   private _info: GraphQLResolveInfo | FieldNodeInfo | null = null;
   private _andWhereExpressions: Array<WhereExpression> = [];
   private _orWhereExpressions: Array<WhereExpression> = [];
@@ -50,7 +50,7 @@ export class GraphQLQueryBuilder {
   public info(
     info: GraphQLResolveInfo,
     fieldName?: string
-  ): GraphQLQueryBuilder {
+  ): GraphQLQueryBuilder<T> {
     if (fieldName) {
       this._info = this._parser.getFieldNode(info, fieldName);
     } else {
@@ -97,7 +97,7 @@ export class GraphQLQueryBuilder {
   public where(
     where: WhereArgument,
     params?: ObjectLiteral
-  ): GraphQLQueryBuilder {
+  ): GraphQLQueryBuilder<T> {
     if (typeof where === "string") {
       this._andWhereExpressions.push({
         condition: where,
@@ -130,7 +130,10 @@ export class GraphQLQueryBuilder {
    * @param params - An optional parameter you can use to bind values for your where condition. See {@link https://github.com/typeorm/typeorm/blob/master/docs/select-query-builder.md#adding-where-expression|TypeORM docs}
    * @returns GraphQLQueryBuilder
    */
-  public orWhere(where: string, params?: ObjectLiteral): GraphQLQueryBuilder {
+  public orWhere(
+    where: string,
+    params?: ObjectLiteral
+  ): GraphQLQueryBuilder<T> {
     this._orWhereExpressions.push({
       condition: where,
       params,
@@ -168,7 +171,7 @@ export class GraphQLQueryBuilder {
    * @param searchOptions - An {@link SearchOptions}that allows you to specify which columns should be searched and what to search for
    * @returns GraphQLQueryBuilder
    */
-  public search(searchOptions: SearchOptions): GraphQLQueryBuilder {
+  public search(searchOptions: SearchOptions): GraphQLQueryBuilder<T> {
     this._searchExpressions.push(searchOptions);
     return this;
   }
@@ -192,7 +195,7 @@ export class GraphQLQueryBuilder {
    * @param order
    * @returns GraphQLQueryBuilder
    */
-  public order(order: OrderByCondition): GraphQLQueryBuilder {
+  public order(order: OrderByCondition): GraphQLQueryBuilder<T> {
     this._order = { ...this._order, ...order };
     return this;
   }
@@ -218,7 +221,7 @@ export class GraphQLQueryBuilder {
    * ```
    * @param fields
    */
-  public selectFields(fields: string | Array<string>): GraphQLQueryBuilder {
+  public selectFields(fields: string | Array<string>): GraphQLQueryBuilder<T> {
     this._selectFields.push(fields);
     return this;
   }
@@ -247,7 +250,7 @@ export class GraphQLQueryBuilder {
    * ```
    * @param pagination
    */
-  public paginate(pagination: QueryPagination): GraphQLQueryBuilder {
+  public paginate(pagination: QueryPagination): GraphQLQueryBuilder<T> {
     this._pagination = pagination;
     return this;
   }
@@ -272,8 +275,8 @@ export class GraphQLQueryBuilder {
    * ```
    * @throws Error Missing info argument
    */
-  public async loadOne<T>(): Promise<T | undefined> {
-    return this._genericLoad<T, false, false>(false, false);
+  public async loadOne(): Promise<T | undefined> {
+    return this._genericLoad<false, false>(false, false);
   }
 
   /**
@@ -295,8 +298,8 @@ export class GraphQLQueryBuilder {
    * ```
    * @throws Error Missing info argument
    */
-  public async loadMany<T>(): Promise<T[] | undefined> {
-    return this._genericLoad<T, true, false>(true, false);
+  public async loadMany(): Promise<T[]> {
+    return this._genericLoad<true, false>(true, false);
   }
 
   /**
@@ -306,13 +309,13 @@ export class GraphQLQueryBuilder {
    * for you, it will only apply the values you give it.
    * See [Pagination Advice](https://gitlab.com/Mando75/typeorm-graphql-loader/-/blob/master/md/pagination.md) for more info
    */
-  public async loadPaginated<T>(): Promise<[T[], number]> {
+  public async loadPaginated(): Promise<[T[], number]> {
     if (!this._pagination) {
       throw new Error(
         "Must provide pagination object before calling load paginated"
       );
     }
-    return this._genericLoad<T, true, true>(true, true);
+    return this._genericLoad<true, true>(true, true);
   }
 
   /**
@@ -322,7 +325,7 @@ export class GraphQLQueryBuilder {
    * @param many
    * @param paginate
    */
-  private async _genericLoad<T, U extends boolean, V extends boolean>(
+  private async _genericLoad<U extends boolean, V extends boolean>(
     many: U,
     paginate: V
   ): Promise<

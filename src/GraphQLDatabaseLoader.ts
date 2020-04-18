@@ -47,7 +47,7 @@ export class GraphQLDatabaseLoader {
    *
    * @param entity - The TypeORM entity you will be loading for this query.
    */
-  public loadEntity(entity: Function | string): GraphQLQueryBuilder {
+  public loadEntity<T>(entity: Function | string): GraphQLQueryBuilder<T> {
     return new GraphQLQueryBuilder(this._queryManager, entity);
   }
 }
