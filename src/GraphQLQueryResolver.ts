@@ -148,6 +148,7 @@ export class GraphQLQueryResolver {
    * @param relations
    * @param alias
    * @param connection
+   * @param depth
    * @private
    */
   private _selectRelations(
