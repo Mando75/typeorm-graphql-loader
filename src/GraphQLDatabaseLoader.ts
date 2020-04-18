@@ -1,5 +1,5 @@
 import { LoaderOptions } from "./types";
-import { Connection } from "typeorm";
+import { BaseEntity, Connection } from "typeorm";
 import { GraphQLQueryBuilder } from "./GraphQLQueryBuilder";
 import { GraphQLQueryManager } from "./GraphQLQueryManager";
 
@@ -47,7 +47,9 @@ export class GraphQLDatabaseLoader {
    *
    * @param entity - The TypeORM entity you will be loading for this query.
    */
-  public loadEntity<T>(entity: Function | string): GraphQLQueryBuilder<T> {
+  public loadEntity<T extends typeof BaseEntity>(
+    entity: T
+  ): GraphQLQueryBuilder<T> {
     return new GraphQLQueryBuilder(this._queryManager, entity);
   }
 }

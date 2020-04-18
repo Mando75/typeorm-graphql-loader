@@ -8,10 +8,10 @@ import {
   SearchOptions
 } from "./types";
 import { GraphQLQueryManager } from "./GraphQLQueryManager";
-import { ObjectLiteral, OrderByCondition } from "typeorm";
+import { BaseEntity, ObjectLiteral, OrderByCondition } from "typeorm";
 import { GraphQLInfoParser } from "./lib/GraphQLInfoParser";
 
-export class GraphQLQueryBuilder<T> {
+export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   private _info: GraphQLResolveInfo | FieldNodeInfo | null = null;
   private _andWhereExpressions: Array<WhereExpression> = [];
   private _orWhereExpressions: Array<WhereExpression> = [];
@@ -275,7 +275,7 @@ export class GraphQLQueryBuilder<T> {
    * ```
    * @throws Error Missing info argument
    */
-  public async loadOne(): Promise<T | undefined> {
+  public async loadOne(): Promise<InstanceType<T> | undefined> {
     return this._genericLoad<false, false>(false, false);
   }
 
@@ -298,7 +298,7 @@ export class GraphQLQueryBuilder<T> {
    * ```
    * @throws Error Missing info argument
    */
-  public async loadMany(): Promise<T[]> {
+  public async loadMany(): Promise<InstanceType<T>[]> {
     return this._genericLoad<true, false>(true, false);
   }
 
@@ -309,7 +309,7 @@ export class GraphQLQueryBuilder<T> {
    * for you, it will only apply the values you give it.
    * See [Pagination Advice](https://gitlab.com/Mando75/typeorm-graphql-loader/-/blob/master/md/pagination.md) for more info
    */
-  public async loadPaginated(): Promise<[T[], number]> {
+  public async loadPaginated(): Promise<[InstanceType<T>[], number]> {
     if (!this._pagination) {
       throw new Error(
         "Must provide pagination object before calling load paginated"
@@ -329,7 +329,11 @@ export class GraphQLQueryBuilder<T> {
     many: U,
     paginate: V
   ): Promise<
-    V extends true ? [T[], number] : U extends true ? T[] : T | undefined
+    V extends true
+      ? [InstanceType<T>[], number]
+      : U extends true
+      ? InstanceType<T>[]
+      : InstanceType<T> | undefined
   > {
     // we need to validate an info object
     this._validateInfo();
