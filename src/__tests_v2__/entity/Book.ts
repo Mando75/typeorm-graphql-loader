@@ -11,12 +11,12 @@ import {
 import { Author } from "./Author";
 import { Publisher } from "./Publisher";
 import { Review } from "./Review";
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, Int, ObjectType } from "type-graphql";
 
 @ObjectType()
 @Entity()
 export class Book extends BaseEntity {
-  @Field(type => ID)
+  @Field(type => Int)
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -25,7 +25,7 @@ export class Book extends BaseEntity {
   title!: string;
 
   @Field()
-  @Column("varchar")
+  @Column("text")
   summary!: string;
 
   @Field()

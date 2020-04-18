@@ -8,12 +8,12 @@ import {
   UpdateDateColumn
 } from "typeorm";
 import { Book } from "./Book";
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, Int, ObjectType } from "type-graphql";
 
 @ObjectType()
 @Entity()
 export class Author extends BaseEntity {
-  @Field(type => ID)
+  @Field(type => Int)
   @PrimaryGeneratedColumn()
   id!: number;
 

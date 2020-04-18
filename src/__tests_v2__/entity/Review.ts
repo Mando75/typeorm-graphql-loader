@@ -6,12 +6,12 @@ import {
   PrimaryGeneratedColumn
 } from "typeorm";
 import { Book } from "./Book";
-import { ID, Field, ObjectType } from "type-graphql";
+import { Int, Field, ObjectType } from "type-graphql";
 
 @ObjectType()
 @Entity()
 export class Review extends BaseEntity {
-  @Field(type => ID)
+  @Field(type => Int)
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -20,12 +20,12 @@ export class Review extends BaseEntity {
   title!: string;
 
   @Field()
-  @Column("varchar")
+  @Column("text")
   body!: string;
 
   @Field()
   @Column("date")
-  reviewDate!: string;
+  reviewDate!: Date;
 
   @Field()
   @Column("int")
