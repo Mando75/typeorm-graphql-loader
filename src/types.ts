@@ -9,6 +9,9 @@ export type WhereArgument =
   | ObjectLiteral
   | Array<ObjectLiteral>;
 
+/**
+ * @hidden
+ */
 export type WhereExpression =
   | LoaderWhereExpression
   | Brackets

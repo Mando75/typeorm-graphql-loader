@@ -91,7 +91,7 @@ For help with pagination, first read [Pagination Advice](https://gitlab.com/Mand
 
 ## API <a name="API"> 
 
-Documentation for the Public API
+[Documentation for the Public API](https://gql-loader.bmuller.net)
 
 ## Contributing <a name="Contributing">
 
