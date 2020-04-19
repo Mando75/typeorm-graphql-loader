@@ -1,5 +1,5 @@
 import { Connection, EntityManager } from "typeorm";
-import { Author, Publisher, Review, Book } from "./entity";
+import { Author, Publisher, Review, Book } from "../entity";
 import * as faker from "faker";
 
 export class Seeder {

@@ -1,9 +1,9 @@
-import { Author, Book, Publisher, Review } from "./entity";
-import resolvers from "./resolvers";
+import { Author, Book, Publisher, Review } from "../entity";
+import resolvers from "../resolvers";
 import { Connection, createConnection } from "typeorm";
 import { Seeder } from "./Seeder";
-import { GraphQLDatabaseLoader } from "../GraphQLDatabaseLoader";
-import { LoaderOptions } from "../types";
+import { GraphQLDatabaseLoader } from "../../GraphQLDatabaseLoader";
+import { LoaderOptions } from "../../types";
 import { buildSchema } from "type-graphql";
 import { GraphQLSchema } from "graphql";
 
