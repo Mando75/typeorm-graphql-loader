@@ -28,20 +28,6 @@ export class GraphQLQueryResolver {
   }
 
   /**
-   * Checks a field property for embedded types and adds the
-   * prefix if necessary
-   * @param field
-   * @private
-   */
-  private static _checkEmbeddedPropertyName(field: ColumnMetadata) {
-    const prefix = field.embeddedMetadata?.prefix;
-    if (prefix) {
-      return prefix + field.propertyName;
-    }
-    return field.propertyName;
-  }
-
-  /**
    * Given a model and queryBuilder, will add the selected fields and
    * relations required by a graphql field selection
    * @param model
@@ -99,9 +85,7 @@ export class GraphQLQueryResolver {
     // Add a select for each field that was requested in the query
     fields.forEach(field => {
       // Make sure we account for embedded types
-      const propertyName: string = GraphQLQueryResolver._checkEmbeddedPropertyName(
-        field
-      );
+      const propertyName: string = field.propertyName;
       queryBuilder = queryBuilder.addSelect(
         this._formatter.columnSelection(alias, propertyName),
         this._formatter.aliasField(alias, propertyName)
