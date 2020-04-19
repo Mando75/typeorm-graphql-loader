@@ -83,6 +83,7 @@
     "typescript": "^3.6.4"
   },
   "peerDependencies": {
-    "typeorm": ">=0.2.8"
+    "typeorm": ">=0.2.8",
+    "graphql": "^14.0.0"
   }
 }
