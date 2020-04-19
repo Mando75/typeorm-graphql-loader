@@ -13,9 +13,14 @@ export interface TestHelpers {
   connection: Connection;
 }
 
+export interface StartupOptions {
+  loaderOptions?: LoaderOptions;
+  logging?: boolean;
+}
+
 export async function startup(
   testName: string,
-  loaderOptions?: LoaderOptions
+  options?: StartupOptions
 ): Promise<TestHelpers> {
   const connection = await createConnection({
     name: testName,
@@ -24,13 +29,13 @@ export async function startup(
     synchronize: true,
     dropSchema: true,
     entities: [Author, Book, Publisher, Review],
-    logging: false
+    logging: !!options?.logging
   });
 
   const seeder = new Seeder(connection);
   await seeder.seed();
 
-  const loader = new GraphQLDatabaseLoader(connection, loaderOptions);
+  const loader = new GraphQLDatabaseLoader(connection, options?.loaderOptions);
   const schema = await buildSchema({ resolvers });
 
   return { schema, loader, connection };

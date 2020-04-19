@@ -63,13 +63,13 @@ export class Seeder {
     publishers: Publisher[]
   ) {
     const books: Array<Partial<Book>> = [];
-    for (let i = 0; i < this.NUM_BOOKS; i++) {
+    for (let i = 1; i <= this.NUM_BOOKS; i++) {
       const book: Partial<Book> = {
         title: faker.lorem.words(3),
         summary: faker.lorem.paragraph(2),
         publishedDate: faker.date.past(),
-        author: authors[this.NUM_AUTHORS % i],
-        publisher: publishers[this.NUM_PUBLISHERS % i]
+        author: authors[i % this.NUM_AUTHORS],
+        publisher: publishers[i % this.NUM_PUBLISHERS]
       };
       books.push(book);
     }
@@ -85,14 +85,14 @@ export class Seeder {
 
   private async seedReviews(manager: EntityManager, books: Book[]) {
     const reviews: Array<Partial<Review>> = [];
-    for (let i = 0; i < this.NUM_REVIEWS; i++) {
+    for (let i = 1; i <= this.NUM_REVIEWS; i++) {
       const review: Partial<Review> = {
         title: faker.lorem.words(3),
         body: faker.lorem.paragraph(5),
         reviewDate: faker.date.past(),
         rating: faker.random.number(5),
         reviewerName: faker.name.firstName() + " " + faker.name.lastName(),
-        book: books[this.NUM_BOOKS % i]
+        book: books[i % this.NUM_BOOKS]
       };
       reviews.push(review);
     }
