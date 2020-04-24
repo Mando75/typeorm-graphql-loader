@@ -150,11 +150,11 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    * you to define which columns should be searched, the type
    * of search, and other SQL options.
    *
-   * Please note that you can either provide a flat array of column
-   * names, or a nested array like in the example below. If a nested
-   * array is found in the searchColumns argument, the loader will
-   * concat the columns in the SQL query,
-   * e.g. CONCAT(firstName, ' ', lastName)
+   * If you need search columns to be concatenated, place the
+   * columns to combine in a sub-array as seen with the name
+   * columns in the example below. These columns will be concatenated
+   * together with an empty string separator in the SQL query
+   *
    * @example
    * ```typescript
    * function resolver(obj, args, context, info) {
@@ -175,6 +175,8 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    *     .loadMany()
    * }
    * ```
+   *
+   *
    * @param searchOptions - An {@link SearchOptions}that allows you to specify which columns should be searched and what to search for
    * @returns GraphQLQueryBuilder
    */
