@@ -45,14 +45,19 @@ export class AuthorResolver {
     @Arg("searchMethod", type => LoaderSearchMethod, { nullable: true })
     searchMethod?: LoaderSearchMethod,
     @Arg("caseSensitive", type => Boolean, { nullable: true })
-    caseSensitive?: boolean
+    caseSensitive?: boolean,
+    @Arg("searchCombinedName", type => Boolean, { nullable: true })
+    searchCombinedName?: boolean
   ) {
+    const searchColumns = searchCombinedName
+      ? ["email", ["firstName", "lastName"]]
+      : ["email", "firstName", "lastName"];
     return loader
       .loadEntity(Author)
       .info(info)
       .search({
         searchText,
-        searchColumns: ["email", "firstName", "lastName"],
+        searchColumns,
         searchMethod,
         caseSensitive
       })

@@ -16,7 +16,7 @@ describe("Search queries", () => {
   let author: Author;
 
   before(async () => {
-    helpers = await startup("searching", { logging: false });
+    helpers = await startup("searching", { logging: true });
     author = helpers.connection.getRepository(Author).create({
       email: TEST_AUTHOR_EMAIL,
       firstName: TEST_AUTHOR_FIRST_NAME,
@@ -94,6 +94,36 @@ describe("Search queries", () => {
 
     const vars = {
       firstName: author.firstName.slice(3, author.firstName.length)
+    };
+
+    const expected = {
+      id: author.id,
+      firstName: author.firstName,
+      lastName: author.lastName
+    };
+
+    const result = await graphql(schema, query, {}, { loader }, vars);
+
+    expect(result).to.not.have.key("errors");
+    result.data?.searchAuthors.should.include.something.that.deep.equals(
+      expected
+    );
+  });
+
+  it("can perform a search on combined columns", async () => {
+    const { schema, loader } = helpers;
+    const query = `
+      query searchAuthorsByFirstName($firstName: String!) {
+        searchAuthors(searchText: $firstName, searchMethod: STARTS_WITH, searchCombinedName: true) {
+          id
+          firstName
+          lastName
+        }
+      }      
+    `;
+
+    const vars = {
+      firstName: author.firstName + " " + author.lastName.slice(0, 3)
     };
 
     const expected = {

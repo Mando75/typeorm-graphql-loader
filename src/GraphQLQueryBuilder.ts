@@ -146,13 +146,20 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    * Provides an easy way to perform searches without needing to manually write SQL WHERE
    * conditions for each search instance
    *
-   * The method accepts a searchOptions parameter that allows you to define which columns should be
-   * searched, the type of search, and other SQL options.
+   * The method accepts a searchOptions parameter that allows
+   * you to define which columns should be searched, the type
+   * of search, and other SQL options.
+   *
+   * Please note that you can either provide a flat array of column
+   * names, or a nested array like in the example below. If a nested
+   * array is found in the searchColumns argument, the loader will
+   * concat the columns in the SQL query,
+   * e.g. CONCAT(firstName, ' ', lastName)
    * @example
    * ```typescript
    * function resolver(obj, args, context, info) {
    *   const searchOptions: SearchOptions = {
-   *     searchColumns: ['email']
+   *     searchColumns: ['email', ['firstName', 'lastName']]
    *     searchText: args.searchText
    *     // optional
    *     searchMethod: LoaderSearchMethod.STARTS_WITH
