@@ -190,8 +190,8 @@ This package offers a solution to take away all the worry of how you manage
 your entity relations in the resolvers. GraphQL provides a parameter in each
 resolver function called `info`. This `info` parameter contains the entire query
 tree, which means we can traverse it and figure out exactly which fields need to
-be selected, and which relations need to be loaded. This can then be used to
-create one SQL query that can get all of the information at once.
+be selected, and which relations need to be loaded. This is used to
+create one SQL query that can get all the information at once.
 
 Because the loader uses the queryBuilder API, it does not matter if you have all
 "normal", "lazy", "eager" relations, or a mix of all of them. You give it your
@@ -202,7 +202,7 @@ signatures executed in the same tick.
 
 ## Acknowledgments <a name="Acknowledgments">
 
-This project is based on the work of [Weboptimizer's typeorm-loader
+This project inspired by the work of [Weboptimizer's typeorm-loader
 package](https://github.com/Webtomizer/typeorm-loader). I work quite a bit with
 Apollo Server + TypeORM and I was looking to find a way to more efficiently pull
 data via TypeORM for GraphQL via intelligently loading the needed relations for
@@ -210,6 +210,6 @@ a given query. I stumbled across his package, which seemed to
 promise all the functionality, but it seemed to be in a broken/unmaintained
 state. After several months of no response from the author, and with significant
 bug fixes/features added in my fork, I decided to just make my own package. So
-thanks to Weboptimizer for doing a lot of the ground work. If you ever stumble
-across this and would like to merge the features back into the main source repo,
-I'd be more than happy to work with you to make that happen.
+thanks to Weboptimizer for doing a lot of the groundwork. Since then, I have
+almost completely rewritten the library to be a bit more maintainable and feature
+rich, but I would still like to acknowledge the inspiration his project gave me. 
