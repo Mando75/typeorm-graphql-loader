@@ -28,7 +28,7 @@ export class Book extends BaseEntity {
   @Column("text")
   summary!: string;
 
-  @Field()
+  @Field(type => String)
   @Column("date")
   publishedDate!: Date;
 

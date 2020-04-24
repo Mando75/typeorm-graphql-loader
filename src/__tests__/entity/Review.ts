@@ -23,7 +23,7 @@ export class Review extends BaseEntity {
   @Column("text")
   body!: string;
 
-  @Field()
+  @Field(type => String)
   @Column("date")
   reviewDate!: Date;
 
