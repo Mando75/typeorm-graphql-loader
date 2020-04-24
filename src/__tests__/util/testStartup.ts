@@ -5,7 +5,8 @@ import { Seeder } from "./Seeder";
 import { GraphQLDatabaseLoader } from "../../GraphQLDatabaseLoader";
 import { LoaderOptions } from "../../types";
 import { buildSchema } from "type-graphql";
-import { GraphQLSchema } from "graphql";
+import { GraphQLSchema, printSchema } from "graphql";
+import * as fs from "fs";
 
 export interface TestHelpers {
   schema: GraphQLSchema;
@@ -37,6 +38,12 @@ export async function startup(
 
   const loader = new GraphQLDatabaseLoader(connection, options?.loaderOptions);
   const schema = await buildSchema({ resolvers });
+
+  fs.writeFile("testSchema.graphql", printSchema(schema), err => {
+    if (err) {
+      console.error(err);
+    }
+  });
 
   return { schema, loader, connection };
 }

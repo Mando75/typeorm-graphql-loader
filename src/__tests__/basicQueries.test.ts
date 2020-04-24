@@ -11,7 +11,7 @@ describe("Basic GraphQL queries", () => {
   let helpers: TestHelpers;
 
   before(async () => {
-    helpers = await startup("basic_queries", { logging: true });
+    helpers = await startup("basic_queries", { logging: false });
   });
 
   describe("querying a single entity", () => {
