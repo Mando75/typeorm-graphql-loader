@@ -36,11 +36,11 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    * function resolver(obj, args, context, info) {
    *   return context
    *      .loader
-   *      .loadEntity(User)
+   *      .loadEntity(User, "user")
    *      // Pass the GraphQLResolveInfo to the loader
    *      // before trying to load the data
    *      .info(info)
-   *      .where({id: args.id})
+   *      .where("user.id = :id", {id: args.id})
    *      .loadOne()
    * }
    * ```
@@ -206,9 +206,9 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    * function resolver(obj, args, context, info) {
    *   return context
    *     .loader
-   *     .loadEntity(User)
+   *     .loadEntity(User, "user")
    *     .info(info)
-   *     .where({id: args.id})
+   *     .where("user.id = :id", {id: args.id})
    *     // include the email and firstName fields
    *     // regardless of whether or not they were included in the query
    *     .selectFields(['email', 'firstName'])
@@ -263,9 +263,9 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    * function resolve(obj, args, context, info) {
    *   return context
    *     .loader
-   *     .loadEntity(User)
+   *     .loadEntity(User, "user")
    *     .info(info)
-   *     .where({id: args.id})
+   *     .where("user.id = :id", {id: args.id})
    *     .loadOne()
    * }
    * ```
@@ -286,9 +286,9 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    * function resolve(obj, args, context, info) {
    *   return context
    *     .loader
-   *     .loadEntity(User)
+   *     .loadEntity(User, "user")
    *     .info(info)
-   *     .where({id: args.id})
+   *     .where("user.id = :id", {id: args.id})
    *     .loadOne()
    * }
    * ```
