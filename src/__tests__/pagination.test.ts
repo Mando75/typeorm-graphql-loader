@@ -1,7 +1,7 @@
 import * as chai from "chai";
 import { graphql } from "graphql";
 import { startup, TestHelpers } from "./util/testStartup";
-import { Book, Review } from "./entity";
+import { Review } from "./entity";
 
 chai.use(require("deep-equal-in-any-order"));
 const { expect } = chai;
