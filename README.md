@@ -67,8 +67,8 @@ The loader will now appear in your resolver's context object:
 Query: {
     getBookById(object: any, args: {id: string }, context: MyGraphQLContext, info: GraphQLResolveInfo) {
         return context.loader
-            .loadEntity(Book)
-            .where({id})
+            .loadEntity(Book, "book")
+            .where("book.id = :id", { id })
             .info(info)
             .loadOne();
     }
