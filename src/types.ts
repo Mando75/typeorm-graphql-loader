@@ -14,7 +14,6 @@ export type WhereExpression = LoaderWhereExpression | Brackets;
  * @hidden
  */
 export interface LoaderWhereExpression {
-  isLoaderWhereExpression: boolean;
   condition: string;
   params?: ObjectLiteral;
 }

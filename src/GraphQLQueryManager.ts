@@ -73,14 +73,11 @@ export class GraphQLQueryManager {
    * @private
    */
   private static _breakDownWhereExpression(where: WhereExpression) {
-    if ((where as LoaderWhereExpression).isLoaderWhereExpression) {
-      const asExpression = where as LoaderWhereExpression;
-      return { where: asExpression.condition, params: asExpression.params };
+    if (where instanceof Brackets) {
+      return { where: where, params: undefined };
     } else {
-      // TypeScript weirdness here. Casting as brackets but it doesn't matter
-      // because the only incompatible type is handled in the if statement above
-      // Just casting this so that TypeORM behaves nicely
-      return { where: where as Brackets, params: undefined };
+      const asExpression = where;
+      return { where: asExpression.condition, params: asExpression.params };
     }
   }
 

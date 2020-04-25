@@ -90,8 +90,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
     if (typeof where === "string") {
       this._andWhereExpressions.push({
         condition: where,
-        params,
-        isLoaderWhereExpression: true
+        params
       });
     } else {
       this._andWhereExpressions.push(where);
@@ -125,8 +124,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   ): GraphQLQueryBuilder<T> {
     this._orWhereExpressions.push({
       condition: where,
-      params,
-      isLoaderWhereExpression: true
+      params
     });
     return this;
   }
