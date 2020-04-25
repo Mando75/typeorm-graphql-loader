@@ -1,7 +1,7 @@
 import * as chai from "chai";
 import { graphql } from "graphql";
 import { startup, TestHelpers } from "./util/testStartup";
-import { Author, Review } from "./entity";
+import { Author, Book, Publisher, Review } from "./entity";
 
 chai.use(require("deep-equal-in-any-order"));
 const { expect } = chai;
@@ -97,5 +97,34 @@ describe("Query Builder options", () => {
 
     expect(result).to.not.have.key("errors");
     expect(result.data?.paginatedReviews).to.deep.equal(expected);
+  });
+
+  it("can apply OR WHERE conditions", async () => {
+    const { connection, schema, loader } = helpers;
+    const query = `
+     query orWhere($authorId: Int!, $publisherId: Int!) {
+       booksByAuthorOrPublisher(authorId: $authorId, publisherId: $publisherId) {
+         id
+         title
+       }
+     }
+    `;
+    const author = await connection.getRepository(Author).findOne();
+    const publisher = await connection.getRepository(Publisher).findOne();
+    const books = await connection
+      .getRepository(Book)
+      .createQueryBuilder("book")
+      .where("book.authorId = :authorId", { authorId: author?.id })
+      .orWhere("book.publisherId = :publisherId", {
+        publisherId: publisher?.id
+      })
+      .getMany();
+
+    const vars = { authorId: author?.id, publisherId: publisher?.id };
+
+    const result = await graphql(schema, query, {}, { loader }, vars);
+    const expected = books.map(({ id, title }) => ({ id, title }));
+    expect(result).to.not.have.key("errors");
+    expect(result.data?.booksByAuthorOrPublisher).to.deep.equal(expected);
   });
 });

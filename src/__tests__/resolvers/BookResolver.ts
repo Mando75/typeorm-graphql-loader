@@ -17,4 +17,19 @@ export class BookResolver {
       .info(info)
       .loadMany();
   }
+
+  @Query(returns => [Book])
+  async booksByAuthorOrPublisher(
+    @Arg("publisherId", type => Int) publisherId: number,
+    @Arg("authorId", type => Int) authorId: number,
+    @Ctx("loader") loader: GraphQLDatabaseLoader,
+    @Info() info: GraphQLResolveInfo
+  ) {
+    return loader
+      .loadEntity(Book)
+      .where("Book.publisherId = :publisherId", { publisherId })
+      .orWhere("Book.authorId = :authorId", { authorId })
+      .info(info)
+      .loadMany();
+  }
 }

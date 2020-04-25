@@ -90,7 +90,7 @@ export class Seeder {
         title: faker.lorem.words(3),
         body: faker.lorem.paragraph(5),
         reviewDate: faker.date.past(),
-        rating: faker.random.number(5),
+        rating: faker.random.number({ min: 0, max: 10 }),
         reviewerName: faker.name.firstName() + " " + faker.name.lastName(),
         book: books[i % this.NUM_BOOKS]
       };
