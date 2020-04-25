@@ -10,7 +10,7 @@ describe("Query Builder options", () => {
   let helpers: TestHelpers;
 
   before(async () => {
-    helpers = await startup("options", { logging: true });
+    helpers = await startup("options", { logging: false });
   });
 
   it("caches the same query to prevent duplicate calls", async () => {
@@ -132,8 +132,8 @@ describe("Query Builder options", () => {
 describe("Depth limiting", () => {
   let helpers: TestHelpers;
   before(async () => {
-    helpers = await startup("options", {
-      logging: true,
+    helpers = await startup("max_depth", {
+      logging: false,
       loaderOptions: { maxQueryDepth: 2 }
     });
   });

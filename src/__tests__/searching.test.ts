@@ -16,7 +16,7 @@ describe("Search queries", () => {
   let author: Author;
 
   before(async () => {
-    helpers = await startup("searching", { logging: true });
+    helpers = await startup("searching", { logging: false });
     author = helpers.connection.getRepository(Author).create({
       email: TEST_AUTHOR_EMAIL,
       firstName: TEST_AUTHOR_FIRST_NAME,

@@ -11,7 +11,7 @@ describe("Pagination", () => {
   let reviews: Review[];
 
   before(async () => {
-    helpers = await startup("pagination", { logging: true });
+    helpers = await startup("pagination", { logging: false });
     reviews = await helpers.connection
       .getRepository(Review)
       .createQueryBuilder("review")
