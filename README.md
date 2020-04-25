@@ -9,6 +9,14 @@ GraphQL query resolvers.
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![pipeline status](https://gitlab.com/Mando75/typeorm-graphql-loader/badges/master/pipeline.svg)](https://gitlab.com/Mando75/typeorm-graphql-loader/commits/master)
 
+## UPGRADE NOTICE
+
+The 1.0.0 release of this package includes almost a complete rewrite
+of the source code. The public interface of the loader has changed significantly (albiet for the better in my opinion :) ). 
+As such, upgrading from the older versions will require significant work. 
+
+For anyone upgrading, I highly recommend reading through the [new documentation](https://gql-loader.bmuller.net) to get an idea of the changes required.
+
 ## Contents
 
 - [Description](#Description)
