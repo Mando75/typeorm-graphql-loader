@@ -64,28 +64,16 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    * by re-invoking the method (they get added to a list). Any where conditions added
    * via this method will be grouped in an AND expression
    *
+   * This method uses the TypeORM SelectQueryBuilder where syntax. For more information,
+   * see the {@link https://typeorm.io/#/select-query-builder/adding-where-expression|TypeORM docs}
+   *
    * @example
    * ```typescript
-   * // using object literal syntax
    * function resolver(obj, args, context, info) {
    *  return context
    *    .loader
    *    .loadEntity(User)
    *    .info(info)
-   *    // You can pass where conditions as an object literal
-   *    .where({id: args.id})
-   *    .loadOne()
-   * }
-   * ```
-   * @example
-   * ```typescript
-   * // using custom SQL
-   * function resolver(obj, args, context, info) {
-   *  return context
-   *    .loader
-   *    .loadEntity(User)
-   *    .info(info)
-   *    // You can use strings with bound values to unlock the full power of SQL
    *    .where("user.id = :myId", {myId: args.id})
    *    .loadOne()
    * }
@@ -114,11 +102,11 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    * Provide the query builder with an OR WHERE condition. Multiple conditions can be added
    * by re-invoking the method (they get added to a list). Any where conditions added via this
    * method will be grouped in an OR expression. Should only be used after an initial WHERE condition.
-   * Please note that TypeORM's internal `.orWhere` does not support object literal syntax, hence the loader
-   * must use the string, parameters syntax as seen in the example below
+   *
+   * Like the {@link GraphQLQueryBuilder.where|where} method, it uses the SelectQueryBuilder where syntax
+   *
    * @example
    * ```
-   * // using custom SQL
    *  loader
    *    .loadEntity(Book)
    *    .info(info)

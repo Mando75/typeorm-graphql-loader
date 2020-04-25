@@ -90,7 +90,7 @@ export class GraphQLQueryManager {
    */
   public processQueryMeta(
     info: GraphQLResolveInfo | FieldNodeInfo,
-    where: Array<WhereArgument>
+    where: Array<WhereExpression>
   ): QueryMeta {
     // Create a new md5 hash function
     const hash = crypto.createHash("md5");

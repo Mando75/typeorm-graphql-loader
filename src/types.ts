@@ -3,20 +3,12 @@ import { ObjectLiteral, OrderByCondition, Brackets } from "typeorm";
 import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
 import { LoaderSearchMethod } from "./enums/LoaderSearchMethod";
 
-export type WhereArgument =
-  | string
-  | Brackets
-  | ObjectLiteral
-  | Array<ObjectLiteral>;
+export type WhereArgument = string | Brackets;
 
 /**
  * @hidden
  */
-export type WhereExpression =
-  | LoaderWhereExpression
-  | Brackets
-  | ObjectLiteral
-  | Array<ObjectLiteral>;
+export type WhereExpression = LoaderWhereExpression | Brackets;
 
 /**
  * @hidden
