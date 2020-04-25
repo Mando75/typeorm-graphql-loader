@@ -73,9 +73,9 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    * function resolver(obj, args, context, info) {
    *  return context
    *    .loader
-   *    .loadEntity(User)
+   *    .loadEntity(User, "users")
    *    .info(info)
-   *    .where("user.id = :myId", {myId: args.id})
+   *    .where("users.id = :myId", {myId: args.id})
    *    .loadOne()
    * }
    *```
@@ -109,10 +109,10 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    * @example
    * ```
    *  loader
-   *    .loadEntity(Book)
+   *    .loadEntity(Book, "books")
    *    .info(info)
-   *    .where({authorId: args.authorId})
-   *    .orWhere("book.isPublicDomain = :includePublicDomain", {includePublicDomain: args.publicDomain})
+   *    .where("books.authorId = :authorId", {authorId: args.authorId})
+   *    .orWhere("books.isPublicDomain = :includePublicDomain", {includePublicDomain: args.publicDomain})
    *    .loadMany()
    *```
    * @param where - the condition you would like applied to the query

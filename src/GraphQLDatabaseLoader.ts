@@ -42,7 +42,7 @@ export class GraphQLDatabaseLoader {
    *
    * @example
    * ```typescript
-   * const userLoader = context.loader.loadEntity(User)
+   * const userLoader = context.loader.loadEntity(User, "users")
    * ```
    *
    * @param entity - The TypeORM entity you will be loading for this query.
