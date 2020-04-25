@@ -69,6 +69,7 @@ export class Seeder {
         summary: faker.lorem.paragraph(2),
         publishedDate: faker.date.past(),
         author: authors[i % this.NUM_AUTHORS],
+        isPublished: faker.random.number(10) < 2,
         publisher: publishers[i % this.NUM_PUBLISHERS]
       };
       books.push(book);

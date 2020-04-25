@@ -20,6 +20,10 @@ export class Book extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
+  @Field(type => Boolean)
+  @Column("boolean")
+  isPublished!: boolean;
+
   @Field()
   @Column("varchar")
   title!: string;

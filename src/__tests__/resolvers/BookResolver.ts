@@ -12,8 +12,9 @@ export class BookResolver {
     @Info() info: GraphQLResolveInfo
   ) {
     return loader
-      .loadEntity(Book)
-      .where("Book.authorId = :authorId", { authorId })
+      .loadEntity(Book, "book")
+      .where("book.authorId = :authorId", { authorId })
+      .where("book.isPublished IS TRUE")
       .info(info)
       .loadMany();
   }

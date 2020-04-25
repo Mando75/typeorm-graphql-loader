@@ -109,7 +109,7 @@ describe("Basic GraphQL queries", () => {
       const { connection, schema, loader } = helpers;
       const books = await connection
         .getRepository(Book)
-        .find({ where: { author: { id: 1 } } });
+        .find({ where: { author: { id: 1 }, isPublished: true } });
 
       const query = `
         query booksByAuthorId($authorId: Int!) {
@@ -135,7 +135,7 @@ describe("Basic GraphQL queries", () => {
     it("can query multiple levels on multiple entities", async () => {
       const { connection, schema, loader } = helpers;
       const books = await connection.getRepository(Book).find({
-        where: { author: { id: 1 } },
+        where: { author: { id: 1 }, isPublished: true },
         relations: ["author", "publisher", "reviews"]
       });
 
