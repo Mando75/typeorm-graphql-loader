@@ -23,7 +23,8 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
 
   constructor(
     private _manager: GraphQLQueryManager,
-    private _entity: Function | string
+    private _entity: Function | string,
+    private _alias?: string
   ) {}
 
   /**
@@ -358,7 +359,8 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
         resolve,
         reject,
         entity: this._entity,
-        pagination: paginate ? this._pagination : undefined
+        pagination: paginate ? this._pagination : undefined,
+        alias: this._alias
       });
     };
 

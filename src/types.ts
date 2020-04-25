@@ -98,6 +98,7 @@ export interface QueueItem {
   reject: (reason: any) => void;
   entity: Function | string;
   pagination?: QueryPagination;
+  alias?: string;
 }
 
 /**

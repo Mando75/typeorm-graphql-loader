@@ -26,9 +26,9 @@ export class BookResolver {
     @Info() info: GraphQLResolveInfo
   ) {
     return loader
-      .loadEntity(Book)
-      .where("Book.publisherId = :publisherId", { publisherId })
-      .orWhere("Book.authorId = :authorId", { authorId })
+      .loadEntity(Book, "books")
+      .where("books.publisherId = :publisherId", { publisherId })
+      .orWhere("books.authorId = :authorId", { authorId })
       .info(info)
       .loadMany();
   }

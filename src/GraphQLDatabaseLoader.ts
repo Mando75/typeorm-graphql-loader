@@ -46,10 +46,12 @@ export class GraphQLDatabaseLoader {
    * ```
    *
    * @param entity - The TypeORM entity you will be loading for this query.
+   * @param alias - The alias you would like to give the select table
    */
   public loadEntity<T extends typeof BaseEntity>(
-    entity: T
+    entity: T,
+    alias?: string
   ): GraphQLQueryBuilder<T> {
-    return new GraphQLQueryBuilder(this._queryManager, entity);
+    return new GraphQLQueryBuilder(this._queryManager, entity, alias);
   }
 }

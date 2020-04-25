@@ -53,14 +53,16 @@ export class GraphQLQueryManager {
    * Helper method to generate a TypeORM query builder
    * @param entityManager
    * @param name
+   * @param alias
    */
   private static createTypeORMQueryBuilder(
     entityManager: EntityManager,
-    name: string
+    name: string,
+    alias: string
   ): SelectQueryBuilder<{}> {
     return entityManager
       .getRepository<{}>(name)
-      .createQueryBuilder(name)
+      .createQueryBuilder(alias)
       .select([]);
   }
 
@@ -183,20 +185,24 @@ export class GraphQLQueryManager {
     return async (item: QueueItem) => {
       const name =
         typeof item.entity == "string" ? item.entity : item.entity.name;
+
+      const alias = item.alias ?? name;
+
       let queryBuilder: SelectQueryBuilder<{}> = GraphQLQueryManager.createTypeORMQueryBuilder(
         entityManager,
-        name
+        name,
+        alias
       );
       queryBuilder = this._resolver.createQuery(
         name,
         item.fields,
         entityManager.connection,
         queryBuilder,
-        name
+        alias
       );
       queryBuilder = this._addSelectFields(
         queryBuilder,
-        name,
+        alias,
         item.predicates.selectFields
       );
       queryBuilder = this._addAndWhereConditions(
@@ -209,7 +215,7 @@ export class GraphQLQueryManager {
       );
       queryBuilder = this._addSearchConditions(
         queryBuilder,
-        name,
+        alias,
         item.predicates.search
       );
       queryBuilder = this._addOrderByCondition(
@@ -376,19 +382,19 @@ export class GraphQLQueryManager {
    * makes sure given fields are selected
    * by the query builder
    * @param queryBuilder
-   * @param name
+   * @param alias
    * @param selectFields
    * @private
    */
   private _addSelectFields(
     queryBuilder: SelectQueryBuilder<{}>,
-    name: string,
+    alias: string,
     selectFields: Array<string>
   ): SelectQueryBuilder<{}> {
     selectFields.forEach(field => {
       queryBuilder = queryBuilder.addSelect(
-        this._formatter.columnSelection(name, field),
-        this._formatter.aliasField(name, field)
+        this._formatter.columnSelection(alias, field),
+        this._formatter.aliasField(alias, field)
       );
     });
     return queryBuilder;
