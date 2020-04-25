@@ -23,7 +23,7 @@ export class Publisher extends BaseEntity {
   @Column("varchar")
   address!: string;
 
-  @Field(type => Book)
+  @Field(type => [Book], { nullable: true })
   @OneToMany(
     type => Book,
     book => book.publisher

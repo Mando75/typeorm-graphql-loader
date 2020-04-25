@@ -128,3 +128,41 @@ describe("Query Builder options", () => {
     expect(result.data?.booksByAuthorOrPublisher).to.deep.equal(expected);
   });
 });
+
+describe("Depth limiting", () => {
+  let helpers: TestHelpers;
+  before(async () => {
+    helpers = await startup("options", {
+      logging: true,
+      loaderOptions: { maxQueryDepth: 2 }
+    });
+  });
+
+  it("does not load relations more than max depth", async () => {
+    const { loader, connection, schema } = helpers;
+    const author = await connection.getRepository(Author).findOne();
+    const query = `
+      query authorById($id: Int!) {
+        authorById(id: $id) {
+          id
+          firstName
+          lastName
+          books {
+            id
+            publisher {
+              id
+              books {
+               id
+              }
+            }
+          }
+        }
+      }
+    `;
+    const vars = { id: author?.id };
+    const result = await graphql(schema, query, {}, { loader }, vars);
+
+    expect(result).to.not.have.key("errors");
+    expect(result.data?.authorById?.books?.publisher?.books).to.not.be.ok;
+  });
+});
