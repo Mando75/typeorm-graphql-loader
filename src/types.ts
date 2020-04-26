@@ -1,92 +1,135 @@
 import { FieldNode, FragmentDefinitionNode } from "graphql";
-import { OrderByCondition } from "typeorm";
-import { LoaderNamingStrategyEnum, LoaderSearchMethod } from "./base";
+import { ObjectLiteral, OrderByCondition, Brackets } from "typeorm";
+import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
+import { LoaderSearchMethod } from "./enums/LoaderSearchMethod";
 
-export type LoaderOptions = {
-  // Time-to-live for cache.
-  ttl?: number;
-  // Include if you are using one of the supported TypeORM custom naming strategies
+export type WhereArgument = string | Brackets;
+
+/**
+ * @hidden
+ */
+export type WhereExpression = LoaderWhereExpression | Brackets;
+
+/**
+ * @hidden
+ */
+export interface LoaderWhereExpression {
+  condition: string;
+  params?: ObjectLiteral;
+}
+
+export interface LoaderOptions {
+  /**
+   * Include if you are using one of the supported TypeORM custom naming strategies
+   */
   namingStrategy?: LoaderNamingStrategyEnum;
-  // this column will always be loaded for every relation by the query builder.
+  /**
+   * This column will always be loaded for every relation by the query builder.
+   */
   primaryKeyColumn?: string;
-  // Use this search method by default unless overwritten in a query option. Defaults to any position
+  /**
+   * Use this search method by default unless overwritten in a query option. Defaults to any position
+   */
   defaultSearchMethod?: LoaderSearchMethod;
-};
-
-export type QueryOptions = {
-  // How to order query results in SQL
-  order?: OrderByCondition;
-  // any valid OR conditions to be inserted into the WHERE clause
-  orWhere?: Array<any>;
   /**
-   * Specify any fields that you may want to select that are not necessarily
-   * included in the graphql query. e.g. you may want to always ge back the
-   * id of the entity for auditing regardless of whether the client asked for
-   * it in the graphql query
+   * Allows you to set a maximum query depth. This can be useful
+   * in preventing malicious queries from locking up your database.
+   * Defaults to Infinity
    */
-  requiredSelectFields?: Array<string>;
-  /**
-   * Include if wanting to search fields for text. Uses LIKE
-   */
-  search?: SearchOptions;
-};
+  maxQueryDepth?: number;
+}
 
-export type SearchOptions = {
-  /*
+export interface SearchOptions {
+  /**
    * The database columns to be searched
    * If columns need to be joined in an or, pass them in as a nested array.
    * e.g. ["email", ["firstName", "lastName"]]
    * This will produce a query like the following:
    * `WHERE email LIKE :searchText
    *  OR firstName || ' ' || lastName LIKE :searchText
-   **/
+   */
   searchColumns: Array<string | Array<string>>;
-  // The text to compare column values with
+  /**
+   * The text to be searched for
+   */
   searchText: string;
-  // Optionally specify a search method. If not provided, default will be used (see LoaderOptions)
+  /**
+   * Optionally specify a search method. If not provided, default will be used (see LoaderOptions)
+   */
   searchMethod?: LoaderSearchMethod;
-  // Whether the query is case sensitive. Default to false. Uses SQL LOWER to perform comparison
+  /**
+   * Whether the query is case sensitive. Default to false. Uses SQL LOWER to perform comparison
+   */
   caseSensitive?: boolean;
-};
+}
 
-export type QueryPagination = {
-  // the max number of records to return
+export interface QueryPagination {
+  /**
+   * the max number of records to return
+   */
   limit: number;
-  // the offset from where to return records
+  /**
+   * the offset from where to return records
+   */
   offset: number;
-};
+}
 
-export type QueueItem = {
+/**
+ * @hidden
+ */
+export interface QueryPredicates {
+  andWhere: Array<WhereExpression>;
+  orWhere: Array<WhereExpression>;
+  search: Array<SearchOptions>;
+  order: OrderByCondition;
+  selectFields: Array<string>;
+}
+
+/**
+ * @hidden
+ */
+export interface QueueItem {
   many: boolean;
   key: string;
-  batchIdx: number;
   fields: Selection | null;
-  where: any;
+  predicates: QueryPredicates;
   resolve: (value?: any) => any;
   reject: (reason: any) => void;
   entity: Function | string;
   pagination?: QueryPagination;
-  options?: QueryOptions;
-};
+  alias?: string;
+}
 
-export type QueryMeta = {
+/**
+ * @hidden
+ */
+export interface QueryMeta {
   key: string;
   fields: Selection | null;
   found: boolean;
   item?: Promise<any>;
-};
+}
 
-export type Hash<T> = {
+/**
+ * @hidden
+ */
+export interface Hash<T> {
   [key: string]: T;
-};
+}
 
-export type Selection = {
+/**
+ * @hidden
+ */
+export interface Selection {
   arguments?: Hash<{ name: string; value: any }>;
   children?: Hash<Selection>;
-};
+}
 
-export type FieldNodeInfo = {
+/**
+ * @hidden
+ */
+export interface FieldNodeInfo {
   fieldNodes: FieldNode[];
   fieldName: string;
   fragments: { [key: string]: FragmentDefinitionNode };
-};
+}

@@ -1,4 +1,4 @@
-image: node:11.10.0
+image: node:11.10.1
 
 cache:
   paths:
@@ -10,6 +10,7 @@ before_script:
 stages:
   - build
   - test
+  - deploy
 
 lint-package:
   stage: build
@@ -33,4 +34,22 @@ test-package:
     - rm -rf .yarn
     - yarn install
   script:
-    - yarn test-with-coverage
+    - yarn test
+  artifacts:
+    name: coverage
+    paths:
+      - coverage/
+    expire_in: 30 days
+
+pages:
+  stage: deploy
+  before_script:
+    - rm -rf .yarn
+    - yarn install
+  script:
+    - yarn publish:docs
+  artifacts:
+    paths:
+      - public
+  only:
+    - master

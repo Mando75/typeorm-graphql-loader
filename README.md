@@ -8,8 +8,14 @@ GraphQL query resolvers.
 ![npm](https://img.shields.io/npm/dm/@mando75/typeorm-graphql-loader)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![pipeline status](https://gitlab.com/Mando75/typeorm-graphql-loader/badges/master/pipeline.svg)](https://gitlab.com/Mando75/typeorm-graphql-loader/commits/master)
-[![Codacy Badge Coverage](https://api.codacy.com/project/badge/Coverage/b7d245d528e34a1c977e98728ad77fa5)](https://www.codacy.com/app/Mando75/typeorm-graphql-loader?utm_source=github.com&utm_medium=referral&utm_content=Mando75/typeorm-graphql-loader&utm_campaign=Badge_Coverage)
-[![Codacy Badge Quality](https://api.codacy.com/project/badge/Grade/b7d245d528e34a1c977e98728ad77fa5)](https://www.codacy.com/app/Mando75/typeorm-graphql-loader?utm_source=github.com&utm_medium=referral&utm_content=Mando75/typeorm-graphql-loader&utm_campaign=Badge_Grade)
+
+## UPGRADE NOTICE
+
+The 1.0.0 release of this package includes almost a complete rewrite
+of the source code. The public interface of the loader has changed significantly (albiet for the better in my opinion :) ). 
+As such, upgrading from the older versions will require significant work. 
+
+For anyone upgrading, I highly recommend reading through the [new documentation](https://gql-loader.bmuller.net) to get an idea of the changes required.
 
 ## Contents
 
@@ -26,7 +32,7 @@ GraphQL query resolvers.
 
 ## Description <a name="Description">
 
-This package provides a `GraphQLDatabaseLoader` class, which is a semi-caching
+This package provides a `GraphQLDatabaseLoader` class, which is a caching
 loader that will trace through a GraphQL query info object and naively load the
 TypeORM fields and relations needed to resolve the query. For a more in-depth
 explanation, see the [Problem](#Problem) and [Solution](#Solution) sections below.
@@ -68,217 +74,32 @@ The loader will now appear in your resolver's context object:
 ```ts
 Query: {
     getBookById(object: any, args: {id: string }, context: MyGraphQLContext, info: GraphQLResolveInfo) {
-        return context.loader.loadOne<Book>(Book, { id }, info, {/** additional options if needed **/});
+        return context.loader
+            .loadEntity(Book, "book")
+            .where("book.id = :id", { id })
+            .info(info)
+            .loadOne();
     }
 }
 ```
 
 Please note that the loader will only return back the fields and relations that
 the client requested in the query. If you need to ensure that certain fields are
-always returned, you can specify this in the QueryOptions parameter.
+always returned, you can specify this using the `selectFields` method on the query builder.
 
 ## Gotchas <a name="Gotchas">
 
-Because this package reads which relations and fields to load from the GraphQL query info object, the loader only works if your schema field names match your TypeORM entity field names. If it cannot find a requested GraphQL query field, it will not return it. In this case, you will need to provide a custom resolver for that field in your GraphQL resolvers file. In this case, the loader will provide the resolver function with an `object` parameter which is an entity loaded with whichever other fields your query requested. The loader will always return an object with at least the id (primary key) field loaded, so basic method calls should be possible. You can specify what your id field is called in the LoaderOptions upon loader initialization. That does require a uniform primary key naming strategy for your entire database schema. Be aware that you may need to reload the entity or provide some fields as requiredSelectFields for entity methods to work properly as not every entity database field is guaranteed to be loaded.
+Because this package reads which relations and fields to load from the GraphQL query info object, the loader only works if your schema field names match your TypeORM entity field names. If it cannot find a requested GraphQL query field, it will not return it. In this case, you will need to provide a custom resolver for that field in your GraphQL resolvers file. In this case, the loader will provide the resolver function with an `object` parameter which is an entity loaded with whichever other fields your query requested. The loader will always return an object with at least the id (primary key) field loaded, so basic method calls should be possible. You can specify what your id field is called in the LoaderOptions upon loader initialization. That does require a uniform primary key naming strategy for your entire database schema. Be aware that you may need to reload the entity or provide some fields to the `selectFields` method for entity methods to work properly as not every entity database field is guaranteed to be loaded.
 
 This is not a complete replacement for Facebook's dataloader. package. While it does provide some batching, it's primary purpose is to load the relations and fields needed to resolve the query. In most cases, you will most likely not need to use dataloader when using this package. However, I have noticed in my own use that there are occasions where this may need to be combined with dataloader to remove N + 1 queries. One such case was a custom resolver for a many-to-many relation that existed in the GraphQL Schema but not on a database level. In order to completely remove the N+1 queries from that resolver, I had to wrap the TypeORM GraphQL loader in a Facebook DataLoader. If you find that you are in a situation where the TypeORM GraphQL loader is not solving the N+1 problem, please open an issue and I'll do my best to help you out with it. 
 
 This package has currently only been tested with Postgresql and SQLite. In theory, everything should work with the other SQL variants that TypeORM supports, as it uses the TypeORM Query Builder API to construct the database queries. If you run into any issues with other SQL dialects, please open an issue.
 
-## Roadmap <a name="Roadmap">
-I have not yet decided on a concrete roadmap, but here are the features I would like to include:
+For help with pagination, first read [Pagination Advice](https://gitlab.com/Mando75/typeorm-graphql-loader/-/blob/master/md/pagination.md)
 
-An improved pagination system that supports the Relay Connection paradigm. This would most likely be in the form of a `loadManyRelayConnection` method that returns a Relay compliant object which can be fed to the GraphQL resolver and read directly as a connection object. 
+## API <a name="API"> 
 
-Support for loading without GraphQL info. Right now the loaders require an info object to determine which relations and fields to load. I would like to make it less reliant on it by turning it into an optional parameter that returns a single entity with all fields and no relations loaded. As of now, I haven't run into a situation where that is practical for me, but I can see that as being a future request others may have. 
-
-## API <a name="API">
-
-The loader provides 4 loading methods and one cache utility methods
-
-### LoadOne
-
-#### Description
-
-Returns a single entity
-
-#### Signature
-
-```ts
-/**
- * Load an entity from the database.
- * @param {Function | string} entity The entity type or name to load. Should match T.
- * @param {Partial<T>} where The conditions to match.
- * @param {GraphQLResolveInfo} info GraphQL resolver information. Used to determine which fields/relations need to be loaded
- * @param {QueryOptions} options (optional) Additional query options
- * @returns {Promise<T>}
- */
-async loadOne<T>(entity: Function, where: Partial<T>, info: GraphQLResolveInfo, options?: QueryOptions): Promise<T | undefined>;
-```
-
-### LoadMany
-
-#### Description
-
-Loads multiple entities with the same criteria
-
-#### Signature
-
-```ts
-/**
- * Load multiple entities that meet the same criteria .
- * @param {Function | string} entity The entity type or name to load. Should match T.
- * @param {Partial<T>} where The conditions to match.
- * @param {GraphQLResolveInfo} info GraphQL resolver information.
- * @param {QueryOptions} options (optional) Additional query options
- * @returns {Promise<T?[]>}
- */
-async loadMany<T>(entity: Function, where: Partial<T>, info: GraphQLResolveInfo, options: QueryOptions): Promise<(T|undefined)[]>;
-```
-
-### LoadManyPaginated
-
-#### Description
-
-Loads many entities with the same criteria with basic pagination (offset, limit).
-
-Returns back the paginated entities and total count (so future offset can be calculated).
-
-Please note, the method does not do any pagination calculation for you. You most
-provide it with the offset and limit each query. It will return back the total record count,
-so you can easily calculate the next pagination offset with something like the following:
-
-```ts
-/**
- * @param pagination The last offset and limit used
- * @param totalRecordCount The total number of records to paginate through
- */
-function getOffset(
-  pagination: { offset: number; limit: number },
-  totalRecordCount: number
-) {
-  const nextOffset = offset + limit;
-  const recordsLeft = totalRecordCount - nextOffset;
-  const newOffset = recordsLeft < 1 ? count : nextOffset;
-  return {
-    offset: newOffset,
-    hasMore: newOffset !== count
-  };
-}
-```
-
-Cursor pagination will be supported in a future version.
-
-#### Signature
-
-```ts
-/**
- * Load multiple entities that meet the same criteria with basic offset pagination.
- * @param {Function | string} entity The entity type or name to load. Should match T.
- * @param {Partial<T>} where The conditions to match.
- * @param {GraphQLResolveInfo} info GraphQL resolver information.
- * @param {QueryPagination} pagination Pagination info used to query offset and limit
- * @param {QueryOptions} options (optional) Additional query options
- * @returns {Promise<[T[], number]>}
- */
-async loadManyPaginated<T>(entity: Function, where: Partial<T>, info: GraphQLResolveInfo, pagination: QueryPagination, options: QueryOptions): Promise<[T[], number]>;
-```
-
-### batchLoadMany
-
-#### Description
-
-Loads many entities with different where criteria.
-
-Under the hood, this just calls `loadOne` with each where class
-
-#### Signature
-
-```ts
-/**
- * Load multiple entities with different criteria.
- * @param {Function | string} entity The entity type or name to load. Should match T.
- * @param {Partial<T>[]} where A series of conditions to match.
- * @param {GraphQLResolveInfo} info GraphQL resolver information.
- * @param {QueryOptions} options (optional) Additional query options
- * @returns {Promise<T?[]>}
- */
-async batchLoadMany<T>(entity: Function, where: Partial<T>[], info: GraphQLResolveInfo, options: QueryOptions): Promise<(T|undefined)[]>;
-
-```
-
-### Type Reference
-
-```ts
-/**
- * GraphQLDatabaseLoader constructor options
- **/
-type LoaderOptions = {
-  // Time-to-live for cache.
-  ttl?: number;
-  // Include if you are using one of the supported TypeORM custom naming strategies
-  namingStrategy?: LoaderNamingStrategyEnum;
-  // This columne will always be loaded for every relation by the query builder
-  primaryKeyColumn?: string
-  // Use this search method by default unless overwritten in a query option. Defaults to any position
-  defaultSearchMethod?: LoaderSearchMethod;
-};
-
-enum LoaderNamingStrategyEnum {
-   CAMELCASE // default if none other specified
-   SNAKECASE
-}
-
-/**
- * Options needed to perform simple search operations.
- **/
-type SearchOptions = {
-  /*
-   * The database columns to be searched
-   * If columns need to be joined in an or, pass them in as a nested array.
-   * e.g. ["email", ["firstName", "lastName"]]
-   * This will produce a query like the following:
-   * `WHERE email LIKE :searchText
-   *  OR firstName || ' ' || lastName LIKE :searchText
-   **/
-  searchColumns: Array<string | Array<string>>;
-  // The text to compare column values with
-  searchText: string;
-  // Optionally specify a search method. If not provided, default will be used (see LoaderOptions)
-  searchMethod?: LoaderSearchMethod;
-  // Whether the query is case sensitive. Default to false. Uses SQL LOWER to perform comparison
-  caseSensitive?: boolean;
-};
-
-/**
- * Can be used to provide additional options to any of the loader function
- */
-type QueryOptions = {
-  // How to order the query results in SQL
-  order?: OrderByCondition;
-  // any valid OR conditions to be inserted into the WHERE clause
-  orWhere?: Array<any>;
-  /**
-   * specify any fields that you may want to select that are not necessarily
-   * included in the graphql query. e.g. you may want to always get back the
-   * id of the entity regardless of whether the client asked for it in the graphql query
-   **/
-  requiredSelectFields?: Array<string>;
-  // Include if wanting to perform a search on database columns
-  search?: SearchOptions
-**;
-
-/**
- * Parameters needed to perform pagination
- */
-type QueryPagination = {
-  // the max number of records to return
-  limit: number;
-  // the offset from where to return records
-  offset: number;
-};
-
-```
+[Documentation for the Public API](https://gql-loader.bmuller.net)
 
 ## Contributing <a name="Contributing">
 
@@ -377,8 +198,8 @@ This package offers a solution to take away all the worry of how you manage
 your entity relations in the resolvers. GraphQL provides a parameter in each
 resolver function called `info`. This `info` parameter contains the entire query
 tree, which means we can traverse it and figure out exactly which fields need to
-be selected, and which relations need to be loaded. This can then be used to
-create one SQL query that can get all of the information at once.
+be selected, and which relations need to be loaded. This is used to
+create one SQL query that can get all the information at once.
 
 Because the loader uses the queryBuilder API, it does not matter if you have all
 "normal", "lazy", "eager" relations, or a mix of all of them. You give it your
@@ -389,7 +210,7 @@ signatures executed in the same tick.
 
 ## Acknowledgments <a name="Acknowledgments">
 
-This project is based on the work of [Weboptimizer's typeorm-loader
+This project inspired by the work of [Weboptimizer's typeorm-loader
 package](https://github.com/Webtomizer/typeorm-loader). I work quite a bit with
 Apollo Server + TypeORM and I was looking to find a way to more efficiently pull
 data via TypeORM for GraphQL via intelligently loading the needed relations for
@@ -397,6 +218,6 @@ a given query. I stumbled across his package, which seemed to
 promise all the functionality, but it seemed to be in a broken/unmaintained
 state. After several months of no response from the author, and with significant
 bug fixes/features added in my fork, I decided to just make my own package. So
-thanks to Weboptimizer for doing a lot of the ground work. If you ever stumble
-across this and would like to merge the features back into the main source repo,
-I'd be more than happy to work with you to make that happen.
+thanks to Weboptimizer for doing a lot of the groundwork. Since then, I have
+almost completely rewritten the library to be a bit more maintainable and feature
+rich, but I would still like to acknowledge the inspiration his project gave me. 
