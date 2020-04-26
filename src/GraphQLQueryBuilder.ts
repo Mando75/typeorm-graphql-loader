@@ -241,7 +241,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    *     .info(info)
    *     .search(searchOptions)
    *     .paginate({offset: args.offset, limit: args.limit})
-   *     .loadManyPaginated()
+   *     .loadPaginated()
    * }
    * ```
    * @param pagination
