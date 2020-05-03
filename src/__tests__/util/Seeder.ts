@@ -54,7 +54,8 @@ export class Seeder {
     for (let i = 0; i < this.NUM_PUBLISHERS; i++) {
       const publisher: Partial<Publisher> = {
         name: faker.company.companyName(),
-        address: Seeder.addressFactory()
+        address: Seeder.addressFactory(),
+        poBox: Seeder.addressFactory()
       };
       publishers.push(publisher);
     }
@@ -79,7 +80,7 @@ export class Seeder {
         summary: faker.lorem.paragraph(2),
         publishedDate: faker.date.past(),
         author: authors[i % this.NUM_AUTHORS],
-        isPublished: faker.random.number(10) < 2,
+        isPublished: faker.random.number(10) <= 5,
         publisher: publishers[i % this.NUM_PUBLISHERS]
       };
       books.push(book);

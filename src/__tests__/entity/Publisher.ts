@@ -24,6 +24,10 @@ export class Publisher extends BaseEntity {
   @Column(type => Address)
   address!: Address;
 
+  @Field(type => Address)
+  @Column(type => Address)
+  poBox!: Address;
+
   @Field(type => [Book], { nullable: true })
   @OneToMany(
     type => Book,
