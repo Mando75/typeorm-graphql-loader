@@ -5,17 +5,17 @@ import { Field, ObjectType } from "type-graphql";
 export class Address {
   @Field()
   @Column()
-  street?: string;
+  street!: string;
 
   @Field()
   @Column()
-  city?: string;
+  city!: string;
 
   @Field()
   @Column()
-  state?: string;
+  state!: string;
 
   @Field()
   @Column()
-  zip?: string;
+  zip!: string;
 }
