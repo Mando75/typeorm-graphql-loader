@@ -2,6 +2,7 @@ import * as chai from "chai";
 import { graphql } from "graphql";
 import { startup, TestHelpers } from "./util/testStartup";
 import { Author } from "./entity";
+import { Seeder } from "./util/Seeder";
 
 chai.should();
 chai.use(require("chai-things"));
@@ -20,7 +21,8 @@ describe("Search queries", () => {
     author = helpers.connection.getRepository(Author).create({
       email: TEST_AUTHOR_EMAIL,
       firstName: TEST_AUTHOR_FIRST_NAME,
-      lastName: TEST_AUTHOR_LAST_NAME
+      lastName: TEST_AUTHOR_LAST_NAME,
+      address: Seeder.addressFactory()
     });
     author = await helpers.connection.createEntityManager().save(author);
   });
