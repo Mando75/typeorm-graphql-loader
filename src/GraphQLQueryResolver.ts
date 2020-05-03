@@ -4,6 +4,7 @@ import { Connection, SelectQueryBuilder } from "typeorm";
 import { Formatter } from "./lib/Formatter";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
+import { EmbeddedMetadata } from "typeorm/metadata/EmbeddedMetadata";
 
 /**
  * Internal only class
@@ -51,7 +52,19 @@ export class GraphQLQueryResolver {
         field => field.propertyName in selection.children!
       );
 
+      const embeddedFields = meta.embeddeds.filter(
+        embed => embed.propertyName in selection.children!
+      );
+
       queryBuilder = this._selectFields(queryBuilder, fields, alias);
+
+      queryBuilder = this._selectEmbeddedFields(
+        queryBuilder,
+        embeddedFields,
+        selection.children,
+        alias
+      );
+
       if (depth < this._maxDepth) {
         queryBuilder = this._selectRelations(
           queryBuilder,
@@ -63,6 +76,37 @@ export class GraphQLQueryResolver {
         );
       }
     }
+    return queryBuilder;
+  }
+
+  private _selectEmbeddedFields(
+    queryBuilder: SelectQueryBuilder<{}>,
+    embeddedFields: Array<EmbeddedMetadata>,
+    children: Hash<Selection>,
+    alias: string
+  ) {
+    const embeddedFieldsToSelect: Array<Array<string>> = [];
+    embeddedFields.forEach(field => {
+      const embeddedFieldName = field.propertyName;
+      const embeddedFieldColumnNames = field.columns.map(
+        column => column.propertyName
+      );
+
+      if (children.hasOwnProperty(embeddedFieldName)) {
+        const embeddedSelection = children[embeddedFieldName];
+        embeddedFieldsToSelect.push(
+          embeddedFieldColumnNames
+            .filter(columnName => columnName in embeddedSelection.children!)
+            .map(fieldName => `${embeddedFieldName}.${fieldName}`)
+        );
+      }
+    });
+
+    embeddedFieldsToSelect.flat().forEach(field => {
+      queryBuilder = queryBuilder.addSelect(
+        this._formatter.columnSelection(alias, field)
+      );
+    });
     return queryBuilder;
   }
 
