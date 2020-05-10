@@ -28,3 +28,33 @@ export class PaginatedReviews {
     return Math.min(...this.reviews.map(review => review.rating));
   }
 }
+
+@ObjectType()
+export class ReviewConnection {
+  @Field(type => Int)
+  public readonly totalCount: number;
+
+  @Field(type => [ReviewEdge])
+  public readonly edges: ReviewEdge[];
+
+  constructor(totalCount: number, records: Review[]) {
+    this.totalCount = totalCount;
+    this.edges = records.map(
+      review => new ReviewEdge(review, review.id.toString())
+    );
+  }
+}
+
+@ObjectType()
+export class ReviewEdge {
+  @Field(type => Review)
+  public readonly node: Review;
+
+  @Field()
+  public readonly cursor: string;
+
+  constructor(node: Review, cursor: string) {
+    this.node = node;
+    this.cursor = cursor;
+  }
+}
