@@ -45,7 +45,22 @@ export class GraphQLInfoParser {
     info: GraphQLResolveInfo,
     fieldName: string
   ): FieldNodeInfo {
-    const childFieldNode = info.fieldNodes
+    const childFieldNode = this.resolveFieldNodePath(
+      info.fieldNodes,
+      fieldName.split(".")
+    );
+
+    const fieldNodes = [childFieldNode];
+    return { fieldNodes, fragments: info.fragments, fieldName };
+  }
+
+  private resolveFieldNodePath(
+    fieldNodes: readonly FieldNode[],
+    fieldNames: string[]
+  ): FieldNode {
+    const fieldName = fieldNames.shift();
+
+    const childNode = fieldNodes
       .map(node => (node.selectionSet ? node.selectionSet.selections : []))
       .flat()
       .find((selection: SelectionNode) =>
@@ -53,9 +68,11 @@ export class GraphQLInfoParser {
           ? selection.name.value === fieldName
           : false
       ) as FieldNode;
-
-    const fieldNodes = [childFieldNode];
-    return { fieldNodes, fragments: info.fragments, fieldName };
+    if (fieldNames.length) {
+      return this.resolveFieldNodePath([childNode], fieldNames);
+    } else {
+      return childNode;
+    }
   }
 
   private flattenAST(
