@@ -102,6 +102,65 @@ describe("Basic GraphQL queries", () => {
       expect(result).to.not.have.key("errors");
       expect(result.data!.authorById).to.deep.equal(expected);
     });
+
+    it("can resolve a query that contains fragments", async () => {
+      const { connection, schema, loader } = helpers;
+      const author = await connection
+        .getRepository(Author)
+        .findOne({ relations: ["books", "books.publisher"] });
+      const query = `
+        fragment bookFragment on Book {
+          id
+          title
+          summary
+          publisher {
+            id
+          }
+        }
+        fragment authorFragment on Author {
+          id
+          firstName
+          lastName
+          email
+          books {
+            ...bookFragment
+          }
+        }
+        query authorById($id: Int!) {
+          authorById(id: $id) {
+           ...authorFragment
+          }
+        }
+      `;
+      const vars = { id: author?.id };
+
+      const result = await graphql(
+        schema,
+        query,
+        {},
+        {
+          loader
+        },
+        vars
+      );
+
+      const expected = {
+        id: author?.id,
+        firstName: author?.firstName,
+        lastName: author?.lastName,
+        email: author?.email,
+        books: author?.books.map(book => ({
+          id: book.id,
+          title: book.title,
+          summary: book.summary,
+          publisher: {
+            id: book.publisher.id
+          }
+        }))
+      };
+      expect(result).to.not.have.key("errors");
+      expect(result.data!.authorById).to.deep.equal(expected);
+    });
   });
 
   describe("querying multiple entities", () => {
