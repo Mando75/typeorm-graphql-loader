@@ -44,8 +44,9 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    *      .loadOne()
    * }
    * ```
+   *
    * @param info - The GraphQLResolveInfo object your resolver function will receive
-   * @param fieldName - Optional parameter to specify a subfield in the query to load
+   * @param fieldName - The path to a child field you would like to resolve, e.g. `edges.node`. [Commonly used with pagination](https://gitlab.com/Mando75/typeorm-graphql-loader/-/blob/master/md/pagination.md)
    * @returns GraphQLQueryBuilder
    */
   public info(
