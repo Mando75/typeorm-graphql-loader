@@ -2,6 +2,7 @@ import * as chai from "chai";
 import { graphql } from "graphql";
 import { startup, TestHelpers } from "./util/testStartup";
 import { Review } from "./entity";
+import { ReviewConnection } from "./entity/PaginatedReviews";
 
 chai.use(require("deep-equal-in-any-order"));
 const { expect } = chai;
@@ -166,5 +167,40 @@ describe("Pagination", () => {
     );
 
     expect(queriedReviews).to.deep.equal(expected);
+  });
+
+  it("can query nested items from the info object", async () => {
+    const { connection, schema, loader } = helpers;
+    const query = `
+      query nestedInfoFields {
+        reviewConnection {
+          totalCount
+          edges {
+            cursor
+            node {
+              id
+              title
+              body
+              reviewerName
+              rating
+              reviewDate
+            }
+          }        
+        }
+      }   
+    `;
+
+    const result = await graphql(schema, query, {}, { loader });
+    const [reviews, count] = await connection
+      .getRepository(Review)
+      .createQueryBuilder("review")
+      .limit(15)
+      .getManyAndCount();
+    const expected = new ReviewConnection(count, reviews);
+
+    expect(result).to.not.have.key("errors");
+    expect(result.data).to.have.key("reviewConnection");
+    // @ts-ignore
+    expect(result.data!.reviewConnection).to.deep.equalInAnyOrder(expected);
   });
 });
