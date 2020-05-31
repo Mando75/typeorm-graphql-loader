@@ -9,6 +9,7 @@ import {
 } from "typeorm";
 import { Book } from "./Book";
 import { Field, Int, ObjectType } from "type-graphql";
+import { Address } from "./Address";
 
 @ObjectType()
 @Entity()
@@ -16,6 +17,10 @@ export class Author extends BaseEntity {
   @Field(type => Int)
   @PrimaryGeneratedColumn()
   id!: number;
+
+  @Field(type => Address)
+  @Column(type => Address)
+  address!: Address;
 
   @Field()
   @Column("varchar")

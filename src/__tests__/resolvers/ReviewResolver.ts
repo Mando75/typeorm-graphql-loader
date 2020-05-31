@@ -1,5 +1,5 @@
 import { Arg, Ctx, Info, Int, Query, Resolver } from "type-graphql";
-import { PaginatedReviews } from "../entity/PaginatedReviews";
+import { PaginatedReviews, ReviewConnection } from "../entity/PaginatedReviews";
 import { GraphQLDatabaseLoader } from "../../GraphQLDatabaseLoader";
 import { GraphQLResolveInfo } from "graphql";
 import { Review } from "../entity";
@@ -25,5 +25,19 @@ export class ReviewResolver {
     const recordsLeft = count - nextOffset;
     const newOffset = recordsLeft < 1 ? count : nextOffset;
     return new PaginatedReviews(reviews, newOffset, newOffset !== count);
+  }
+
+  @Query(returns => ReviewConnection)
+  async reviewConnection(
+    @Ctx("loader") loader: GraphQLDatabaseLoader,
+    @Info() info: GraphQLResolveInfo
+  ): Promise<ReviewConnection> {
+    const [reviews, count] = await loader
+      .loadEntity(Review)
+      .info(info, "edges.node")
+      .selectFields("rating")
+      .paginate({ offset: 0, limit: 15 })
+      .loadPaginated();
+    return new ReviewConnection(count, reviews);
   }
 }
