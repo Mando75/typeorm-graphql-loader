@@ -225,7 +225,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
 
   /**
    * Allows you to paginate the query using offset and limit.
-   * If used, should be paired with {@link GraphQLQueryBuilder.loadPaginated | loadPaginated}, the other
+   * If used, should be paired with {@link GraphQLQueryBuilder.loadPaginated|loadPaginated}, the other
    * loaders will ignore these options.
    *
    * @example
