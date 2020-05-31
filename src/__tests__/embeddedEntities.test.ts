@@ -12,7 +12,7 @@ describe("Querying embedded entities", () => {
   let helpers: TestHelpers;
 
   before(async () => {
-    helpers = await startup("embedded_entities", { logging: true });
+    helpers = await startup("embedded_entities", { logging: false });
   });
 
   it("can query embedded fields on an entity", async () => {
