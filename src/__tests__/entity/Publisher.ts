@@ -7,6 +7,7 @@ import {
 } from "typeorm";
 import { Book } from "./Book";
 import { Field, Int, ObjectType } from "type-graphql";
+import { Address } from "./Address";
 
 @ObjectType()
 @Entity()
@@ -19,9 +20,13 @@ export class Publisher extends BaseEntity {
   @Column("varchar")
   name!: string;
 
-  @Field()
-  @Column("varchar")
-  address!: string;
+  @Field(type => Address)
+  @Column(type => Address)
+  address!: Address;
+
+  @Field(type => Address)
+  @Column(type => Address)
+  poBox!: Address;
 
   @Field(type => [Book], { nullable: true })
   @OneToMany(

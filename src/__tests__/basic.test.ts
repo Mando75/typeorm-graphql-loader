@@ -210,7 +210,7 @@ describe("Basic GraphQL queries", () => {
               lastName
             }
             publisher {
-              address
+              name
             }
             reviews {
               rating
@@ -233,7 +233,7 @@ describe("Basic GraphQL queries", () => {
             lastName: author.lastName
           },
           publisher: {
-            address: publisher.address
+            name: publisher.name
           },
           reviews: reviews.map(review => ({ rating: review.rating }))
         })

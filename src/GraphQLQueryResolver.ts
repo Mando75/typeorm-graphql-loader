@@ -4,6 +4,7 @@ import { Connection, SelectQueryBuilder } from "typeorm";
 import { Formatter } from "./lib/Formatter";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
+import { EmbeddedMetadata } from "typeorm/metadata/EmbeddedMetadata";
 
 /**
  * Internal only class
@@ -51,7 +52,19 @@ export class GraphQLQueryResolver {
         field => field.propertyName in selection.children!
       );
 
+      const embeddedFields = meta.embeddeds.filter(
+        embed => embed.propertyName in selection.children!
+      );
+
       queryBuilder = this._selectFields(queryBuilder, fields, alias);
+
+      queryBuilder = this._selectEmbeddedFields(
+        queryBuilder,
+        embeddedFields,
+        selection.children,
+        alias
+      );
+
       if (depth < this._maxDepth) {
         queryBuilder = this._selectRelations(
           queryBuilder,
@@ -63,6 +76,56 @@ export class GraphQLQueryResolver {
         );
       }
     }
+    return queryBuilder;
+  }
+
+  /**
+   * Given a list of EmbeddedField metadata and the current selection set,
+   * will find any GraphQL fields that map to embedded entities on the current
+   * TypeORM model and add them to the SelectQuery
+   * @param queryBuilder
+   * @param embeddedFields
+   * @param children
+   * @param alias
+   * @private
+   */
+  private _selectEmbeddedFields(
+    queryBuilder: SelectQueryBuilder<{}>,
+    embeddedFields: Array<EmbeddedMetadata>,
+    children: Hash<Selection>,
+    alias: string
+  ) {
+    const embeddedFieldsToSelect: Array<Array<string>> = [];
+    embeddedFields.forEach(field => {
+      // This is the name of the embedded entity on the TypeORM model
+      const embeddedFieldName = field.propertyName;
+
+      // Check if this particular field was queried for in GraphQL
+      if (children.hasOwnProperty(embeddedFieldName)) {
+        const embeddedSelection = children[embeddedFieldName];
+        // Extract the column names from the embedded field
+        // so we can compare it to what was requested in the GraphQL query
+        const embeddedFieldColumnNames = field.columns.map(
+          column => column.propertyName
+        );
+        // Filter out any columns that weren't requested in GQL
+        // and format them in a way that TypeORM can understand.
+        // The query builder api requires we query like so:
+        // .addSelect('table.embeddedField.embeddedColumn')
+        embeddedFieldsToSelect.push(
+          embeddedFieldColumnNames
+            .filter(columnName => columnName in embeddedSelection.children!)
+            .map(columnName => `${embeddedFieldName}.${columnName}`)
+        );
+      }
+    });
+
+    // Now add each embedded select statement on to the query builder
+    embeddedFieldsToSelect.flat().forEach(field => {
+      queryBuilder = queryBuilder.addSelect(
+        this._formatter.columnSelection(alias, field)
+      );
+    });
     return queryBuilder;
   }
 

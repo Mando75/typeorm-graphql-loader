@@ -10,6 +10,15 @@ export class Seeder {
 
   constructor(private conn: Connection) {}
 
+  public static addressFactory() {
+    return {
+      street: faker.address.streetAddress(),
+      city: faker.address.city(),
+      state: faker.address.state(),
+      zip: faker.address.zipCode()
+    };
+  }
+
   async seed() {
     await this.conn.transaction(async entityManager => {
       const authors = await this.seedAuthors(entityManager);
@@ -25,7 +34,8 @@ export class Seeder {
       const author: Partial<Author> = {
         firstName: faker.name.firstName(),
         lastName: faker.name.lastName(),
-        email: faker.internet.email()
+        email: faker.internet.email(),
+        address: Seeder.addressFactory()
       };
       authors.push(author);
     }
@@ -44,7 +54,8 @@ export class Seeder {
     for (let i = 0; i < this.NUM_PUBLISHERS; i++) {
       const publisher: Partial<Publisher> = {
         name: faker.company.companyName(),
-        address: faker.address.streetAddress(true)
+        address: Seeder.addressFactory(),
+        poBox: Seeder.addressFactory()
       };
       publishers.push(publisher);
     }
@@ -69,7 +80,7 @@ export class Seeder {
         summary: faker.lorem.paragraph(2),
         publishedDate: faker.date.past(),
         author: authors[i % this.NUM_AUTHORS],
-        isPublished: faker.random.number(10) < 2,
+        isPublished: faker.random.number(10) <= 5,
         publisher: publishers[i % this.NUM_PUBLISHERS]
       };
       books.push(book);
