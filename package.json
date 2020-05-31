@@ -1,6 +1,6 @@
 {
   "name": "@mando75/typeorm-graphql-loader",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A dataloader which intelligently selects/joins the fields/relations from your TypeORM entities needed to resolve a GraphQL query",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,26 +14,9 @@
   "files": [
     "dist/",
     "yarn.lock",
-    ".gitignore"
+    ".gitignore",
+    "!/dist/__tests__"
   ],
-  "nyc": {
-    "include": [
-      "src/**/*.ts"
-    ],
-    "extension": [
-      ".ts"
-    ],
-    "require": [
-      "ts-node/register",
-      "tslib"
-    ],
-    "reporter": [
-      "lcov",
-      "text"
-    ],
-    "sourceMap": true,
-    "instrument": true
-  },
   "repository": {
     "type": "git",
     "url": "https://gitlab.com/Mando75/typeorm-graphql-loader"
@@ -91,5 +74,23 @@
   "peerDependencies": {
     "graphql": "^14.5.8",
     "typeorm": ">=0.2.8"
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.ts"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register",
+      "tslib"
+    ],
+    "reporter": [
+      "lcov",
+      "text"
+    ],
+    "sourceMap": true,
+    "instrument": true
   }
 }
