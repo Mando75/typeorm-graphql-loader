@@ -11,6 +11,11 @@
     "lint": "eslint 'src/**/*.ts'",
     "test": "yarn build && nyc mocha -r ts-node/register -r tslib -r source-map-support/register --full-trace src/__tests__/**/*.test.ts --timeout 5000"
   },
+  "files": [
+    "dist/",
+    "yarn.lock",
+    ".gitignore"
+  ],
   "nyc": {
     "include": [
       "src/**/*.ts"

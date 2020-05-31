@@ -27,6 +27,6 @@
   },
   "include": ["src"],
   "exclude": [
-    "__tests__"
+    "src/__tests__"
   ]
 }
