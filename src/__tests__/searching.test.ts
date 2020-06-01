@@ -10,6 +10,7 @@ const { expect } = chai;
 const TEST_AUTHOR_EMAIL = "testingsearchemail@testingsearch.com";
 const TEST_AUTHOR_FIRST_NAME = "testingSearchFirstName";
 const TEST_AUTHOR_LAST_NAME = "testingSearchLastName";
+const TEST_AUTHOR_MOBILE_NUM = "123-456-7890";
 
 describe("Search queries", () => {
   let helpers: TestHelpers;
@@ -20,7 +21,8 @@ describe("Search queries", () => {
     author = helpers.connection.getRepository(Author).create({
       email: TEST_AUTHOR_EMAIL,
       firstName: TEST_AUTHOR_FIRST_NAME,
-      lastName: TEST_AUTHOR_LAST_NAME
+      lastName: TEST_AUTHOR_LAST_NAME,
+      phone: TEST_AUTHOR_MOBILE_NUM
     });
     author = await helpers.connection.createEntityManager().save(author);
   });
@@ -130,6 +132,66 @@ describe("Search queries", () => {
       id: author.id,
       firstName: author.firstName,
       lastName: author.lastName
+    };
+
+    const result = await graphql(schema, query, {}, { loader }, vars);
+
+    expect(result).to.not.have.key("errors");
+    result.data?.searchAuthors.should.include.something.that.deep.equals(
+      expected
+    );
+  });
+
+  it("can perform a default search on a named column", async () => {
+    const { schema, loader } = helpers;
+    const query = `
+      query searchAuthorsByPhone($phone: String!) {
+        searchAuthors(searchText: $phone) {
+          id
+          firstName
+          lastName
+          phone
+        }
+      }      
+    `;
+
+    const vars = { phone: author.phone.slice(0, 3) };
+
+    const expected = {
+      id: author.id,
+      firstName: author.firstName,
+      lastName: author.lastName,
+      phone: author.phone
+    };
+
+    const result = await graphql(schema, query, {}, { loader }, vars);
+
+    expect(result).to.not.have.key("errors");
+    result.data?.searchAuthors.should.include.something.that.deep.equals(
+      expected
+    );
+  });
+
+  it("can perform a STARTS_WITH search on a named column", async () => {
+    const { schema, loader } = helpers;
+    const query = `
+      query searchAuthorsByPhone($phone: String!) {
+        searchAuthors(searchText: $phone, searchMethod: STARTS_WITH) {
+          id
+          firstName
+          lastName
+          phone
+        }
+      }      
+    `;
+
+    const vars = { phone: author.phone.slice(0, 3) };
+
+    const expected = {
+      id: author.id,
+      firstName: author.firstName,
+      lastName: author.lastName,
+      phone: author.phone
     };
 
     const result = await graphql(schema, query, {}, { loader }, vars);

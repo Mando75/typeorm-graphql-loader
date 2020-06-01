@@ -50,8 +50,8 @@ export class AuthorResolver {
     searchCombinedName?: boolean
   ) {
     const searchColumns = searchCombinedName
-      ? ["email", ["firstName", "lastName"]]
-      : ["email", "firstName", "lastName"];
+      ? ["email", "phone", ["firstName", "lastName"]]
+      : ["email", "phone", "firstName", "lastName"];
     return loader
       .loadEntity(Author)
       .info(info)

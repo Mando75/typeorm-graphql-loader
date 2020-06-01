@@ -25,6 +25,7 @@ describe("Basic GraphQL queries", () => {
             firstName
             lastName
             email
+            phone
           }
         }
       `;
@@ -44,7 +45,8 @@ describe("Basic GraphQL queries", () => {
         id: author?.id,
         firstName: author?.firstName,
         lastName: author?.lastName,
-        email: author?.email
+        email: author?.email,
+        phone: author?.phone
       };
       expect(result).to.not.have.key("errors");
       expect(result.data!.authorById).to.deep.equal(expected);

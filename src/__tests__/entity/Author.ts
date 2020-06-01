@@ -29,6 +29,10 @@ export class Author extends BaseEntity {
   @Column("varchar")
   lastName!: string;
 
+  @Field()
+  @Column("varchar", { name: "mobile" })
+  phone!: string;
+
   @Field(type => [Book])
   @OneToMany(
     type => Book,
