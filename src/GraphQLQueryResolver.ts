@@ -149,9 +149,10 @@ export class GraphQLQueryResolver {
     fields.forEach(field => {
       // Make sure we account for embedded types
       const propertyName: string = field.propertyName;
+      const databaseName: string = field.databaseName;
       queryBuilder = queryBuilder.addSelect(
         this._formatter.columnSelection(alias, propertyName),
-        this._formatter.aliasField(alias, propertyName)
+        this._formatter.aliasField(alias, databaseName)
       );
     });
     return queryBuilder;

@@ -50,6 +50,43 @@ describe("Basic GraphQL queries", () => {
       expect(result.data!.authorById).to.deep.equal(expected);
     });
 
+    it("can query fields that have custom column names", async () => {
+      const { connection, schema, loader } = helpers;
+      const author = await connection.getRepository(Author).findOne();
+      const query = `
+        query authorById($id: Int!) {
+          authorById(id: $id) {
+            id
+            firstName
+            lastName
+            email
+            phone
+          }
+        }
+      `;
+      const vars = { id: author?.id };
+
+      const result = await graphql(
+        schema,
+        query,
+        {},
+        {
+          loader
+        },
+        vars
+      );
+
+      const expected = {
+        id: author?.id,
+        firstName: author?.firstName,
+        lastName: author?.lastName,
+        email: author?.email,
+        phone: author?.phone
+      };
+      expect(result).to.not.have.key("errors");
+      expect(result.data!.authorById).to.deep.equal(expected);
+    });
+
     it("can query a single entity multiple layers deep", async () => {
       const { connection, schema, loader } = helpers;
       const author = await connection
