@@ -15,7 +15,8 @@ export class Address {
   @Column()
   state!: string;
 
+  // testing custom column names
   @Field()
-  @Column()
+  @Column({ name: "postCode" })
   zip!: string;
 }

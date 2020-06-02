@@ -35,7 +35,8 @@ export class Seeder {
         firstName: faker.name.firstName(),
         lastName: faker.name.lastName(),
         email: faker.internet.email(),
-        address: Seeder.addressFactory()
+        address: Seeder.addressFactory(),
+        phone: faker.phone.phoneNumber()
       };
       authors.push(author);
     }

@@ -11,6 +11,7 @@ const { expect } = chai;
 const TEST_AUTHOR_EMAIL = "testingsearchemail@testingsearch.com";
 const TEST_AUTHOR_FIRST_NAME = "testingSearchFirstName";
 const TEST_AUTHOR_LAST_NAME = "testingSearchLastName";
+const TEST_AUTHOR_PHONE = "123-456-7890";
 
 describe("Search queries", () => {
   let helpers: TestHelpers;
@@ -22,7 +23,8 @@ describe("Search queries", () => {
       email: TEST_AUTHOR_EMAIL,
       firstName: TEST_AUTHOR_FIRST_NAME,
       lastName: TEST_AUTHOR_LAST_NAME,
-      address: Seeder.addressFactory()
+      address: Seeder.addressFactory(),
+      phone: TEST_AUTHOR_PHONE
     });
     author = await helpers.connection.createEntityManager().save(author);
   });
