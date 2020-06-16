@@ -12,17 +12,14 @@ import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
  * @hidden
  */
 export class GraphQLQueryResolver {
-  private readonly _primaryKeyColumn: string;
   private readonly _namingStrategy: LoaderNamingStrategyEnum;
   private _formatter: Formatter;
   private readonly _maxDepth: number;
   constructor({
-    primaryKeyColumn,
     namingStrategy,
     maxQueryDepth
   }: LoaderOptions) {
     this._namingStrategy = namingStrategy ?? LoaderNamingStrategyEnum.CAMELCASE;
-    this._primaryKeyColumn = primaryKeyColumn ?? "id";
     this._formatter = new Formatter(this._namingStrategy);
     this._maxDepth = maxQueryDepth ?? Infinity;
   }
@@ -48,7 +45,7 @@ export class GraphQLQueryResolver {
     const meta = connection.getMetadata(model);
     if (selection && selection.children) {
       const fields = meta.columns.filter(
-        field => field.propertyName in selection.children!
+        field => field.isPrimary || field.propertyName in selection.children!
       );
 
       queryBuilder = this._selectFields(queryBuilder, fields, alias);
@@ -79,9 +76,6 @@ export class GraphQLQueryResolver {
     fields: Array<ColumnMetadata>,
     alias: string
   ): SelectQueryBuilder<{}> {
-    // Ensure we select the primary key column
-    queryBuilder = this._selectPrimaryKey(queryBuilder, fields, alias);
-
     // Add a select for each field that was requested in the query
     fields.forEach(field => {
       // Make sure we account for embedded types
@@ -92,35 +86,6 @@ export class GraphQLQueryResolver {
       );
     });
     return queryBuilder;
-  }
-
-  /**
-   * Ensures that the primary key of each entity is selected.
-   * This is to ensure that joins work properly
-   * @param qb
-   * @param fields
-   * @param alias
-   * @private
-   */
-  private _selectPrimaryKey(
-    qb: SelectQueryBuilder<{}>,
-    fields: Array<ColumnMetadata>,
-    alias: string
-  ): SelectQueryBuilder<{}> {
-    // Did they already include the primary key column in their query?
-    const queriedPrimaryKey = fields.find(
-      field => field.propertyName === this._primaryKeyColumn
-    );
-
-    if (!queriedPrimaryKey) {
-      // if not, add it so joins don't break
-      return qb.addSelect(
-        this._formatter.columnSelection(alias, this._primaryKeyColumn),
-        this._formatter.aliasField(alias, this._primaryKeyColumn)
-      );
-    } else {
-      return qb;
-    }
   }
 
   /**
