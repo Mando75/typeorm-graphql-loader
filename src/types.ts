@@ -25,6 +25,8 @@ export interface LoaderOptions {
   namingStrategy?: LoaderNamingStrategyEnum;
   /**
    * This column will always be loaded for every relation by the query builder.
+   *
+   * @deprecated The loader now automatically pulls the primary column from the entity metadata.
    */
   primaryKeyColumn?: string;
   /**
