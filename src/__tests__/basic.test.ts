@@ -147,7 +147,6 @@ describe("Basic GraphQL queries", () => {
         .findOne({ relations: ["books", "books.publisher"] });
       const query = `
         fragment bookFragment on Book {
-          id
           title
           summary
           publisher {
@@ -155,7 +154,6 @@ describe("Basic GraphQL queries", () => {
           }
         }
         fragment authorFragment on Author {
-          id
           firstName
           lastName
           email
@@ -182,12 +180,10 @@ describe("Basic GraphQL queries", () => {
       );
 
       const expected = {
-        id: author?.id,
         firstName: author?.firstName,
         lastName: author?.lastName,
         email: author?.email,
         books: author?.books.map(book => ({
-          id: book.id,
           title: book.title,
           summary: book.summary,
           publisher: {
