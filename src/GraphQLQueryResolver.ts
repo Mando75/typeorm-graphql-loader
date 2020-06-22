@@ -21,7 +21,7 @@ export class GraphQLQueryResolver {
   constructor({
     primaryKeyColumn,
     namingStrategy,
-    maxQueryDepth,
+    maxQueryDepth
   }: LoaderOptions) {
     this._namingStrategy = namingStrategy ?? LoaderNamingStrategyEnum.CAMELCASE;
     this._primaryKeyColumn = primaryKeyColumn ?? "id";
@@ -211,7 +211,11 @@ export class GraphQLQueryResolver {
     relations.forEach(relation => {
       // Join each relation that was queried
       if (relation.propertyName in children) {
-        const childAlias = this._generateChildHash(alias, relation.propertyName, 10)
+        const childAlias = this._generateChildHash(
+          alias,
+          relation.propertyName,
+          10
+        );
         queryBuilder = queryBuilder.leftJoin(
           this._formatter.columnSelection(alias, relation.propertyName),
           childAlias
@@ -231,16 +235,20 @@ export class GraphQLQueryResolver {
     return queryBuilder;
   }
 
-  private _generateChildHash(alias: string, propertyName: string, length = 0): string {
-    const hash = crypto.createHash('md5')
-    hash.update(`${alias}__${propertyName}`)
-    
-    const output = hash.digest('hex')
+  private _generateChildHash(
+    alias: string,
+    propertyName: string,
+    length = 0
+  ): string {
+    const hash = crypto.createHash("md5");
+    hash.update(`${alias}__${propertyName}`);
+
+    const output = hash.digest("hex");
 
     if (length != 0) {
-      return output.slice(0, length)
+      return output.slice(0, length);
     }
 
-    return output
+    return output;
   }
 }
