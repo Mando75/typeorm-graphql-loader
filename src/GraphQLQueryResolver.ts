@@ -18,18 +18,15 @@ export class GraphQLQueryResolver {
   private readonly _namingStrategy: LoaderNamingStrategyEnum;
   private _formatter: Formatter;
   private readonly _maxDepth: number;
-  private readonly _useHashes: boolean;
   constructor({
     primaryKeyColumn,
     namingStrategy,
     maxQueryDepth,
-    useHashesForChildAliases
   }: LoaderOptions) {
     this._namingStrategy = namingStrategy ?? LoaderNamingStrategyEnum.CAMELCASE;
     this._primaryKeyColumn = primaryKeyColumn ?? "id";
     this._formatter = new Formatter(this._namingStrategy);
     this._maxDepth = maxQueryDepth ?? Infinity;
-    this._useHashes = useHashesForChildAliases ?? false
   }
 
   /**
@@ -214,9 +211,7 @@ export class GraphQLQueryResolver {
     relations.forEach(relation => {
       // Join each relation that was queried
       if (relation.propertyName in children) {
-        const childAlias = this._useHashes ? 
-          this._generateChildHash(alias, relation.propertyName, 10) :
-          alias + "__" + relation.propertyName
+        const childAlias = this._generateChildHash(alias, relation.propertyName, 10)
         queryBuilder = queryBuilder.leftJoin(
           this._formatter.columnSelection(alias, relation.propertyName),
           childAlias

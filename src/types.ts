@@ -37,15 +37,6 @@ export interface LoaderOptions {
    * Defaults to Infinity
    */
   maxQueryDepth?: number;
-  /**
-   * When enabled, uses hashes for the generated aliases for child
-   * tables. This prevents an issue that can occur when using Postgres
-   * which has a 63 byte limit for these aliases. When too many child
-   * tables are selected, the alias can become too long causing the
-   * query to fail. Enabling this option will prevent that but it
-   * does generate harder to understand queries.
-   */
-  useHashesForChildAliases?: boolean
 }
 
 export interface SearchOptions {
