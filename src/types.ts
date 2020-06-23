@@ -26,9 +26,9 @@ export interface LoaderOptions {
   /**
    * This column will always be loaded for every relation by the query builder.
    *
-   * @deprecated The loader now automatically pulls the primary column from the entity metadata.
-   *             To avoid breaking the API, the query builder will still select this column, but the option
-   *             will be removed in a future major version.
+   * @deprecated The loader now automatically finds and selects the primary column from the entity metadata
+   *             so this is no longer necessary. To avoid breaking the API, the query builder will still
+   *             select this column for every relation, but the option will be removed in a future major version.
    */
   primaryKeyColumn?: string;
   /**
