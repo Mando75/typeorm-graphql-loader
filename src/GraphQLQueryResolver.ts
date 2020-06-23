@@ -5,6 +5,7 @@ import { Formatter } from "./lib/Formatter";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 import { EmbeddedMetadata } from "typeorm/metadata/EmbeddedMetadata";
+import * as crypto from "crypto";
 
 /**
  * Internal only class
@@ -226,7 +227,11 @@ export class GraphQLQueryResolver {
     relations.forEach(relation => {
       // Join each relation that was queried
       if (relation.propertyName in children) {
-        const childAlias = alias + "__" + relation.propertyName;
+        const childAlias = this._generateChildHash(
+          alias,
+          relation.propertyName,
+          10
+        );
         queryBuilder = queryBuilder.leftJoin(
           this._formatter.columnSelection(alias, relation.propertyName),
           childAlias
@@ -244,5 +249,22 @@ export class GraphQLQueryResolver {
       }
     });
     return queryBuilder;
+  }
+
+  private _generateChildHash(
+    alias: string,
+    propertyName: string,
+    length = 0
+  ): string {
+    const hash = crypto.createHash("md5");
+    hash.update(`${alias}__${propertyName}`);
+
+    const output = hash.digest("hex");
+
+    if (length != 0) {
+      return output.slice(0, length);
+    }
+
+    return output;
   }
 }
