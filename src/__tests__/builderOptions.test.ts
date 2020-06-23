@@ -166,3 +166,67 @@ describe("Depth limiting", () => {
     expect(result.data?.authorById?.books?.publisher?.books).to.not.be.ok;
   });
 });
+
+describe("Primary Key Backwards compatibility", () => {
+  let helpers: TestHelpers;
+
+  before(async () => {
+    helpers = await startup("deprecated_primary_key", {
+      logging: false,
+      loaderOptions: { primaryKeyColumn: "rating" }
+    });
+  });
+
+  it("is backwards compatible with primary key option", async () => {
+    const { schema, loader, connection } = helpers;
+    const query = `
+      query getPaginatedReviews($offset: Int!, $limit: Int!) {
+        deprecatedPrimaryKey(offset: $offset, limit: $limit) {
+          reviews {
+            id
+            title
+            body
+            reviewDate
+            reviewerName
+          }
+          offset
+          hasMore
+          maxRating
+          minRating
+        }
+      }
+    `;
+
+    const vars = { offset: 0, limit: 10 };
+    const result = await graphql(
+      schema,
+      query,
+      {},
+      { loader, connection },
+      vars
+    );
+    const reviews = await helpers.connection
+      .getRepository(Review)
+      .createQueryBuilder("review")
+      .orderBy({ rating: "DESC" })
+      .limit(10)
+      .getMany();
+
+    const expected = {
+      hasMore: true,
+      offset: 10,
+      minRating: Math.min(...reviews.map(review => review.rating)),
+      maxRating: Math.max(...reviews.map(review => review.rating)),
+      reviews: reviews.map(({ id, title, body, reviewDate, reviewerName }) => ({
+        id,
+        title,
+        body,
+        reviewDate,
+        reviewerName
+      }))
+    };
+
+    expect(result).to.not.have.key("errors");
+    expect(result.data?.deprecatedPrimaryKey).to.deep.equal(expected);
+  });
+});
