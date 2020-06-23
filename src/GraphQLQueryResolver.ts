@@ -14,17 +14,17 @@ import * as crypto from "crypto";
  * @hidden
  */
 export class GraphQLQueryResolver {
-  private readonly _primaryKeyColumn: string;
+  private readonly _primaryKeyColumn?: string;
   private readonly _namingStrategy: LoaderNamingStrategyEnum;
   private _formatter: Formatter;
   private readonly _maxDepth: number;
   constructor({
     primaryKeyColumn,
     namingStrategy,
-    maxQueryDepth,
+    maxQueryDepth
   }: LoaderOptions) {
     this._namingStrategy = namingStrategy ?? LoaderNamingStrategyEnum.CAMELCASE;
-    this._primaryKeyColumn = primaryKeyColumn ?? "id";
+    this._primaryKeyColumn = primaryKeyColumn;
     this._formatter = new Formatter(this._namingStrategy);
     this._maxDepth = maxQueryDepth ?? Infinity;
   }
@@ -50,7 +50,7 @@ export class GraphQLQueryResolver {
     const meta = connection.getMetadata(model);
     if (selection && selection.children) {
       const fields = meta.columns.filter(
-        field => field.propertyName in selection.children!
+        field => field.isPrimary || field.propertyName in selection.children!
       );
 
       const embeddedFields = meta.embeddeds.filter(
@@ -143,6 +143,7 @@ export class GraphQLQueryResolver {
     fields: Array<ColumnMetadata>,
     alias: string
   ): SelectQueryBuilder<{}> {
+    // TODO Remove in 2.0
     // Ensure we select the primary key column
     queryBuilder = this._selectPrimaryKey(queryBuilder, fields, alias);
 
@@ -166,16 +167,31 @@ export class GraphQLQueryResolver {
    * @param fields
    * @param alias
    * @private
+   * @deprecated The loader now uses the entity metadata to grab the primary key
    */
   private _selectPrimaryKey(
     qb: SelectQueryBuilder<{}>,
     fields: Array<ColumnMetadata>,
     alias: string
   ): SelectQueryBuilder<{}> {
+    /**
+     * The query builder will automatically include the primary key column
+     * in it's selection. To avoid a breaking change, we'll still select a column
+     * if the user provides it, but this will be removed in the next major version.
+     */
+    if (!this._primaryKeyColumn) {
+      return qb;
+    }
+
     // Did they already include the primary key column in their query?
     const queriedPrimaryKey = fields.find(
       field => field.propertyName === this._primaryKeyColumn
     );
+
+    // This will have already been selected
+    if (queriedPrimaryKey?.isPrimary) {
+      return qb;
+    }
 
     if (!queriedPrimaryKey) {
       // if not, add it so joins don't break
@@ -211,7 +227,11 @@ export class GraphQLQueryResolver {
     relations.forEach(relation => {
       // Join each relation that was queried
       if (relation.propertyName in children) {
-        const childAlias = this._generateChildHash(alias, relation.propertyName, 10)
+        const childAlias = this._generateChildHash(
+          alias,
+          relation.propertyName,
+          10
+        );
         queryBuilder = queryBuilder.leftJoin(
           this._formatter.columnSelection(alias, relation.propertyName),
           childAlias
@@ -231,16 +251,20 @@ export class GraphQLQueryResolver {
     return queryBuilder;
   }
 
-  private _generateChildHash(alias: string, propertyName: string, length = 0): string {
-    const hash = crypto.createHash('md5')
-    hash.update(`${alias}__${propertyName}`)
-    
-    const output = hash.digest('hex')
+  private _generateChildHash(
+    alias: string,
+    propertyName: string,
+    length = 0
+  ): string {
+    const hash = crypto.createHash("md5");
+    hash.update(`${alias}__${propertyName}`);
+
+    const output = hash.digest("hex");
 
     if (length != 0) {
-      return output.slice(0, length)
+      return output.slice(0, length);
     }
 
-    return output
+    return output;
   }
 }
