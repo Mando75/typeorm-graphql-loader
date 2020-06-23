@@ -97,6 +97,21 @@ This package has currently only been tested with Postgresql and SQLite. In theor
 
 For help with pagination, first read [Pagination Advice](https://gitlab.com/Mando75/typeorm-graphql-loader/-/blob/master/md/pagination.md)
 
+## Roadmap <a name="Roadmap">
+
+### Relay Support
+
+Currently, the loader only supports offset pagination. I would like to add the ability to support Relay-style pagination out of the box. 
+
+[Track Progress](https://gitlab.com/Mando75/typeorm-graphql-loader/-/issues/8)
+
+### More control over field resolution
+
+I would like to add a method for users to have more control over how fields are resolved via the loader. 
+My current thought is to build a decorator that can be used to annotate the TypeORM entities and pass options for that specific field to the loader. 
+
+[Track Progress](https://gitlab.com/Mando75/typeorm-graphql-loader/-/issues/9)
+
 ## API <a name="API"> 
 
 [Documentation for the Public API](https://gql-loader.bmuller.net)

@@ -11,3 +11,4 @@ dist/
 yarn-error.log
 public/
 testSchema.graphql
+.run/
