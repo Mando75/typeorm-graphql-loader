@@ -78,6 +78,11 @@ export interface QueryPagination {
   offset: number;
 }
 
+export interface DecoratorArgs {
+  ignore?: boolean;
+  required?: boolean;
+}
+
 /**
  * @hidden
  */
