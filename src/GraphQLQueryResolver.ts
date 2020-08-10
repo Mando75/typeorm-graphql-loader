@@ -1,10 +1,11 @@
 import { Hash, LoaderOptions, Selection } from "./types";
 import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
-import { Connection, SelectQueryBuilder } from "typeorm";
+import { Connection, EntityMetadata, SelectQueryBuilder } from "typeorm";
 import { Formatter } from "./lib/Formatter";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 import { EmbeddedMetadata } from "typeorm/metadata/EmbeddedMetadata";
+import { getLoaderRequiredFields, getLoaderIgnoredFields } from "./decorator";
 import * as crypto from "crypto";
 
 /**
@@ -49,12 +50,21 @@ export class GraphQLQueryResolver {
   ): SelectQueryBuilder<{}> {
     const meta = connection.getMetadata(model);
     if (selection && selection.children) {
+      const requiredFields = getLoaderRequiredFields(meta.target);
+      const ignoredFields = getLoaderIgnoredFields(meta.target);
       const fields = meta.columns.filter(
-        field => field.isPrimary || field.propertyName in selection.children!
+        field =>
+          !ignoredFields.get(field.propertyName) &&
+          (field.isPrimary ||
+            field.propertyName in selection.children! ||
+            requiredFields.get(field.propertyName))
       );
 
       const embeddedFields = meta.embeddeds.filter(
-        embed => embed.propertyName in selection.children!
+        embed =>
+          !ignoredFields.get(embed.propertyName) &&
+          (embed.propertyName in selection.children! ||
+            requiredFields.get(embed.propertyName))
       );
 
       queryBuilder = this._selectFields(queryBuilder, fields, alias);
@@ -72,6 +82,7 @@ export class GraphQLQueryResolver {
           selection.children,
           meta.relations,
           alias,
+          meta,
           connection,
           depth
         );
@@ -212,6 +223,7 @@ export class GraphQLQueryResolver {
    * @param children
    * @param relations
    * @param alias
+   * @param meta
    * @param connection
    * @param depth
    * @private
@@ -221,33 +233,42 @@ export class GraphQLQueryResolver {
     children: Hash<Selection>,
     relations: Array<RelationMetadata>,
     alias: string,
+    meta: EntityMetadata,
     connection: Connection,
     depth: number
   ): SelectQueryBuilder<{}> {
-    relations.forEach(relation => {
-      // Join each relation that was queried
-      if (relation.propertyName in children) {
-        const childAlias = this._generateChildHash(
-          alias,
-          relation.propertyName,
-          10
-        );
-        queryBuilder = queryBuilder.leftJoin(
-          this._formatter.columnSelection(alias, relation.propertyName),
-          childAlias
-        );
-        // Recursively call createQuery to select and join any subfields
-        // from this relation
-        queryBuilder = this.createQuery(
-          relation.inverseEntityMetadata.target,
-          children[relation.propertyName],
-          connection,
-          queryBuilder,
-          childAlias,
-          depth + 1
-        );
-      }
-    });
+    const requiredFields = getLoaderRequiredFields(meta.target);
+    const ignoredFields = getLoaderIgnoredFields(meta.target);
+
+    relations
+      .filter(relation => !ignoredFields.get(relation.propertyName))
+      .forEach(relation => {
+        // Join each relation that was queried
+        if (
+          relation.propertyName in children ||
+          requiredFields.get(relation.propertyName)
+        ) {
+          const childAlias = this._generateChildHash(
+            alias,
+            relation.propertyName,
+            10
+          );
+          queryBuilder = queryBuilder.leftJoin(
+            this._formatter.columnSelection(alias, relation.propertyName),
+            childAlias
+          );
+          // Recursively call createQuery to select and join any subfields
+          // from this relation
+          queryBuilder = this.createQuery(
+            relation.inverseEntityMetadata.target,
+            children[relation.propertyName],
+            connection,
+            queryBuilder,
+            childAlias,
+            depth + 1
+          );
+        }
+      });
     return queryBuilder;
   }
 

@@ -10,7 +10,6 @@ import {
 import { Book } from "./Book";
 import { Field, Int, ObjectType } from "type-graphql";
 import { Address } from "./Address";
-import { LoaderOptions } from "../../decorator";
 
 @ObjectType()
 @Entity()
@@ -29,7 +28,6 @@ export class Author extends BaseEntity {
 
   @Field()
   @Column("varchar")
-  @LoaderOptions({})
   firstName!: string;
 
   @Field()

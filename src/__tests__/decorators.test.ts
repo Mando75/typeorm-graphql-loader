@@ -1,7 +1,7 @@
 import * as chai from "chai";
 import { startup, TestHelpers } from "./util/testStartup";
 import { Author } from "./entity";
-import { getMetadata } from "../decorator";
+import "reflect-metadata";
 
 const { expect } = chai;
 describe("Decorators", () => {
@@ -12,7 +12,6 @@ describe("Decorators", () => {
   });
   it("logs stuff out", async () => {
     const author = await helpers.connection.getRepository(Author).findOne();
-    console.log(getMetadata(author, "firstName"));
     expect(true).to.be.true;
   });
 });

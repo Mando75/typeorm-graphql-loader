@@ -11,21 +11,41 @@ const defaultArgs: DecoratorArgs = {
   required: false
 };
 
-export const LoaderOptions = (args: DecoratorArgs = defaultArgs) => {
-  const { ignore, required } = {
+export const ConfigureLoader = (args: DecoratorArgs = defaultArgs) => {
+  const { required, ignore } = {
     ...defaultArgs,
     ...args
   };
 
   return (target: any, propertyKey: string) => {
-    Reflect.defineMetadata(keys.IGNORE_FIELD, ignore, target, propertyKey);
-    Reflect.defineMetadata(keys.REQUIRED_FIELD, required, target, propertyKey);
+    const ignoreSettings: Map<string, boolean | undefined> =
+      Reflect.getMetadata(keys.IGNORE_FIELD, target.constructor) ?? new Map();
+    ignoreSettings.set(propertyKey, ignore);
+    Reflect.defineMetadata(
+      keys.IGNORE_FIELD,
+      ignoreSettings,
+      target.constructor
+    );
+
+    const requiredSettings: Map<string, boolean | undefined> =
+      Reflect.getMetadata(keys.REQUIRED_FIELD, target.constructor) ?? new Map();
+    requiredSettings.set(propertyKey, required);
+    Reflect.defineMetadata(
+      keys.REQUIRED_FIELD,
+      requiredSettings,
+      target.constructor
+    );
   };
 };
 
-export const getMetadata = (target: any, propertyKey: string) => {
-  return {
-    ignore: Reflect.getMetadata(keys.IGNORE_FIELD, target, propertyKey),
-    required: Reflect.getMetadata(keys.REQUIRED_FIELD, target, propertyKey)
-  };
+export const getLoaderRequiredFields = (
+  target: any
+): Map<string, boolean | undefined> => {
+  return Reflect.getMetadata(keys.REQUIRED_FIELD, target) ?? new Map();
+};
+
+export const getLoaderIgnoredFields = (
+  target: any
+): Map<string, boolean | undefined> => {
+  return Reflect.getMetadata(keys.IGNORE_FIELD, target) ?? new Map();
 };
