@@ -36,7 +36,7 @@ describe("Decorators", () => {
     };
 
     expect(result).to.not.have.key("errors");
-    expect(result.data!.decoratorTests).to.deep.equal(expected);
+    expect(result.data?.decoratorTests).to.deep.equal(expected);
   });
 
   it("loads a required field even when not requested", async () => {
@@ -44,7 +44,7 @@ describe("Decorators", () => {
 
     const query = `
       query DecoratorTest($dtId: Int!, $validateRequired: Boolean) {
-        decoratorTests(dtId: $dtId, validateRequired: $validateRequired) {
+        decoratorTests(dtId: $dtId, validateRequiredField: $validateRequired) {
           id
           ignoredField
         }
@@ -67,7 +67,7 @@ describe("Decorators", () => {
 
     const query = `
       query DecoratorTest($dtId: Int!, $validateIgnore: Boolean) {
-        decoratorTests(dtId: $dtId, validateIgnore: $validateIgnore) {
+        decoratorTests(dtId: $dtId, validateIgnoreField: $validateIgnore) {
           id
           requiredField
           ignoredField

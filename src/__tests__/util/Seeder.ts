@@ -1,7 +1,6 @@
 import { Connection, EntityManager } from "typeorm";
-import { Author, Book, Publisher, Review } from "../entity";
+import { Author, Book, DecoratorTest, Publisher, Review } from "../entity";
 import * as faker from "faker";
-import { DecoratorTest } from "../entity/DecoratorTest";
 
 export class Seeder {
   private readonly NUM_AUTHORS = 10;
@@ -27,7 +26,7 @@ export class Seeder {
       const publishers = await this.seedPublishers(entityManager);
       const books = await this.seedBooks(entityManager, authors, publishers);
       await this.seedReviews(entityManager, books);
-      await this.seedDecoratorTests(entityManager);
+      await this.seedDecoratorTests(entityManager, authors);
     });
   }
 
@@ -121,12 +120,17 @@ export class Seeder {
       .execute();
   }
 
-  private async seedDecoratorTests(manager: EntityManager) {
+  private async seedDecoratorTests(
+    manager: EntityManager,
+    authors: Array<Author>
+  ) {
     const decoratorTests: Array<Partial<DecoratorTest>> = [];
     for (let i = 1; i <= this.NUM_DECORATOR_TESTS; i++) {
       const dt: Partial<DecoratorTest> = {
         requiredField: faker.lorem.words(1),
         ignoredField: faker.lorem.words(1),
+        requiredRelation: authors[i % this.NUM_AUTHORS],
+        ignoredRelation: authors[i % this.NUM_AUTHORS],
       };
       decoratorTests.push(dt);
     }

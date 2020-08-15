@@ -8,10 +8,14 @@ export class DecoratorTestResolver {
   @Query((returns) => DecoratorTest)
   async decoratorTests(
     @Arg("dtId", (type) => Int) dtId: number,
-    @Arg("validateIgnore", { nullable: true, defaultValue: false })
-    validateIgnore: boolean,
-    @Arg("validateRequired", { nullable: true, defaultValue: false })
-    validateRequired: boolean,
+    @Arg("validateIgnoreField", { nullable: true, defaultValue: false })
+    validateIgnoreField: boolean,
+    @Arg("validateRequiredField", { nullable: true, defaultValue: false })
+    validateRequiredField: boolean,
+    @Arg("validateIgnoreRelation", { nullable: true, defaultValue: false })
+    validateIgnoreRelation: boolean,
+    @Arg("validateRequiredRelation", { nullable: true, defaultValue: false })
+    validateRequiredRelation: boolean,
     @Ctx("loader") loader: GraphQLDatabaseLoader,
     @Info() info: GraphQLResolveInfo
   ) {
@@ -21,15 +25,27 @@ export class DecoratorTestResolver {
       .where("dt.id = :id", { id: dtId })
       .loadOne();
 
-    if (validateIgnore && record?.ignoredField) {
+    if (validateIgnoreField && record?.ignoredField) {
       throw new Error(
         "Validation Failed: Ignored Field is present in response"
       );
     }
 
-    if (validateRequired && !record?.requiredField) {
+    if (validateIgnoreRelation && record?.ignoredRelation) {
+      throw new Error(
+        "Validation Failed: Ignored Relation is present in response"
+      );
+    }
+
+    if (validateRequiredField && !record?.requiredField) {
       throw new Error(
         "Validation Failed: Required Field is missing in response"
+      );
+    }
+
+    if (validateRequiredRelation && !record?.requiredRelation) {
+      throw new Error(
+        "Validation Failed: Required Relation is missing in response"
       );
     }
 
