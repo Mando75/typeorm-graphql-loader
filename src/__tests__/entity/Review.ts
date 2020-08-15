@@ -7,7 +7,6 @@ import {
 } from "typeorm";
 import { Book } from "./Book";
 import { Int, Field, ObjectType } from "type-graphql";
-import { ConfigureLoader } from "../../decorator";
 
 @ObjectType()
 @Entity()
@@ -30,7 +29,6 @@ export class Review extends BaseEntity {
 
   @Field()
   @Column("int")
-  @ConfigureLoader({ required: true })
   rating!: number;
 
   @Field()

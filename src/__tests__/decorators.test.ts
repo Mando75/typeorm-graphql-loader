@@ -10,8 +10,9 @@ describe("Decorators", () => {
   before(async () => {
     helpers = await startup("decorators", { logging: false });
   });
+
   it("logs stuff out", async () => {
-    const author = await helpers.connection.getRepository(Author).findOne();
+    await helpers.connection.getRepository(Author).findOne();
     expect(true).to.be.true;
   });
 });

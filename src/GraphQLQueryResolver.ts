@@ -5,7 +5,7 @@ import { Formatter } from "./lib/Formatter";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 import { EmbeddedMetadata } from "typeorm/metadata/EmbeddedMetadata";
-import { getLoaderRequiredFields, getLoaderIgnoredFields } from "./decorator";
+import { getLoaderRequiredFields, getLoaderIgnoredFields } from "./ConfigureLoader";
 import * as crypto from "crypto";
 
 /**
