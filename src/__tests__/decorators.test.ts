@@ -1,18 +1,92 @@
 import * as chai from "chai";
 import { startup, TestHelpers } from "./util/testStartup";
-import { Author } from "./entity";
 import "reflect-metadata";
+import { DecoratorTest } from "./entity";
+import { graphql } from "graphql";
 
 const { expect } = chai;
 describe("Decorators", () => {
   let helpers: TestHelpers;
+  let dt: DecoratorTest | undefined;
 
   before(async () => {
     helpers = await startup("decorators", { logging: false });
+    dt = await helpers.connection.getRepository(DecoratorTest).findOne();
   });
 
-  it("logs stuff out", async () => {
-    await helpers.connection.getRepository(Author).findOne();
-    expect(true).to.be.true;
+  it("Can successfully execute a query against an entity with decorators", async () => {
+    const { schema, loader } = helpers;
+
+    const query = `
+      query DecoratorTest($dtId: Int!) {
+        decoratorTests(dtId: $dtId) {
+          id
+          requiredField
+          ignoredField
+        }
+      }
+    `;
+    const vars = { dtId: dt?.id };
+    const result = await graphql(schema, query, {}, { loader }, vars);
+
+    const expected = {
+      id: dt?.id,
+      requiredField: dt?.requiredField,
+      ignoredField: null,
+    };
+
+    expect(result).to.not.have.key("errors");
+    expect(result.data!.decoratorTests).to.deep.equal(expected);
+  });
+
+  it("loads a required field even when not requested", async () => {
+    const { schema, loader } = helpers;
+
+    const query = `
+      query DecoratorTest($dtId: Int!, $validateRequired: Boolean) {
+        decoratorTests(dtId: $dtId, validateRequired: $validateRequired) {
+          id
+          ignoredField
+        }
+      }
+    `;
+    const vars = { dtId: dt?.id, validateRequired: true };
+    const result = await graphql(schema, query, {}, { loader }, vars);
+
+    const expected = {
+      id: dt?.id,
+      ignoredField: null,
+    };
+
+    expect(result).to.not.have.key("errors");
+    expect(result.data?.decoratorTests).to.deep.equal(expected);
+  });
+
+  it("ignores fields correctly", async () => {
+    const { schema, loader } = helpers;
+
+    const query = `
+      query DecoratorTest($dtId: Int!, $validateIgnore: Boolean) {
+        decoratorTests(dtId: $dtId, validateIgnore: $validateIgnore) {
+          id
+          requiredField
+          ignoredField
+        }
+      }
+    `;
+    const vars = { dtId: dt?.id, validateIgnore: true };
+    const result = await graphql(schema, query, {}, { loader }, vars);
+
+    const expected = {
+      id: dt?.id,
+      requiredField: dt?.requiredField,
+      // Ignored is a non-nullable column on the db.
+      // even so, the field should be ignored in the query
+      // and return null.
+      ignoredField: null,
+    };
+
+    expect(result).to.not.have.key("errors");
+    expect(result.data?.decoratorTests).to.deep.equal(expected);
   });
 });

@@ -1,12 +1,14 @@
 import { Connection, EntityManager } from "typeorm";
-import { Author, Publisher, Review, Book } from "../entity";
+import { Author, Book, Publisher, Review } from "../entity";
 import * as faker from "faker";
+import { DecoratorTest } from "../entity/DecoratorTest";
 
 export class Seeder {
   private readonly NUM_AUTHORS = 10;
   private readonly NUM_PUBLISHERS = 3;
   private readonly NUM_BOOKS = 50;
   private readonly NUM_REVIEWS = 100;
+  private readonly NUM_DECORATOR_TESTS = 10;
 
   constructor(private conn: Connection) {}
 
@@ -15,16 +17,17 @@ export class Seeder {
       street: faker.address.streetAddress(),
       city: faker.address.city(),
       state: faker.address.state(),
-      zip: faker.address.zipCode()
+      zip: faker.address.zipCode(),
     };
   }
 
   async seed() {
-    await this.conn.transaction(async entityManager => {
+    await this.conn.transaction(async (entityManager) => {
       const authors = await this.seedAuthors(entityManager);
       const publishers = await this.seedPublishers(entityManager);
       const books = await this.seedBooks(entityManager, authors, publishers);
       await this.seedReviews(entityManager, books);
+      await this.seedDecoratorTests(entityManager);
     });
   }
 
@@ -36,7 +39,7 @@ export class Seeder {
         lastName: faker.name.lastName(),
         email: faker.internet.email(),
         address: Seeder.addressFactory(),
-        phone: faker.phone.phoneNumber()
+        phone: faker.phone.phoneNumber(),
       };
       authors.push(author);
     }
@@ -56,7 +59,7 @@ export class Seeder {
       const publisher: Partial<Publisher> = {
         name: faker.company.companyName(),
         address: Seeder.addressFactory(),
-        poBox: Seeder.addressFactory()
+        poBox: Seeder.addressFactory(),
       };
       publishers.push(publisher);
     }
@@ -82,7 +85,7 @@ export class Seeder {
         publishedDate: faker.date.past(),
         author: authors[i % this.NUM_AUTHORS],
         isPublished: faker.random.number(10) <= 5,
-        publisher: publishers[i % this.NUM_PUBLISHERS]
+        publisher: publishers[i % this.NUM_PUBLISHERS],
       };
       books.push(book);
     }
@@ -105,7 +108,7 @@ export class Seeder {
         reviewDate: faker.date.past(),
         rating: faker.random.number({ min: 0, max: 10 }),
         reviewerName: faker.name.firstName() + " " + faker.name.lastName(),
-        book: books[i % this.NUM_BOOKS]
+        book: books[i % this.NUM_BOOKS],
       };
       reviews.push(review);
     }
@@ -115,6 +118,24 @@ export class Seeder {
       .insert()
       .into(Review)
       .values(reviews)
+      .execute();
+  }
+
+  private async seedDecoratorTests(manager: EntityManager) {
+    const decoratorTests: Array<Partial<DecoratorTest>> = [];
+    for (let i = 1; i <= this.NUM_DECORATOR_TESTS; i++) {
+      const dt: Partial<DecoratorTest> = {
+        requiredField: faker.lorem.words(1),
+        ignoredField: faker.lorem.words(1),
+      };
+      decoratorTests.push(dt);
+    }
+
+    await manager
+      .createQueryBuilder()
+      .insert()
+      .into(DecoratorTest)
+      .values(decoratorTests)
       .execute();
   }
 }

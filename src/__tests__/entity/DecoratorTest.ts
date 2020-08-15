@@ -16,18 +16,21 @@ export class DecoratorTest extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Field()
+  @Field({nullable: true})
   @Column("varchar", {nullable: false})
   @ConfigureLoader({ignore: true})
-  ignoredField!: string;
+  ignoredField?: string;
 
   @Column("varchar", {nullable: false})
+  @Field()
   @ConfigureLoader({required: true})
   requiredField!: string;
 
+  @Field()
   @CreateDateColumn()
   createdAt!: Date;
 
+  @Field()
   @UpdateDateColumn()
   updatedAt!: Date;
 }

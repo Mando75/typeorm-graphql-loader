@@ -7,6 +7,7 @@ import { LoaderOptions } from "../../types";
 import { buildSchema } from "type-graphql";
 import { GraphQLSchema, printSchema } from "graphql";
 import * as fs from "fs";
+import {DecoratorTest} from "../entity/DecoratorTest";
 
 export interface TestHelpers {
   schema: GraphQLSchema;
@@ -29,7 +30,7 @@ export async function startup(
     database: `test_${testName}.sqlite3`,
     synchronize: true,
     dropSchema: true,
-    entities: [Author, Book, Publisher, Review],
+    entities: [Author, Book, Publisher, Review, DecoratorTest],
     logging: !!options?.logging
   });
 
