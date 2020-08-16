@@ -41,7 +41,7 @@ const defaultLoaderFieldConfiguration: LoaderFieldConfiguration = {
 export const ConfigureLoader = (
   options: LoaderFieldConfiguration = defaultLoaderFieldConfiguration
 ) => {
-  const {required, ignore} = {
+  const { required, ignore } = {
     ...defaultLoaderFieldConfiguration,
     ...options,
   };
