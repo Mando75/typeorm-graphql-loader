@@ -10,7 +10,7 @@ describe("Decorators", () => {
   let dt: DecoratorTest | undefined;
 
   before(async () => {
-    helpers = await startup("decorators", { logging: false });
+    helpers = await startup("decorators", { logging: true });
     dt = await helpers.connection.getRepository(DecoratorTest).findOne();
   });
 
@@ -62,6 +62,29 @@ describe("Decorators", () => {
     expect(result.data?.decoratorTests).to.deep.equal(expected);
   });
 
+  it("loads a required relation even when not requested", async () => {
+    const { schema, loader } = helpers;
+
+    const query = `
+      query DecoratorTest($dtId: Int!, $validateRequiredRelation: Boolean) {
+        decoratorTests(dtId: $dtId, validateRequiredRelation: $validateRequiredRelation) {
+          id
+        }
+      }
+    `;
+
+    const vars = { dtId: dt?.id, validateRequiredRelation: true };
+
+    const result = await graphql(schema, query, {}, { loader }, vars);
+
+    const expected = {
+      id: dt?.id,
+    };
+
+    expect(result).to.not.have.key("errors");
+    expect(result.data?.decoratorTests).to.deep.equal(expected);
+  });
+
   it("ignores fields correctly", async () => {
     const { schema, loader } = helpers;
 
@@ -84,6 +107,34 @@ describe("Decorators", () => {
       // even so, the field should be ignored in the query
       // and return null.
       ignoredField: null,
+    };
+
+    expect(result).to.not.have.key("errors");
+    expect(result.data?.decoratorTests).to.deep.equal(expected);
+  });
+
+  it("ignores relations correctly", async () => {
+    const { schema, loader } = helpers;
+
+    const query = `
+      query DecoratorTest($dtId: Int!, $validateIgnore: Boolean) {
+        decoratorTests(dtId: $dtId, validateIgnoreRelation: $validateIgnore) {
+          id
+          ignoredRelation {
+            id
+          }
+        }
+      }
+    `;
+    const vars = { dtId: dt?.id, validateIgnore: true };
+    const result = await graphql(schema, query, {}, { loader }, vars);
+
+    const expected = {
+      id: dt?.id,
+      // Ignored is a non-nullable column on the db.
+      // even so, the field should be ignored in the query
+      // and return null.
+      ignoredRelation: null,
     };
 
     expect(result).to.not.have.key("errors");
