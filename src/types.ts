@@ -1,5 +1,5 @@
 import { FieldNode, FragmentDefinitionNode } from "graphql";
-import { ObjectLiteral, OrderByCondition, Brackets } from "typeorm";
+import { Brackets, ObjectLiteral, OrderByCondition } from "typeorm";
 import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
 import { LoaderSearchMethod } from "./enums/LoaderSearchMethod";
 
@@ -78,8 +78,42 @@ export interface QueryPagination {
   offset: number;
 }
 
-export interface DecoratorArgs {
+export interface LoaderFieldConfiguration {
+  /**
+   * When a field or relation is ignored, the loader will
+   * never fetch it from the database, even if a matching field
+   * name is present in the GraphQL Query.
+   *
+   * This is useful if you have a field that exists in both your
+   * GraphQL schema and on your entity, but you want the field
+   * to have custom resolve logic in order to implement
+   * things like pagination or sorting. Ignoring the field will
+   * improve dataloader performance as it helps prevent
+   * over-fetching from the database.
+   *
+   * Please note that if a field is ignored, the entire sub-graph
+   * will be ignored as well.
+   */
   ignore?: boolean;
+
+  /**
+   * When a field or relation is required, the loader will always
+   * fetch it from the database, regardless of whether or not it
+   * was included in the GraphQL Query.
+   *
+   * This is useful if your entity relies on particular fields for
+   * computed values or relations. Because the loader typically
+   * only fetches the fields from the database that were requested
+   * in the GraphQL query, using this option is a good way to ensure
+   * any computed properties work the way you expect them to.
+   *
+   * Important note:
+   * When requiring a relation, the loader will perform a
+   * `leftJoinAndSelect` on the relation. This loads all the
+   * relation's fields (essentially doing a `SELECT *` on the
+   * relation). It does not currently perform any recursive requires
+   * for the joined relation.
+   */
   required?: boolean;
 }
 

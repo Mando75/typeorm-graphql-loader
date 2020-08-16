@@ -1,20 +1,49 @@
 import "reflect-metadata";
-import { DecoratorArgs } from "./types";
+import { LoaderFieldConfiguration } from "./types";
 
 const keys = {
   IGNORE_FIELD: Symbol("gqlLoader:ignoreField"),
-  REQUIRED_FIELD: Symbol("gqlLoader:requiredField")
+  REQUIRED_FIELD: Symbol("gqlLoader:requiredField"),
 };
 
-const defaultArgs: DecoratorArgs = {
+const defaultLoaderFieldConfiguration: LoaderFieldConfiguration = {
   ignore: false,
-  required: false
+  required: false,
 };
 
-export const ConfigureLoader = (args: DecoratorArgs = defaultArgs) => {
-  const { required, ignore } = {
-    ...defaultArgs,
-    ...args
+/**
+ * An experimental decorator that can be used
+ * to annotate fields or relations in your TypeORM entities
+ * and customize the loader resolution logic.
+ *
+ * The decorator implementation is still being developed
+ * and the API may change in the future prior to a 2.0 release.
+ *
+ * @example
+ * ```typescript
+ * @Entity()
+ * class Author extends BaseEntity {
+ *
+ *   // This relation will never be fetched by the dataloader
+ *   @ConfigureLoader({ignore: true})
+ *   @OneToMany()
+ *   books: [Book]
+ *
+ *   // This relation will always be fetched by the dataloader
+ *   @ConfigureLoader({required: true})
+ *   @OneToOne()
+ *   user: User
+ * }
+ * ```
+ *
+ * @param options
+ */
+export const ConfigureLoader = (
+  options: LoaderFieldConfiguration = defaultLoaderFieldConfiguration
+) => {
+  const {required, ignore} = {
+    ...defaultLoaderFieldConfiguration,
+    ...options,
   };
 
   return (target: any, propertyKey: string) => {
@@ -38,12 +67,22 @@ export const ConfigureLoader = (args: DecoratorArgs = defaultArgs) => {
   };
 };
 
+/**
+ * Fetch the required fields from entity metadata
+ * @hidden
+ * @param target
+ */
 export const getLoaderRequiredFields = (
   target: any
 ): Map<string, boolean | undefined> => {
   return Reflect.getMetadata(keys.REQUIRED_FIELD, target) ?? new Map();
 };
 
+/**
+ * Fetch the ignored fields from entity metadata
+ * @hidden
+ * @param target
+ */
 export const getLoaderIgnoredFields = (
   target: any
 ): Map<string, boolean | undefined> => {
