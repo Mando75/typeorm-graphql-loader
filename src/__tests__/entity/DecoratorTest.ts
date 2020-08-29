@@ -11,6 +11,7 @@ import {
 import { Field, Int, ObjectType } from "type-graphql";
 import { ConfigureLoader } from "../../";
 import { Author } from "./Author";
+import { Address } from "./Address";
 
 @ObjectType()
 @Entity()
@@ -29,6 +30,11 @@ export class DecoratorTest extends BaseEntity {
   @ConfigureLoader({ required: true })
   requiredField!: string;
 
+  @Field(type => Address)
+  @Column(type => Address)
+  @ConfigureLoader({ required: true })
+  requiredEmbed!: Address;
+
   @OneToOne(type => Author)
   @JoinColumn()
   @Field(type => Author)
@@ -40,6 +46,11 @@ export class DecoratorTest extends BaseEntity {
   @Field(type => Author, { nullable: true })
   @ConfigureLoader({ ignore: true })
   ignoredRelation?: Author;
+
+  @Field(type => Address, { nullable: true })
+  @Column(type => Address)
+  @ConfigureLoader({ ignore: true })
+  ignoredEmbed?: Address;
 
   @Field()
   @CreateDateColumn()

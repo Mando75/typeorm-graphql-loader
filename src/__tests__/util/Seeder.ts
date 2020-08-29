@@ -130,7 +130,9 @@ export class Seeder {
         requiredField: faker.lorem.words(1),
         ignoredField: faker.lorem.words(1),
         requiredRelation: authors[i % this.NUM_AUTHORS],
-        ignoredRelation: authors[i % this.NUM_AUTHORS]
+        ignoredRelation: authors[i % this.NUM_AUTHORS],
+        requiredEmbed: Seeder.addressFactory(),
+        ignoredEmbed: Seeder.addressFactory()
       };
       decoratorTests.push(dt);
     }
