@@ -16,6 +16,10 @@ export class DecoratorTestResolver {
     validateIgnoreRelation: boolean,
     @Arg("validateRequiredRelation", { nullable: true, defaultValue: false })
     validateRequiredRelation: boolean,
+    @Arg("validateRequiredEmbed", { nullable: true, defaultValue: false })
+    validateRequiredEmbed: boolean,
+    @Arg("validateIgnoreEmbed", { nullable: true, defaultValue: false })
+    validateIgnoreEmbed: boolean,
     @Ctx("loader") loader: GraphQLDatabaseLoader,
     @Info() info: GraphQLResolveInfo
   ) {
@@ -46,6 +50,18 @@ export class DecoratorTestResolver {
     if (validateRequiredRelation && !record?.requiredRelation) {
       throw new Error(
         "Validation Failed: Required Relation is missing in response"
+      );
+    }
+
+    if (validateRequiredEmbed && !record?.requiredEmbed) {
+      throw new Error(
+        "Validation Failed: Required Embed is missing in response"
+      );
+    }
+
+    if (validateIgnoreEmbed && record?.ignoredEmbed) {
+      throw new Error(
+        "Validation Failed: Ignored embed is present in response"
       );
     }
 
