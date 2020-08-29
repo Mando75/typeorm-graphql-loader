@@ -6,7 +6,7 @@ import {
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
 import { Field, Int, ObjectType } from "type-graphql";
 import { ConfigureLoader } from "../../";
@@ -15,7 +15,7 @@ import { Author } from "./Author";
 @ObjectType()
 @Entity()
 export class DecoratorTest extends BaseEntity {
-  @Field((type) => Int)
+  @Field(type => Int)
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -29,15 +29,15 @@ export class DecoratorTest extends BaseEntity {
   @ConfigureLoader({ required: true })
   requiredField!: string;
 
-  @OneToOne((type) => Author)
+  @OneToOne(type => Author)
   @JoinColumn()
-  @Field((type) => Author)
+  @Field(type => Author)
   @ConfigureLoader({ required: true })
   requiredRelation!: Author;
 
-  @OneToOne((type) => Author)
+  @OneToOne(type => Author)
   @JoinColumn()
-  @Field((type) => Author, { nullable: true })
+  @Field(type => Author, { nullable: true })
   @ConfigureLoader({ ignore: true })
   ignoredRelation?: Author;
 

@@ -11,7 +11,7 @@ export class Formatter {
     [
       [LoaderSearchMethod.ANY_POSITION, (text: string) => `%${text}%`],
       [LoaderSearchMethod.STARTS_WITH, (text: string) => `${text}%`],
-      [LoaderSearchMethod.ENDS_WITH, (text: string) => `%${text}`],
+      [LoaderSearchMethod.ENDS_WITH, (text: string) => `%${text}`]
     ]
   );
 
@@ -51,7 +51,7 @@ export class Formatter {
     alias: string,
     caseSensitive: boolean | undefined
   ) {
-    return searchColumns.map((field) => {
+    return searchColumns.map(field => {
       // straightforward, add a like field
       if (typeof field === "string") {
         const formattedColumnName = this.columnSelection(alias, field);
@@ -62,7 +62,7 @@ export class Formatter {
         // Indicates it is an array of columns we want to combine into a single
         // search
         const joinedFields = field
-          .map((item) => this.columnSelection(alias, item))
+          .map(item => this.columnSelection(alias, item))
           .join(" || ' ' || ");
         return caseSensitive
           ? `${joinedFields} LIKE :searchText`

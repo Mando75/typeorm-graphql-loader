@@ -5,9 +5,9 @@ import { GraphQLResolveInfo } from "graphql";
 
 @Resolver(DecoratorTest)
 export class DecoratorTestResolver {
-  @Query((returns) => DecoratorTest)
+  @Query(returns => DecoratorTest)
   async decoratorTests(
-    @Arg("dtId", (type) => Int) dtId: number,
+    @Arg("dtId", type => Int) dtId: number,
     @Arg("validateIgnoreField", { nullable: true, defaultValue: false })
     validateIgnoreField: boolean,
     @Arg("validateRequiredField", { nullable: true, defaultValue: false })

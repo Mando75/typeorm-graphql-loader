@@ -32,7 +32,7 @@ describe("Decorators", () => {
     const expected = {
       id: dt?.id,
       requiredField: dt?.requiredField,
-      ignoredField: null,
+      ignoredField: null
     };
 
     expect(result).to.not.have.key("errors");
@@ -55,7 +55,7 @@ describe("Decorators", () => {
 
     const expected = {
       id: dt?.id,
-      ignoredField: null,
+      ignoredField: null
     };
 
     expect(result).to.not.have.key("errors");
@@ -78,7 +78,7 @@ describe("Decorators", () => {
     const result = await graphql(schema, query, {}, { loader }, vars);
 
     const expected = {
-      id: dt?.id,
+      id: dt?.id
     };
 
     expect(result).to.not.have.key("errors");
@@ -106,7 +106,7 @@ describe("Decorators", () => {
       // Ignored is a non-nullable column on the db.
       // even so, the field should be ignored in the query
       // and return null.
-      ignoredField: null,
+      ignoredField: null
     };
 
     expect(result).to.not.have.key("errors");
@@ -134,7 +134,7 @@ describe("Decorators", () => {
       // Ignored is a non-nullable column on the db.
       // even so, the field should be ignored in the query
       // and return null.
-      ignoredRelation: null,
+      ignoredRelation: null
     };
 
     expect(result).to.not.have.key("errors");

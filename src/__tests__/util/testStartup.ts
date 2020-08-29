@@ -7,7 +7,7 @@ import { LoaderOptions } from "../../types";
 import { buildSchema } from "type-graphql";
 import { GraphQLSchema, printSchema } from "graphql";
 import * as fs from "fs";
-import {DecoratorTest} from "../entity/DecoratorTest";
+import { DecoratorTest } from "../entity/DecoratorTest";
 
 export interface TestHelpers {
   schema: GraphQLSchema;

@@ -7,7 +7,7 @@ import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 import { EmbeddedMetadata } from "typeorm/metadata/EmbeddedMetadata";
 import {
   getLoaderIgnoredFields,
-  getLoaderRequiredFields,
+  getLoaderRequiredFields
 } from "./ConfigureLoader";
 import * as crypto from "crypto";
 
@@ -26,7 +26,7 @@ export class GraphQLQueryResolver {
   constructor({
     primaryKeyColumn,
     namingStrategy,
-    maxQueryDepth,
+    maxQueryDepth
   }: LoaderOptions) {
     this._namingStrategy = namingStrategy ?? LoaderNamingStrategyEnum.CAMELCASE;
     this._primaryKeyColumn = primaryKeyColumn;
@@ -74,7 +74,7 @@ export class GraphQLQueryResolver {
       const requiredFields = getLoaderRequiredFields(meta.target);
       const ignoredFields = getLoaderIgnoredFields(meta.target);
       const fields = meta.columns.filter(
-        (field) =>
+        field =>
           !ignoredFields.get(field.propertyName) &&
           (field.isPrimary ||
             field.propertyName in selection.children! ||
@@ -82,7 +82,7 @@ export class GraphQLQueryResolver {
       );
 
       const embeddedFields = meta.embeddeds.filter(
-        (embed) =>
+        embed =>
           !ignoredFields.get(embed.propertyName) &&
           (embed.propertyName in selection.children! ||
             requiredFields.get(embed.propertyName))
@@ -129,7 +129,7 @@ export class GraphQLQueryResolver {
     alias: string
   ) {
     const embeddedFieldsToSelect: Array<Array<string>> = [];
-    embeddedFields.forEach((field) => {
+    embeddedFields.forEach(field => {
       // This is the name of the embedded entity on the TypeORM model
       const embeddedFieldName = field.propertyName;
 
@@ -139,7 +139,7 @@ export class GraphQLQueryResolver {
         // Extract the column names from the embedded field
         // so we can compare it to what was requested in the GraphQL query
         const embeddedFieldColumnNames = field.columns.map(
-          (column) => column.propertyName
+          column => column.propertyName
         );
         // Filter out any columns that weren't requested in GQL
         // and format them in a way that TypeORM can understand.
@@ -147,14 +147,14 @@ export class GraphQLQueryResolver {
         // .addSelect('table.embeddedField.embeddedColumn')
         embeddedFieldsToSelect.push(
           embeddedFieldColumnNames
-            .filter((columnName) => columnName in embeddedSelection.children!)
-            .map((columnName) => `${embeddedFieldName}.${columnName}`)
+            .filter(columnName => columnName in embeddedSelection.children!)
+            .map(columnName => `${embeddedFieldName}.${columnName}`)
         );
       }
     });
 
     // Now add each embedded select statement on to the query builder
-    embeddedFieldsToSelect.flat().forEach((field) => {
+    embeddedFieldsToSelect.flat().forEach(field => {
       queryBuilder = queryBuilder.addSelect(
         this._formatter.columnSelection(alias, field)
       );
@@ -180,7 +180,7 @@ export class GraphQLQueryResolver {
     queryBuilder = this._selectPrimaryKey(queryBuilder, fields, alias);
 
     // Add a select for each field that was requested in the query
-    fields.forEach((field) => {
+    fields.forEach(field => {
       // Make sure we account for embedded types
       const propertyName: string = field.propertyName;
       const databaseName: string = field.databaseName;
@@ -217,7 +217,7 @@ export class GraphQLQueryResolver {
 
     // Did they already include the primary key column in their query?
     const queriedPrimaryKey = fields.find(
-      (field) => field.propertyName === this._primaryKeyColumn
+      field => field.propertyName === this._primaryKeyColumn
     );
 
     // This will have already been selected
@@ -262,8 +262,8 @@ export class GraphQLQueryResolver {
     const ignoredFields = getLoaderIgnoredFields(meta.target);
 
     relations
-      .filter((relation) => !ignoredFields.get(relation.propertyName))
-      .forEach((relation) => {
+      .filter(relation => !ignoredFields.get(relation.propertyName))
+      .forEach(relation => {
         const isRequired: boolean = !!requiredFields.get(relation.propertyName);
         // Join each relation that was queried
         if (relation.propertyName in children || isRequired) {

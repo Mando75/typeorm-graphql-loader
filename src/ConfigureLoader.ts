@@ -3,12 +3,12 @@ import { LoaderFieldConfiguration } from "./types";
 
 const keys = {
   IGNORE_FIELD: Symbol("gqlLoader:ignoreField"),
-  REQUIRED_FIELD: Symbol("gqlLoader:requiredField"),
+  REQUIRED_FIELD: Symbol("gqlLoader:requiredField")
 };
 
 const defaultLoaderFieldConfiguration: LoaderFieldConfiguration = {
   ignore: false,
-  required: false,
+  required: false
 };
 
 /**
@@ -43,7 +43,7 @@ export const ConfigureLoader = (
 ) => {
   const { required, ignore } = {
     ...defaultLoaderFieldConfiguration,
-    ...options,
+    ...options
   };
 
   return (target: any, propertyKey: string) => {

@@ -53,7 +53,7 @@ describe("Query Builder options", () => {
   });
 
   it("respects the selectFields option", async () => {
-    const { schema, loader, connection} = helpers;
+    const { schema, loader, connection } = helpers;
     const query = `
       query getPaginatedReviews($offset: Int!, $limit: Int!) {
         paginatedReviews(offset: $offset, limit: $limit) {
