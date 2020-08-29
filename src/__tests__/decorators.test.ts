@@ -10,7 +10,7 @@ describe("Decorators", () => {
   let dt: DecoratorTest | undefined;
 
   before(async () => {
-    helpers = await startup("decorators", { logging: true });
+    helpers = await startup("decorators", { logging: false });
     dt = await helpers.connection.getRepository(DecoratorTest).findOne();
   });
 
