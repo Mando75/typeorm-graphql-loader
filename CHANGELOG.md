@@ -1,5 +1,14 @@
 # Change Log
 
+## [1.3.0]
+
+### Added
+A new decorator called `ConfigureLoader` that allows for more control over how entity fields/relations are resolved by the loader. For the initial version, the decorator allows you to ignore or require fields/embeds/relations during query resolution. This is still experimental and may require some hardening. For more information, see the [documentation](https://gql-loader.bmuller.net/globals.html#configureloader)
+
+### Deprecated
+
+`GraphQLQueryBuilder#selectFields`. This was always a rather flaky solution to the problem it was trying to solve. With the release of the configuration decorator, I don't plan on supporting or fixing any bugs with this anymore. Once the decorator API is solidified, this will be removed in a 2.0 release. 
+
 ## [1.2.0]
 
 ### Added
