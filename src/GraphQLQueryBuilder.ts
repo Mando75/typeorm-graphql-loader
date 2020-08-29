@@ -217,6 +217,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    * }
    * ```
    * @param fields
+   * @deprecated Use new `ConfigureLoader` decorator to require fields
    */
   public selectFields(fields: string | Array<string>): GraphQLQueryBuilder<T> {
     this._selectFields.push(fields);

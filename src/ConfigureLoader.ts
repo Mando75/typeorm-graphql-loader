@@ -1,11 +1,19 @@
 import "reflect-metadata";
 import { LoaderFieldConfiguration } from "./types";
 
+/**
+ * Internal keys for mapping entity metadata
+ * @hidden
+ */
 const keys = {
   IGNORE_FIELD: Symbol("gqlLoader:ignoreField"),
   REQUIRED_FIELD: Symbol("gqlLoader:requiredField")
 };
 
+/**
+ * Default args
+ * @hidden
+ */
 const defaultLoaderFieldConfiguration: LoaderFieldConfiguration = {
   ignore: false,
   required: false
