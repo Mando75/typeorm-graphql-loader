@@ -165,5 +165,40 @@ describe("Decorators", () => {
     expect(result.data?.decoratorTests).to.deep.equal(expected);
   });
 
-  it("ignores embedded fields correctly", async () => {});
+  it("ignores embedded fields correctly", async () => {
+    const { schema, loader } = helpers;
+
+    const query = `
+      query DecoratorTest($dtId: Int!, $validateIgnore: Boolean) {
+        decoratorTests(dtId: $dtId, validateIgnoreEmbed: $validateIgnore) {
+          id
+          requiredEmbed {
+            street
+            city
+          }
+          ignoredEmbed {
+            street 
+            city
+          }
+        }
+      }
+    `;
+    const vars = { dtId: dt?.id, validateIgnore: true };
+    const result = await graphql(schema, query, {}, { loader }, vars);
+
+    const expected = {
+      id: dt?.id,
+      // Ignored is a non-nullable column on the db.
+      // even so, the field should be ignored in the query
+      // and return null.
+      ignoredEmbed: null,
+      requiredEmbed: {
+        city: dt?.requiredEmbed.city,
+        street: dt?.requiredEmbed.street
+      }
+    };
+
+    expect(result).to.not.have.key("errors");
+    expect(result.data?.decoratorTests).to.deep.equal(expected);
+  });
 });
