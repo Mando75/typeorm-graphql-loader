@@ -94,6 +94,7 @@ export class GraphQLQueryResolver {
         queryBuilder,
         embeddedFields,
         selection.children,
+        meta,
         alias
       );
 
@@ -119,6 +120,7 @@ export class GraphQLQueryResolver {
    * @param queryBuilder
    * @param embeddedFields
    * @param children
+   * @param meta
    * @param alias
    * @private
    */
@@ -126,15 +128,25 @@ export class GraphQLQueryResolver {
     queryBuilder: SelectQueryBuilder<{}>,
     embeddedFields: Array<EmbeddedMetadata>,
     children: Hash<Selection>,
+    meta: EntityMetadata,
     alias: string
   ) {
     const embeddedFieldsToSelect: Array<Array<string>> = [];
+    const requiredFields = getLoaderRequiredFields(meta.target);
     embeddedFields.forEach(field => {
       // This is the name of the embedded entity on the TypeORM model
       const embeddedFieldName = field.propertyName;
 
-      // Check if this particular field was queried for in GraphQL
-      if (children.hasOwnProperty(embeddedFieldName)) {
+      // If the embed was required, just select everything
+      if (requiredFields.get(embeddedFieldName)) {
+        embeddedFieldsToSelect.push(
+          field.columns.map(
+            ({ propertyName }) => `${embeddedFieldName}.${propertyName}`
+          )
+        );
+
+        // Otherwise check if this particular field was queried for in GraphQL
+      } else if (children.hasOwnProperty(embeddedFieldName)) {
         const embeddedSelection = children[embeddedFieldName];
         // Extract the column names from the embedded field
         // so we can compare it to what was requested in the GraphQL query
