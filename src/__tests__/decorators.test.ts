@@ -140,4 +140,30 @@ describe("Decorators", () => {
     expect(result).to.not.have.key("errors");
     expect(result.data?.decoratorTests).to.deep.equal(expected);
   });
+
+  it("requires embedded fields correctly", async () => {
+    const { schema, loader } = helpers;
+
+    const query = `
+      query DecoratorTest($dtId: Int!, $validateRequired: Boolean) {
+        decoratorTests(dtId: $dtId, validateRequiredEmbed: $validateRequired) {
+          id
+          requiredField
+        }
+      } 
+    `;
+
+    const vars = { dtId: dt?.id, validateRequired: true };
+    const result = await graphql(schema, query, {}, { loader }, vars);
+
+    const expected = {
+      id: dt?.id,
+      requiredField: dt?.requiredField
+    };
+
+    expect(result).to.not.have.key("errors");
+    expect(result.data?.decoratorTests).to.deep.equal(expected);
+  });
+
+  it("ignores embedded fields correctly", async () => {});
 });
