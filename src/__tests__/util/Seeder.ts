@@ -1,5 +1,5 @@
 import { Connection, EntityManager } from "typeorm";
-import { Author, Publisher, Review, Book } from "../entity";
+import { Author, Book, DecoratorTest, Publisher, Review } from "../entity";
 import * as faker from "faker";
 
 export class Seeder {
@@ -7,6 +7,7 @@ export class Seeder {
   private readonly NUM_PUBLISHERS = 3;
   private readonly NUM_BOOKS = 50;
   private readonly NUM_REVIEWS = 100;
+  private readonly NUM_DECORATOR_TESTS = 10;
 
   constructor(private conn: Connection) {}
 
@@ -25,6 +26,7 @@ export class Seeder {
       const publishers = await this.seedPublishers(entityManager);
       const books = await this.seedBooks(entityManager, authors, publishers);
       await this.seedReviews(entityManager, books);
+      await this.seedDecoratorTests(entityManager, authors);
     });
   }
 
@@ -115,6 +117,31 @@ export class Seeder {
       .insert()
       .into(Review)
       .values(reviews)
+      .execute();
+  }
+
+  private async seedDecoratorTests(
+    manager: EntityManager,
+    authors: Array<Author>
+  ) {
+    const decoratorTests: Array<Partial<DecoratorTest>> = [];
+    for (let i = 1; i <= this.NUM_DECORATOR_TESTS; i++) {
+      const dt: Partial<DecoratorTest> = {
+        requiredField: faker.lorem.words(1),
+        ignoredField: faker.lorem.words(1),
+        requiredRelation: authors[i % this.NUM_AUTHORS],
+        ignoredRelation: authors[i % this.NUM_AUTHORS],
+        requiredEmbed: Seeder.addressFactory(),
+        ignoredEmbed: Seeder.addressFactory()
+      };
+      decoratorTests.push(dt);
+    }
+
+    await manager
+      .createQueryBuilder()
+      .insert()
+      .into(DecoratorTest)
+      .values(decoratorTests)
       .execute();
   }
 }

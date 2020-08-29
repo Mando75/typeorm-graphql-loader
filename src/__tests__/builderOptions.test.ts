@@ -74,7 +74,7 @@ describe("Query Builder options", () => {
 
     const vars = { offset: 0, limit: 10 };
     const result = await graphql(schema, query, {}, { loader }, vars);
-    const reviews = await helpers.connection
+    const reviews = await connection
       .getRepository(Review)
       .createQueryBuilder("review")
       .orderBy({ rating: "DESC" })

@@ -16,8 +16,8 @@ export class ReviewResolver {
     const [reviews, count] = await loader
       .loadEntity(Review)
       .info(info, "reviews")
-      .selectFields("rating")
       .paginate({ offset, limit })
+      .selectFields(["rating"])
       .order({ rating: "DESC" })
       .loadPaginated();
 
@@ -35,7 +35,7 @@ export class ReviewResolver {
     const [reviews, count] = await loader
       .loadEntity(Review)
       .info(info, "edges.node")
-      .selectFields("rating")
+      .selectFields(["rating"])
       .paginate({ offset: 0, limit: 15 })
       .loadPaginated();
     return new ReviewConnection(count, reviews);

@@ -1,10 +1,14 @@
 import { Hash, LoaderOptions, Selection } from "./types";
 import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
-import { Connection, SelectQueryBuilder } from "typeorm";
+import { Connection, EntityMetadata, SelectQueryBuilder } from "typeorm";
 import { Formatter } from "./lib/Formatter";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 import { EmbeddedMetadata } from "typeorm/metadata/EmbeddedMetadata";
+import {
+  getLoaderIgnoredFields,
+  getLoaderRequiredFields
+} from "./ConfigureLoader";
 import * as crypto from "crypto";
 
 /**
@@ -18,6 +22,7 @@ export class GraphQLQueryResolver {
   private readonly _namingStrategy: LoaderNamingStrategyEnum;
   private _formatter: Formatter;
   private readonly _maxDepth: number;
+
   constructor({
     primaryKeyColumn,
     namingStrategy,
@@ -27,6 +32,23 @@ export class GraphQLQueryResolver {
     this._primaryKeyColumn = primaryKeyColumn;
     this._formatter = new Formatter(this._namingStrategy);
     this._maxDepth = maxQueryDepth ?? Infinity;
+  }
+
+  private static _generateChildHash(
+    alias: string,
+    propertyName: string,
+    length = 0
+  ): string {
+    const hash = crypto.createHash("md5");
+    hash.update(`${alias}__${propertyName}`);
+
+    const output = hash.digest("hex");
+
+    if (length != 0) {
+      return output.slice(0, length);
+    }
+
+    return output;
   }
 
   /**
@@ -49,12 +71,21 @@ export class GraphQLQueryResolver {
   ): SelectQueryBuilder<{}> {
     const meta = connection.getMetadata(model);
     if (selection && selection.children) {
+      const requiredFields = getLoaderRequiredFields(meta.target);
+      const ignoredFields = getLoaderIgnoredFields(meta.target);
       const fields = meta.columns.filter(
-        field => field.isPrimary || field.propertyName in selection.children!
+        field =>
+          !ignoredFields.get(field.propertyName) &&
+          (field.isPrimary ||
+            field.propertyName in selection.children! ||
+            requiredFields.get(field.propertyName))
       );
 
       const embeddedFields = meta.embeddeds.filter(
-        embed => embed.propertyName in selection.children!
+        embed =>
+          !ignoredFields.get(embed.propertyName) &&
+          (embed.propertyName in selection.children! ||
+            requiredFields.get(embed.propertyName))
       );
 
       queryBuilder = this._selectFields(queryBuilder, fields, alias);
@@ -63,6 +94,7 @@ export class GraphQLQueryResolver {
         queryBuilder,
         embeddedFields,
         selection.children,
+        meta,
         alias
       );
 
@@ -72,6 +104,7 @@ export class GraphQLQueryResolver {
           selection.children,
           meta.relations,
           alias,
+          meta,
           connection,
           depth
         );
@@ -87,6 +120,7 @@ export class GraphQLQueryResolver {
    * @param queryBuilder
    * @param embeddedFields
    * @param children
+   * @param meta
    * @param alias
    * @private
    */
@@ -94,15 +128,25 @@ export class GraphQLQueryResolver {
     queryBuilder: SelectQueryBuilder<{}>,
     embeddedFields: Array<EmbeddedMetadata>,
     children: Hash<Selection>,
+    meta: EntityMetadata,
     alias: string
   ) {
     const embeddedFieldsToSelect: Array<Array<string>> = [];
+    const requiredFields = getLoaderRequiredFields(meta.target);
     embeddedFields.forEach(field => {
       // This is the name of the embedded entity on the TypeORM model
       const embeddedFieldName = field.propertyName;
 
-      // Check if this particular field was queried for in GraphQL
-      if (children.hasOwnProperty(embeddedFieldName)) {
+      // If the embed was required, just select everything
+      if (requiredFields.get(embeddedFieldName)) {
+        embeddedFieldsToSelect.push(
+          field.columns.map(
+            ({ propertyName }) => `${embeddedFieldName}.${propertyName}`
+          )
+        );
+
+        // Otherwise check if this particular field was queried for in GraphQL
+      } else if (children.hasOwnProperty(embeddedFieldName)) {
         const embeddedSelection = children[embeddedFieldName];
         // Extract the column names from the embedded field
         // so we can compare it to what was requested in the GraphQL query
@@ -212,6 +256,7 @@ export class GraphQLQueryResolver {
    * @param children
    * @param relations
    * @param alias
+   * @param meta
    * @param connection
    * @param depth
    * @private
@@ -221,50 +266,49 @@ export class GraphQLQueryResolver {
     children: Hash<Selection>,
     relations: Array<RelationMetadata>,
     alias: string,
+    meta: EntityMetadata,
     connection: Connection,
     depth: number
   ): SelectQueryBuilder<{}> {
-    relations.forEach(relation => {
-      // Join each relation that was queried
-      if (relation.propertyName in children) {
-        const childAlias = this._generateChildHash(
-          alias,
-          relation.propertyName,
-          10
-        );
-        queryBuilder = queryBuilder.leftJoin(
-          this._formatter.columnSelection(alias, relation.propertyName),
-          childAlias
-        );
-        // Recursively call createQuery to select and join any subfields
-        // from this relation
-        queryBuilder = this.createQuery(
-          relation.inverseEntityMetadata.target,
-          children[relation.propertyName],
-          connection,
-          queryBuilder,
-          childAlias,
-          depth + 1
-        );
-      }
-    });
+    const requiredFields = getLoaderRequiredFields(meta.target);
+    const ignoredFields = getLoaderIgnoredFields(meta.target);
+
+    relations
+      .filter(relation => !ignoredFields.get(relation.propertyName))
+      .forEach(relation => {
+        const isRequired: boolean = !!requiredFields.get(relation.propertyName);
+        // Join each relation that was queried
+        if (relation.propertyName in children || isRequired) {
+          const childAlias = GraphQLQueryResolver._generateChildHash(
+            alias,
+            relation.propertyName,
+            10
+          );
+
+          // For now, if a relation is required, we load the full entity
+          // via leftJoinAndSelect. It does not recurse through the required
+          // relation.
+          queryBuilder = isRequired
+            ? queryBuilder.leftJoinAndSelect(
+                this._formatter.columnSelection(alias, relation.propertyName),
+                childAlias
+              )
+            : queryBuilder.leftJoin(
+                this._formatter.columnSelection(alias, relation.propertyName),
+                childAlias
+              );
+          // Recursively call createQuery to select and join any subfields
+          // from this relation
+          queryBuilder = this.createQuery(
+            relation.inverseEntityMetadata.target,
+            children[relation.propertyName],
+            connection,
+            queryBuilder,
+            childAlias,
+            depth + 1
+          );
+        }
+      });
     return queryBuilder;
-  }
-
-  private _generateChildHash(
-    alias: string,
-    propertyName: string,
-    length = 0
-  ): string {
-    const hash = crypto.createHash("md5");
-    hash.update(`${alias}__${propertyName}`);
-
-    const output = hash.digest("hex");
-
-    if (length != 0) {
-      return output.slice(0, length);
-    }
-
-    return output;
   }
 }
