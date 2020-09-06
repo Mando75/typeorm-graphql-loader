@@ -78,6 +78,11 @@ export interface QueryPagination {
   offset: number;
 }
 
+export type FieldConfigurationPredicate = <K>(
+  context: K,
+  selection: Array<string>
+) => boolean;
+
 export interface LoaderFieldConfiguration {
   /**
    * When a field or relation is ignored, the loader will
@@ -94,7 +99,7 @@ export interface LoaderFieldConfiguration {
    * Please note that if a field is ignored, the entire sub-graph
    * will be ignored as well.
    */
-  ignore?: boolean;
+  ignore?: boolean | FieldConfigurationPredicate;
 
   /**
    * When a field or relation is required, the loader will always
@@ -114,7 +119,7 @@ export interface LoaderFieldConfiguration {
    * relation). It does not currently perform any recursive requires
    * for the joined relation.
    */
-  required?: boolean;
+  required?: boolean | FieldConfigurationPredicate;
 }
 
 /**

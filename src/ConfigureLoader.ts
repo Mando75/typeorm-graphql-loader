@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { LoaderFieldConfiguration } from "./types";
+import { FieldConfigurationPredicate, LoaderFieldConfiguration } from "./types";
 
 /**
  * Internal keys for mapping entity metadata
@@ -55,8 +55,10 @@ export const ConfigureLoader = (
   };
 
   return (target: any, propertyKey: string) => {
-    const ignoreSettings: Map<string, boolean | undefined> =
-      Reflect.getMetadata(keys.IGNORE_FIELD, target.constructor) ?? new Map();
+    const ignoreSettings: Map<
+      string,
+      boolean | FieldConfigurationPredicate | undefined
+    > = Reflect.getMetadata(keys.IGNORE_FIELD, target.constructor) ?? new Map();
     ignoreSettings.set(propertyKey, ignore);
     Reflect.defineMetadata(
       keys.IGNORE_FIELD,
@@ -64,7 +66,10 @@ export const ConfigureLoader = (
       target.constructor
     );
 
-    const requiredSettings: Map<string, boolean | undefined> =
+    const requiredSettings: Map<
+      string,
+      boolean | FieldConfigurationPredicate | undefined
+    > =
       Reflect.getMetadata(keys.REQUIRED_FIELD, target.constructor) ?? new Map();
     requiredSettings.set(propertyKey, required);
     Reflect.defineMetadata(
