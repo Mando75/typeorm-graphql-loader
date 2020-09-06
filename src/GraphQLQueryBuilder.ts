@@ -20,6 +20,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   private _selectFields: Array<string | Array<string>> = [];
   private _pagination?: QueryPagination;
   private _parser: GraphQLInfoParser = new GraphQLInfoParser();
+  private _context: any;
 
   constructor(
     private _manager: GraphQLQueryManager,
@@ -251,6 +252,30 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   public paginate(pagination: QueryPagination): GraphQLQueryBuilder<T> {
     this._pagination = pagination;
     return this;
+  }
+
+  /**
+   * Allows you to pass a user defined context to the loader. This context will
+   * be passed to the decorator predicates at resolve time.
+   *
+   * @example
+   * ```typescript
+   * function resolve(obj, args, context, info) {
+   *   return context
+   *     .loader
+   *     .loadEntity(User, "user")
+   *     .info(info)
+   *     .where("user.id = :id", { id: args.id })
+   *     // this method accepts any value for the context
+   *     .context({ requireRelation: true, ignoreField: false })
+   *     .loadOne()
+   * }
+   * ```
+   *
+   * @param context
+   */
+  public context<K>(context: K) {
+    this._context = context;
   }
 
   /**
