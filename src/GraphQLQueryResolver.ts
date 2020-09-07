@@ -95,13 +95,13 @@ export class GraphQLQueryResolver {
         alias
       );
 
-      // queryBuilder = this._selectRequiredFields(
-      //   queryBuilder,
-      //   selection.children,
-      //   alias,
-      //   meta,
-      //   context
-      // );
+      queryBuilder = this._selectRequiredFields(
+        queryBuilder,
+        selection.children,
+        alias,
+        meta,
+        context
+      );
 
       if (depth < this._maxDepth) {
         queryBuilder = this._selectRelations(
@@ -346,11 +346,16 @@ export class GraphQLQueryResolver {
         );
       } else if ((embed = embeddeds.find(matchingPropertyName))) {
         // Select embed
-        const { propertyName } = embed;
-        queryBuilder.addSelect(
-          this._formatter.columnSelection(alias, propertyName),
-          this._formatter.aliasField(alias, propertyName)
-        );
+        const { propertyName: embedName, columns } = embed;
+        columns.forEach(({ propertyName }) => {
+          queryBuilder.addSelect(
+            this._formatter.columnSelection(
+              alias,
+              `${embedName}.${propertyName}`
+            ),
+            this._formatter.aliasField(alias, propertyName)
+          );
+        });
       }
     });
     return queryBuilder;
