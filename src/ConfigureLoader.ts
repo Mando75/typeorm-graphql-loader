@@ -87,7 +87,7 @@ export const ConfigureLoader = (
  */
 export const getLoaderRequiredFields = (
   target: any
-): Map<string, boolean | undefined> => {
+): Map<string, boolean | FieldConfigurationPredicate | undefined> => {
   return Reflect.getMetadata(keys.REQUIRED_FIELD, target) ?? new Map();
 };
 
@@ -98,6 +98,6 @@ export const getLoaderRequiredFields = (
  */
 export const getLoaderIgnoredFields = (
   target: any
-): Map<string, boolean | undefined> => {
+): Map<string, boolean | FieldConfigurationPredicate | undefined> => {
   return Reflect.getMetadata(keys.IGNORE_FIELD, target) ?? new Map();
 };
