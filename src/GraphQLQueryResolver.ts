@@ -73,21 +73,17 @@ export class GraphQLQueryResolver {
   ): SelectQueryBuilder<{}> {
     const meta = connection.getMetadata(model);
     if (selection && selection.children) {
-      const requiredFields = getLoaderRequiredFields(meta.target);
       const ignoredFields = getLoaderIgnoredFields(meta.target);
       const fields = meta.columns.filter(
         field =>
           !ignoredFields.get(field.propertyName) &&
-          (field.isPrimary ||
-            field.propertyName in selection.children! ||
-            requiredFields.get(field.propertyName))
+          (field.isPrimary || field.propertyName in selection.children!)
       );
 
       const embeddedFields = meta.embeddeds.filter(
         embed =>
           !ignoredFields.get(embed.propertyName) &&
-          (embed.propertyName in selection.children! ||
-            requiredFields.get(embed.propertyName))
+          embed.propertyName in selection.children!
       );
 
       queryBuilder = this._selectFields(queryBuilder, fields, alias);
