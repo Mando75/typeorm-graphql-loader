@@ -59,6 +59,7 @@ export class GraphQLQueryResolver {
    * @param connection
    * @param queryBuilder
    * @param alias
+   * @param context
    * @param depth
    */
   public createQuery(
@@ -67,6 +68,7 @@ export class GraphQLQueryResolver {
     connection: Connection,
     queryBuilder: SelectQueryBuilder<{}>,
     alias: string,
+    context: any,
     depth = 0
   ): SelectQueryBuilder<{}> {
     const meta = connection.getMetadata(model);
@@ -97,6 +99,14 @@ export class GraphQLQueryResolver {
         meta,
         alias
       );
+
+      // queryBuilder = this._selectRequiredFields(
+      //   queryBuilder,
+      //   selection.children,
+      //   alias,
+      //   meta,
+      //   context
+      // );
 
       if (depth < this._maxDepth) {
         queryBuilder = this._selectRelations(
@@ -309,6 +319,66 @@ export class GraphQLQueryResolver {
           );
         }
       });
+    return queryBuilder;
+  }
+
+  private _selectRequiredFields(
+    queryBuilder: SelectQueryBuilder<{}>,
+    children: Hash<Selection>,
+    alias: string,
+    meta: EntityMetadata,
+    context: any
+  ): SelectQueryBuilder<{}> {
+    const requiredFields = getLoaderRequiredFields(meta.target);
+    const { columns, relations, embeddeds } = meta;
+
+    requiredFields.forEach((predicate, key) => {
+      // Find predicate
+      const matchingPropertyName = ({
+        propertyName
+      }: ColumnMetadata | RelationMetadata | EmbeddedMetadata) =>
+        propertyName === key;
+
+      // Determine whether the field is required by invoking the provided predicate
+      const isRequired =
+        typeof predicate === "function"
+          ? predicate(context, Object.keys(children))
+          : predicate;
+
+      let col: ColumnMetadata | undefined;
+      let rel: RelationMetadata | undefined;
+      let embed: EmbeddedMetadata | undefined;
+
+      if (!isRequired) {
+        return;
+      } else if ((col = columns.find(matchingPropertyName))) {
+        // Select Column
+        const { propertyName, databaseName } = col;
+        queryBuilder = queryBuilder.addSelect(
+          this._formatter.columnSelection(alias, propertyName),
+          this._formatter.aliasField(alias, databaseName)
+        );
+      } else if ((rel = relations.find(matchingPropertyName))) {
+        // Join Relation
+        const { propertyName } = rel;
+        const childAlias = GraphQLQueryResolver._generateChildHash(
+          alias,
+          propertyName,
+          10
+        );
+        queryBuilder.leftJoinAndSelect(
+          this._formatter.columnSelection(alias, propertyName),
+          childAlias
+        );
+      } else if ((embed = embeddeds.find(matchingPropertyName))) {
+        // Select embed
+        const { propertyName } = embed;
+        queryBuilder.addSelect(
+          this._formatter.columnSelection(alias, propertyName),
+          this._formatter.aliasField(alias, propertyName)
+        );
+      }
+    });
     return queryBuilder;
   }
 }
