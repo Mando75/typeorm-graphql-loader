@@ -263,33 +263,24 @@ export class GraphQLQueryResolver {
     connection: Connection,
     depth: number
   ): SelectQueryBuilder<{}> {
-    const requiredFields = getLoaderRequiredFields(meta.target);
     const ignoredFields = getLoaderIgnoredFields(meta.target);
 
     relations
       .filter(relation => !ignoredFields.get(relation.propertyName))
       .forEach(relation => {
-        const isRequired: boolean = !!requiredFields.get(relation.propertyName);
         // Join each relation that was queried
-        if (relation.propertyName in children || isRequired) {
+        if (relation.propertyName in children) {
           const childAlias = GraphQLQueryResolver._generateChildHash(
             alias,
             relation.propertyName,
             10
           );
 
-          // For now, if a relation is required, we load the full entity
-          // via leftJoinAndSelect. It does not recurse through the required
-          // relation.
-          queryBuilder = isRequired
-            ? queryBuilder.leftJoinAndSelect(
-                this._formatter.columnSelection(alias, relation.propertyName),
-                childAlias
-              )
-            : queryBuilder.leftJoin(
-                this._formatter.columnSelection(alias, relation.propertyName),
-                childAlias
-              );
+          // Join, but don't select the full relation
+          queryBuilder = queryBuilder.leftJoin(
+            this._formatter.columnSelection(alias, relation.propertyName),
+            childAlias
+          );
           // Recursively call createQuery to select and join any subfields
           // from this relation
           queryBuilder = this.createQuery(
