@@ -359,10 +359,10 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
       : InstanceType<T> | undefined
   > {
     // we need to validate an info object
-    this._validateInfo();
+    this._validateInfo(this._info);
     // Check if this query is already in the cache
     const { fields, found, key, item } = this._manager.processQueryMeta(
-      this._info!,
+      this._info,
       this._andWhereExpressions
     );
 
@@ -371,7 +371,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
       return item;
     }
 
-    // Otherwise build an executer and and add it to the cache
+    // Otherwise build an executor and and add it to the cache
     const executor = (
       resolve: (value?: any) => void,
       reject: (reason?: any) => void
@@ -398,10 +398,10 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   /**
    * Throw an error if the info object has not been defined for this query
    */
-  private _validateInfo() {
-    if (this._info) {
-      return true;
-    } else {
+  private _validateInfo(
+    info?: GraphQLResolveInfo | FieldNodeInfo | null
+  ): asserts info is GraphQLResolveInfo | FieldNodeInfo {
+    if (!this._info) {
       throw new Error(
         "Missing GraphQL Resolve info. Please invoke `.info()` before calling this method"
       );
