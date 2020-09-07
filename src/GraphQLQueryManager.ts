@@ -185,8 +185,6 @@ export class GraphQLQueryManager {
 
       const alias = item.alias ?? name;
 
-      const context = item.context;
-
       let queryBuilder: SelectQueryBuilder<{}> = GraphQLQueryManager.createTypeORMQueryBuilder(
         entityManager,
         name,
@@ -197,7 +195,8 @@ export class GraphQLQueryManager {
         item.fields,
         entityManager.connection,
         queryBuilder,
-        alias
+        alias,
+        item.context
       );
       queryBuilder = this._addSelectFields(
         queryBuilder,
