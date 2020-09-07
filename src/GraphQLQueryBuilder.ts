@@ -385,7 +385,8 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
         reject,
         entity: this._entity,
         pagination: paginate ? this._pagination : undefined,
-        alias: this._alias
+        alias: this._alias,
+        context: this._context
       });
     };
 

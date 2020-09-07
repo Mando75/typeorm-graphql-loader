@@ -146,6 +146,7 @@ export interface QueueItem {
   entity: Function | string;
   pagination?: QueryPagination;
   alias?: string;
+  context?: any;
 }
 
 /**
