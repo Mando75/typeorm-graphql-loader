@@ -1,5 +1,10 @@
 import "reflect-metadata";
-import { FieldConfigurationPredicate, LoaderFieldConfiguration } from "./types";
+import {
+  FieldConfigurationPredicate,
+  Hash,
+  LoaderFieldConfiguration,
+  Selection
+} from "./types";
 
 /**
  * Internal keys for mapping entity metadata
@@ -101,3 +106,12 @@ export const getLoaderIgnoredFields = (
 ): Map<string, boolean | FieldConfigurationPredicate | undefined> => {
   return Reflect.getMetadata(keys.IGNORE_FIELD, target) ?? new Map();
 };
+
+export const resolvePredicate = (
+  predicate: boolean | FieldConfigurationPredicate | undefined,
+  context: any,
+  children: Hash<Selection>
+): boolean | undefined =>
+  typeof predicate === "function"
+    ? predicate(context, Object.keys(children))
+    : predicate;

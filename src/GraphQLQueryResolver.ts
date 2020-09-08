@@ -7,7 +7,8 @@ import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 import { EmbeddedMetadata } from "typeorm/metadata/EmbeddedMetadata";
 import {
   getLoaderIgnoredFields,
-  getLoaderRequiredFields
+  getLoaderRequiredFields,
+  resolvePredicate
 } from "./ConfigureLoader";
 import * as crypto from "crypto";
 
@@ -109,6 +110,7 @@ export class GraphQLQueryResolver {
           selection.children,
           meta.relations,
           alias,
+          context,
           meta,
           connection,
           depth
@@ -249,6 +251,7 @@ export class GraphQLQueryResolver {
    * @param children
    * @param relations
    * @param alias
+   * @param context
    * @param meta
    * @param connection
    * @param depth
@@ -259,43 +262,78 @@ export class GraphQLQueryResolver {
     children: Hash<Selection>,
     relations: Array<RelationMetadata>,
     alias: string,
+    context: any,
     meta: EntityMetadata,
     connection: Connection,
     depth: number
   ): SelectQueryBuilder<{}> {
     const ignoredFields = getLoaderIgnoredFields(meta.target);
+    const requiredFields = getLoaderRequiredFields(meta.target);
 
-    relations
-      .filter(relation => !ignoredFields.get(relation.propertyName))
-      .forEach(relation => {
-        // Join each relation that was queried
-        if (relation.propertyName in children) {
-          const childAlias = GraphQLQueryResolver._generateChildHash(
-            alias,
-            relation.propertyName,
-            10
-          );
+    // Filter function for pulling out the relations we need to join
+    const relationFilter = (relation: RelationMetadata) =>
+      // Pass on ignored relations
+      !ignoredFields.get(relation.propertyName) &&
+      // check first to see if it was queried for
+      (relation.propertyName in children ||
+        // or if the field has been marked as required
+        resolvePredicate(
+          requiredFields.get(relation.propertyName),
+          context,
+          children
+        ));
 
-          // Join, but don't select the full relation
-          queryBuilder = queryBuilder.leftJoin(
-            this._formatter.columnSelection(alias, relation.propertyName),
-            childAlias
-          );
-          // Recursively call createQuery to select and join any subfields
-          // from this relation
-          queryBuilder = this.createQuery(
-            relation.inverseEntityMetadata.target,
-            children[relation.propertyName],
-            connection,
-            queryBuilder,
-            childAlias,
-            depth + 1
-          );
-        }
-      });
+    relations.filter(relationFilter).forEach(relation => {
+      // Join each relation that was queried
+      const childAlias = GraphQLQueryResolver._generateChildHash(
+        alias,
+        relation.propertyName,
+        10
+      );
+
+      if (
+        resolvePredicate(
+          requiredFields.get(relation.propertyName),
+          context,
+          children
+        )
+      ) {
+        queryBuilder = queryBuilder.leftJoinAndSelect(
+          this._formatter.columnSelection(alias, relation.propertyName),
+          childAlias
+        );
+      } else {
+        // Join, but don't select the full relation
+        queryBuilder = queryBuilder.leftJoin(
+          this._formatter.columnSelection(alias, relation.propertyName),
+          childAlias
+        );
+      }
+      // Recursively call createQuery to select and join any subfields
+      // from this relation
+      queryBuilder = this.createQuery(
+        relation.inverseEntityMetadata.target,
+        children[relation.propertyName],
+        connection,
+        queryBuilder,
+        childAlias,
+        context,
+        depth + 1
+      );
+    });
     return queryBuilder;
   }
 
+  /**
+   * Attaches fields marked as required via the ConfigureLoader decorator
+   * to the query builder.
+   * @param queryBuilder
+   * @param children
+   * @param alias
+   * @param meta
+   * @param context
+   * @private
+   */
   private _selectRequiredFields(
     queryBuilder: SelectQueryBuilder<{}>,
     children: Hash<Selection>,
@@ -304,59 +342,75 @@ export class GraphQLQueryResolver {
     context: any
   ): SelectQueryBuilder<{}> {
     const requiredFields = getLoaderRequiredFields(meta.target);
-    const { columns, relations, embeddeds } = meta;
 
-    requiredFields.forEach((predicate, key) => {
-      // Find predicate
-      const matchingPropertyName = ({
-        propertyName
-      }: ColumnMetadata | RelationMetadata | EmbeddedMetadata) =>
-        propertyName === key;
+    // We will use columns to attach properties and relations
+    const columns = meta.columns.filter(col => {
+      const predicate = requiredFields.get(col.propertyName);
+      return (
+        !col.relationMetadata && resolvePredicate(predicate, context, children)
+      );
+    });
 
-      // Determine whether the field is required by invoking the provided predicate
-      const isRequired =
-        typeof predicate === "function"
-          ? predicate(context, Object.keys(children))
-          : predicate;
+    // Used to attach embedded columns
+    const embeds = meta.embeddeds.filter(embed => {
+      const predicate = requiredFields.get(embed.propertyName);
+      return resolvePredicate(predicate, context, children);
+    });
 
-      let col: ColumnMetadata | undefined;
-      let rel: RelationMetadata | undefined;
-      let embed: EmbeddedMetadata | undefined;
+    queryBuilder = this._selectRequiredColumns(queryBuilder, columns, alias);
+    queryBuilder = this._selectRequiredEmbeds(queryBuilder, embeds, alias);
+    return queryBuilder;
+  }
 
-      if (!isRequired) {
-        return;
-      } else if ((col = columns.find(matchingPropertyName))) {
-        // Select Column
-        const { propertyName, databaseName } = col;
+  /**
+   * Selects columns depending on their column type.
+   * Properties are selected, relations are joined.
+   * @param queryBuilder
+   * @param columns
+   * @param alias
+   * @private
+   */
+  private _selectRequiredColumns(
+    queryBuilder: SelectQueryBuilder<{}>,
+    columns: Array<ColumnMetadata>,
+    alias: string
+  ): SelectQueryBuilder<{}> {
+    columns.forEach(col => {
+      const { propertyName, databaseName } = col;
+      // If relation metadata is present, this is a joinable column
+      if (!col.relationMetadata) {
+        // Otherwise we can assume this column is property and safe to select
         queryBuilder = queryBuilder.addSelect(
           this._formatter.columnSelection(alias, propertyName),
           this._formatter.aliasField(alias, databaseName)
         );
-      } else if ((rel = relations.find(matchingPropertyName))) {
-        // Join Relation
-        const { propertyName } = rel;
-        const childAlias = GraphQLQueryResolver._generateChildHash(
-          alias,
-          propertyName,
-          10
-        );
-        queryBuilder.leftJoinAndSelect(
-          this._formatter.columnSelection(alias, propertyName),
-          childAlias
-        );
-      } else if ((embed = embeddeds.find(matchingPropertyName))) {
-        // Select embed
-        const { propertyName: embedName, columns } = embed;
-        columns.forEach(({ propertyName }) => {
-          queryBuilder.addSelect(
-            this._formatter.columnSelection(
-              alias,
-              `${embedName}.${propertyName}`
-            ),
-            this._formatter.aliasField(alias, propertyName)
-          );
-        });
       }
+    });
+    return queryBuilder;
+  }
+
+  /**
+   * Select the required embeds. Embedded entities are a bit clunky to work
+   * with inside the query builder API, so we handle that junk here.
+   * @param queryBuilder
+   * @param embeds
+   * @param alias
+   * @private
+   */
+  private _selectRequiredEmbeds(
+    queryBuilder: SelectQueryBuilder<{}>,
+    embeds: Array<EmbeddedMetadata>,
+    alias: string
+  ): SelectQueryBuilder<{}> {
+    embeds.forEach(embed => {
+      // Select embed
+      const { propertyName: embedName, columns: embedColumns } = embed;
+
+      embedColumns.forEach(({ propertyName }) => {
+        queryBuilder.addSelect(
+          this._formatter.columnSelection(alias, `${embedName}.${propertyName}`)
+        );
+      });
     });
     return queryBuilder;
   }
