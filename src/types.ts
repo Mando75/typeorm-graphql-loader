@@ -78,9 +78,13 @@ export interface QueryPagination {
   offset: number;
 }
 
+/**
+ *
+ */
 export type FieldConfigurationPredicate = (
   context: any,
-  selection: Array<string>
+  queriedFields: Array<string>,
+  selection: Hash<Selection>
 ) => boolean;
 
 export interface LoaderFieldConfiguration {

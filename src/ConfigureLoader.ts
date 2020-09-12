@@ -110,8 +110,8 @@ export const getLoaderIgnoredFields = (
 export const resolvePredicate = (
   predicate: boolean | FieldConfigurationPredicate | undefined,
   context: any,
-  children: Hash<Selection> | undefined
+  selection: Hash<Selection> | undefined
 ): boolean | undefined =>
   typeof predicate === "function"
-    ? predicate(context, Object.keys(children ?? {}))
+    ? predicate(context, Object.keys(selection ?? {}), selection ?? {})
     : predicate;
