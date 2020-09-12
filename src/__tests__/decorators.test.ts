@@ -5,13 +5,16 @@ import { DecoratorTest } from "./entity";
 import { graphql } from "graphql";
 
 const { expect } = chai;
-describe("Decorators", () => {
+
+describe("ConfigureLoader", () => {
   let helpers: TestHelpers;
   let dt: DecoratorTest | undefined;
 
   before(async () => {
-    helpers = await startup("decorators", { logging: false });
-    dt = await helpers.connection.getRepository(DecoratorTest).findOne();
+    helpers = await startup("configure_loader", { logging: false });
+    dt = await helpers.connection
+      .getRepository(DecoratorTest)
+      .findOne({ relations: ["testRelation"] });
   });
 
   it("Can successfully execute a query against an entity with decorators", async () => {
@@ -22,6 +25,12 @@ describe("Decorators", () => {
         decoratorTests(dtId: $dtId) {
           id
           testField
+          testRelation {
+            id
+          }
+          testEmbed {
+            street
+          }
         }
       }
     `;
@@ -30,7 +39,13 @@ describe("Decorators", () => {
 
     const expected = {
       id: dt?.id,
-      testField: dt?.testField
+      testField: dt?.testField,
+      testRelation: {
+        id: dt?.testRelation.id
+      },
+      testEmbed: {
+        street: dt?.testEmbed.street
+      }
     };
 
     expect(result.errors).to.be.undefined;
@@ -44,6 +59,12 @@ describe("Decorators", () => {
       query DecoratorTest($dtId: Int!, $requireField: Boolean) {
         decoratorTests(dtId: $dtId, requireField: $requireField) {
           id
+          testRelation {
+            id
+          }
+          testEmbed {
+            street
+          }
         }
       }
     `;
@@ -53,7 +74,13 @@ describe("Decorators", () => {
     const result = await graphql(schema, query, {}, { loader }, vars);
 
     const expected = {
-      id: dt?.id
+      id: dt?.id,
+      testRelation: {
+        id: dt?.testRelation.id
+      },
+      testEmbed: {
+        street: dt?.testEmbed.street
+      }
     };
 
     expect(result.errors).to.be.undefined;
@@ -67,6 +94,10 @@ describe("Decorators", () => {
       query DecoratorTest($dtId: Int!, $requireRelation: Boolean) {
         decoratorTests(dtId: $dtId, requireRelation: $requireRelation) {
           id
+          testField
+          testEmbed {
+            street
+          } 
         }
       }
     `;
@@ -78,7 +109,11 @@ describe("Decorators", () => {
     const result = await graphql(schema, query, {}, { loader }, vars);
 
     const expected = {
-      id: dt?.id
+      id: dt?.id,
+      testField: dt?.testField,
+      testEmbed: {
+        street: dt?.testEmbed.street
+      }
     };
 
     expect(result.errors).to.be.undefined;
@@ -92,6 +127,10 @@ describe("Decorators", () => {
       query DecoratorTest($dtId: Int!, $requireEmbed: Boolean) {
         decoratorTests(dtId: $dtId, requireEmbed: $requireEmbed) {
           id
+          testField
+          testRelation {
+            id
+          }
         }
       } 
     `;
@@ -100,7 +139,11 @@ describe("Decorators", () => {
     const result = await graphql(schema, query, {}, { loader }, vars);
 
     const expected = {
-      id: dt?.id
+      id: dt?.id,
+      testField: dt?.testField,
+      testRelation: {
+        id: dt?.testRelation.id
+      }
     };
 
     expect(result.errors).to.be.undefined;
@@ -115,6 +158,12 @@ describe("Decorators", () => {
         decoratorTests(dtId: $dtId, ignoreField: $ignoreField) {
           id
           testField
+          testRelation {
+            id
+          }
+          testEmbed {
+            street
+          }
         }
       }
     `;
@@ -123,7 +172,13 @@ describe("Decorators", () => {
 
     const expected = {
       id: dt?.id,
-      testField: null
+      testField: null,
+      testRelation: {
+        id: dt?.testRelation.id
+      },
+      testEmbed: {
+        street: dt?.testEmbed.street
+      }
     };
     expect(result.errors).to.be.undefined;
     expect(result.data?.decoratorTests).to.deep.equal(expected);
@@ -136,8 +191,12 @@ describe("Decorators", () => {
       query DecoratorTest($dtId: Int!, $ignoreRelation: Boolean) {
         decoratorTests(dtId: $dtId, ignoreRelation: $ignoreRelation) {
           id
+          testField
           testRelation {
             id
+          }
+          testEmbed {
+            street
           }
         }
       }
@@ -147,10 +206,14 @@ describe("Decorators", () => {
 
     const expected = {
       id: dt?.id,
+      testField: dt?.testField,
       // Ignored is a non-nullable column on the db.
       // even so, the field should be ignored in the query
       // and return null.
-      testRelation: null
+      testRelation: null,
+      testEmbed: {
+        street: dt?.testEmbed.street
+      }
     };
 
     expect(result.errors).to.be.undefined;
@@ -164,6 +227,10 @@ describe("Decorators", () => {
       query DecoratorTest($dtId: Int!, $ignoreEmbed: Boolean) {
         decoratorTests(dtId: $dtId, ignoreEmbed: $ignoreEmbed) {
           id
+          testField
+          testRelation {
+            id
+          }
           testEmbed {
             street
             city
@@ -176,6 +243,10 @@ describe("Decorators", () => {
 
     const expected = {
       id: dt?.id,
+      testField: dt?.testField,
+      testRelation: {
+        id: dt?.testRelation.id
+      },
       // Ignored is a non-nullable column on the db.
       // even so, the field should be ignored in the query
       // and return null.
