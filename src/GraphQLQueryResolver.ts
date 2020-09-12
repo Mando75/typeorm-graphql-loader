@@ -73,18 +73,25 @@ export class GraphQLQueryResolver {
     depth = 0
   ): SelectQueryBuilder<{}> {
     const meta = connection.getMetadata(model);
-    if (selection && selection.children) {
+    if (selection?.children) {
       const ignoredFields = getLoaderIgnoredFields(meta.target);
       const fields = meta.columns.filter(
         field =>
-          !ignoredFields.get(field.propertyName) &&
+          !resolvePredicate(
+            ignoredFields.get(field.propertyName),
+            context,
+            selection.children
+          ) &&
           (field.isPrimary || field.propertyName in selection.children!)
       );
 
       const embeddedFields = meta.embeddeds.filter(
         embed =>
-          !ignoredFields.get(embed.propertyName) &&
-          embed.propertyName in selection.children!
+          !resolvePredicate(
+            ignoredFields.get(embed.propertyName),
+            context,
+            selection.children
+          ) && embed.propertyName in selection.children!
       );
 
       queryBuilder = this._selectFields(queryBuilder, fields, alias);
@@ -273,7 +280,11 @@ export class GraphQLQueryResolver {
     // Filter function for pulling out the relations we need to join
     const relationFilter = (relation: RelationMetadata) =>
       // Pass on ignored relations
-      !ignoredFields.get(relation.propertyName) &&
+      !resolvePredicate(
+        ignoredFields.get(relation.propertyName),
+        context,
+        children
+      ) &&
       // check first to see if it was queried for
       (relation.propertyName in children ||
         // or if the field has been marked as required
