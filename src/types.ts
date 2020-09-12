@@ -78,8 +78,8 @@ export interface QueryPagination {
   offset: number;
 }
 
-export type FieldConfigurationPredicate = <K>(
-  context: K,
+export type FieldConfigurationPredicate = (
+  context: any,
   selection: Array<string>
 ) => boolean;
 
