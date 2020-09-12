@@ -1,13 +1,11 @@
 import {
-  QueueItem,
-  WhereArgument,
-  WhereExpression,
   FieldNodeInfo,
   LoaderOptions,
-  LoaderWhereExpression,
   QueryMeta,
   QueryPagination,
-  SearchOptions
+  QueueItem,
+  SearchOptions,
+  WhereExpression
 } from "./types";
 import { LoaderSearchMethod } from "./enums/LoaderSearchMethod";
 import { GraphQLInfoParser } from "./lib/GraphQLInfoParser";

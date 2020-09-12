@@ -1,7 +1,6 @@
 import {
   Arg,
   Ctx,
-  ID,
   Info,
   Int,
   Query,

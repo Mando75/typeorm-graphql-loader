@@ -1,4 +1,4 @@
-import { Author, Book, Publisher, Review } from "../entity";
+import { Author, Book, DecoratorTest, Publisher, Review } from "../entity";
 import resolvers from "../resolvers";
 import { Connection, createConnection } from "typeorm";
 import { Seeder } from "./Seeder";
@@ -7,7 +7,6 @@ import { LoaderOptions } from "../../types";
 import { buildSchema } from "type-graphql";
 import { GraphQLSchema, printSchema } from "graphql";
 import * as fs from "fs";
-import { DecoratorTest } from "../entity/DecoratorTest";
 
 export interface TestHelpers {
   schema: GraphQLSchema;

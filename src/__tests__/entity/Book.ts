@@ -1,12 +1,12 @@
 import {
-  CreateDateColumn,
-  Column,
-  ManyToOne,
   BaseEntity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
   OneToMany,
-  Entity
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
 } from "typeorm";
 import { Author } from "./Author";
 import { Publisher } from "./Publisher";

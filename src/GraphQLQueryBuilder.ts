@@ -1,11 +1,11 @@
 import { GraphQLResolveInfo } from "graphql";
 import {
-  WhereArgument,
-  WhereExpression,
   FieldNodeInfo,
   QueryPagination,
   QueryPredicates,
-  SearchOptions
+  SearchOptions,
+  WhereArgument,
+  WhereExpression
 } from "./types";
 import { GraphQLQueryManager } from "./GraphQLQueryManager";
 import { BaseEntity, ObjectLiteral, OrderByCondition } from "typeorm";
