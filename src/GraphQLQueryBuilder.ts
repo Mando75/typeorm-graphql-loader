@@ -274,7 +274,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    *
    * @param context
    */
-  public context<K>(context: K): GraphQLQueryBuilder<T> {
+  public context(context: any): GraphQLQueryBuilder<T> {
     this._context = context;
     return this;
   }
