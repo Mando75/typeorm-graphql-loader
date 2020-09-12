@@ -1,5 +1,10 @@
 import { Author, Book, DecoratorTest, Publisher, Review } from "../entity";
-import resolvers from "../resolvers";
+import {
+  AuthorResolver,
+  BookResolver,
+  DecoratorTestResolver,
+  ReviewResolver
+} from "../resolvers";
 import { Connection, createConnection } from "typeorm";
 import { Seeder } from "./Seeder";
 import { GraphQLDatabaseLoader } from "../../GraphQLDatabaseLoader";
@@ -37,7 +42,14 @@ export async function startup(
   await seeder.seed();
 
   const loader = new GraphQLDatabaseLoader(connection, options?.loaderOptions);
-  const schema = await buildSchema({ resolvers });
+  const schema = await buildSchema({
+    resolvers: [
+      AuthorResolver,
+      BookResolver,
+      ReviewResolver,
+      DecoratorTestResolver
+    ]
+  });
 
   fs.writeFile("testSchema.graphql", printSchema(schema), err => {
     if (err) {
