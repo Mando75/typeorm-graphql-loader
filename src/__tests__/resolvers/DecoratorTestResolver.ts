@@ -2,64 +2,73 @@ import { Arg, Ctx, Info, Int, Query, Resolver } from "type-graphql";
 import { DecoratorTest } from "../entity/DecoratorTest";
 import { GraphQLDatabaseLoader } from "../../GraphQLDatabaseLoader";
 import { GraphQLResolveInfo } from "graphql";
+import { DecoratorContext } from "../util/DecoratorContext";
 
 @Resolver(DecoratorTest)
 export class DecoratorTestResolver {
   @Query(returns => DecoratorTest)
   async decoratorTests(
     @Arg("dtId", type => Int) dtId: number,
-    @Arg("validateIgnoreField", { nullable: true, defaultValue: false })
-    validateIgnoreField: boolean,
-    @Arg("validateRequiredField", { nullable: true, defaultValue: false })
-    validateRequiredField: boolean,
-    @Arg("validateIgnoreRelation", { nullable: true, defaultValue: false })
-    validateIgnoreRelation: boolean,
-    @Arg("validateRequiredRelation", { nullable: true, defaultValue: false })
-    validateRequiredRelation: boolean,
-    @Arg("validateRequiredEmbed", { nullable: true, defaultValue: false })
-    validateRequiredEmbed: boolean,
-    @Arg("validateIgnoreEmbed", { nullable: true, defaultValue: false })
-    validateIgnoreEmbed: boolean,
+    @Arg("ignoreField", { nullable: true, defaultValue: false })
+    ignoreField: boolean,
+    @Arg("requireField", { nullable: true, defaultValue: false })
+    requireField: boolean,
+    @Arg("ignoreRelation", { nullable: true, defaultValue: false })
+    ignoreRelation: boolean,
+    @Arg("requireRelation", { nullable: true, defaultValue: false })
+    requireRelation: boolean,
+    @Arg("requireEmbed", { nullable: true, defaultValue: false })
+    requireEmbed: boolean,
+    @Arg("ignoreEmbed", { nullable: true, defaultValue: false })
+    ignoreEmbed: boolean,
     @Ctx("loader") loader: GraphQLDatabaseLoader,
     @Info() info: GraphQLResolveInfo
   ) {
     const record = await loader
       .loadEntity(DecoratorTest, "dt")
       .info(info)
+      .context<DecoratorContext>({
+        ignoreRelation,
+        ignoreEmbed,
+        ignoreField,
+        requireRelation,
+        requireField,
+        requireEmbed
+      })
       .where("dt.id = :id", { id: dtId })
       .loadOne();
 
-    if (validateIgnoreField && record?.ignoredField) {
+    if (ignoreField && record?.testField) {
       throw new Error(
         "Validation Failed: Ignored Field is present in response"
       );
     }
 
-    if (validateIgnoreRelation && record?.ignoredRelation) {
+    if (ignoreRelation && record?.testRelation) {
       throw new Error(
         "Validation Failed: Ignored Relation is present in response"
       );
     }
 
-    if (validateRequiredField && !record?.requiredField) {
+    if (requireField && !record?.testField) {
       throw new Error(
         "Validation Failed: Required Field is missing in response"
       );
     }
 
-    if (validateRequiredRelation && !record?.requiredRelation) {
+    if (requireRelation && !record?.testRelation) {
       throw new Error(
         "Validation Failed: Required Relation is missing in response"
       );
     }
 
-    if (validateRequiredEmbed && !record?.requiredEmbed) {
+    if (requireEmbed && !record?.testEmbed) {
       throw new Error(
         "Validation Failed: Required Embed is missing in response"
       );
     }
 
-    if (validateIgnoreEmbed && record?.ignoredEmbed) {
+    if (ignoreEmbed && record?.testEmbed) {
       throw new Error(
         "Validation Failed: Ignored embed is present in response"
       );
