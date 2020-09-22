@@ -2,6 +2,10 @@
 
 ## [1.4.0]
 
+### Fixed
+
+Paginated records with order by conditions could come back in the incorrect order due to an internal TypeORM. A different TypeORM bug prevented the loader from using the suggested `skip/take` TypeORM API. That `skip/take` bug has been fixed, so the loader is able to switch to `skip/take` and address the ordering bug. 
+
 ### Changed
 
 The `ignore` and `requried` options in the `ConfigureLoader` decorator now also accept a predicate function in addition to primitive booleans. If given, the predicate function will be called at resolve time of that field during the GraphQL query resolution. For more information, read the [documentation](https://gql-loader.bmuller.net/globals.html#fieldconfigurationpredicate)
