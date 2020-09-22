@@ -11,7 +11,7 @@ Updated package dependencies and peer dependencies to latest versions
 
 ### Added
 
-A new `.context` method to the GraphQLQueryBuilder that receives a user defined context and passes it to the configuration decorator predicates at resolve time. See the [documentation](https://gql-loader.bmuller.net/classes/graphqlquerybuilder.html#context).
+A new `context` method to the GraphQLQueryBuilder that receives a user defined context and passes it to the configuration decorator predicates at resolve time. See the [documentation](https://gql-loader.bmuller.net/classes/graphqlquerybuilder.html#context).
 
 ## [1.3.0]
 
