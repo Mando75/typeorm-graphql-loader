@@ -1,11 +1,11 @@
 import { GraphQLResolveInfo } from "graphql";
 import {
-  WhereArgument,
-  WhereExpression,
   FieldNodeInfo,
   QueryPagination,
   QueryPredicates,
-  SearchOptions
+  SearchOptions,
+  WhereArgument,
+  WhereExpression
 } from "./types";
 import { GraphQLQueryManager } from "./GraphQLQueryManager";
 import { BaseEntity, ObjectLiteral, OrderByCondition } from "typeorm";
@@ -20,6 +20,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   private _selectFields: Array<string | Array<string>> = [];
   private _pagination?: QueryPagination;
   private _parser: GraphQLInfoParser = new GraphQLInfoParser();
+  private _context: any;
 
   constructor(
     private _manager: GraphQLQueryManager,
@@ -107,7 +108,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    * Like the {@link GraphQLQueryBuilder.where|where} method, it uses the SelectQueryBuilder where syntax
    *
    * @example
-   * ```
+   * ```typescript
    *  loader
    *    .loadEntity(Book, "books")
    *    .info(info)
@@ -254,6 +255,31 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   }
 
   /**
+   * Allows you to pass a user defined context to the loader. This context will
+   * be passed to the decorator predicates at resolve time.
+   *
+   * @example
+   * ```typescript
+   * function resolve(obj, args, context, info) {
+   *   return context
+   *     .loader
+   *     .loadEntity(User, "user")
+   *     .info(info)
+   *     .where("user.id = :id", { id: args.id })
+   *     // this method accepts any value for the context
+   *     .context({ requireRelation: true, ignoreField: false })
+   *     .loadOne()
+   * }
+   * ```
+   *
+   * @param context
+   */
+  public context<K>(context: K): GraphQLQueryBuilder<T> {
+    this._context = context;
+    return this;
+  }
+
+  /**
    * Load one record from the database.
    * This record will include all relations and fields requested
    * in the GraphQL query that exist on the TypeORM entities.
@@ -334,10 +360,10 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
       : InstanceType<T> | undefined
   > {
     // we need to validate an info object
-    this._validateInfo();
+    this._validateInfo(this._info);
     // Check if this query is already in the cache
     const { fields, found, key, item } = this._manager.processQueryMeta(
-      this._info!,
+      this._info,
       this._andWhereExpressions
     );
 
@@ -346,7 +372,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
       return item;
     }
 
-    // Otherwise build an executer and and add it to the cache
+    // Otherwise build an executor and and add it to the cache
     const executor = (
       resolve: (value?: any) => void,
       reject: (reason?: any) => void
@@ -360,7 +386,8 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
         reject,
         entity: this._entity,
         pagination: paginate ? this._pagination : undefined,
-        alias: this._alias
+        alias: this._alias,
+        context: this._context
       });
     };
 
@@ -373,10 +400,10 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   /**
    * Throw an error if the info object has not been defined for this query
    */
-  private _validateInfo() {
-    if (this._info) {
-      return true;
-    } else {
+  private _validateInfo(
+    info?: GraphQLResolveInfo | FieldNodeInfo | null
+  ): asserts info is GraphQLResolveInfo | FieldNodeInfo {
+    if (!this._info) {
       throw new Error(
         "Missing GraphQL Resolve info. Please invoke `.info()` before calling this method"
       );

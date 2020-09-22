@@ -1,6 +1,6 @@
-import { LoaderNamingStrategyEnum } from "../index";
+import { LoaderNamingStrategyEnum } from "..";
 import { snakeCase } from "typeorm/util/StringUtils";
-import { LoaderSearchMethod } from "../enums/LoaderSearchMethod";
+import { LoaderSearchMethod } from "..";
 
 /**
  * A helper class for formatting various sql strings used by the loader

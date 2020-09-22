@@ -1,5 +1,18 @@
 # Change Log
 
+## [1.4.0]
+
+### Changed
+
+The `ignore` and `requried` options in the `ConfigureLoader` decorator now also accept a predicate function in addition to primitive booleans. If given, the predicate function will be called at resolve time of that field during the GraphQL query resolution. For more information, read the [documentation](https://gql-loader.bmuller.net/globals.html#fieldconfigurationpredicate)
+
+Updated package dependencies and peer dependencies to latest versions
+
+
+### Added
+
+A new `context` method to the GraphQLQueryBuilder that receives a user defined context and passes it to the configuration decorator predicates at resolve time. See the [documentation](https://gql-loader.bmuller.net/classes/graphqlquerybuilder.html#context).
+
 ## [1.3.0]
 
 ### Added

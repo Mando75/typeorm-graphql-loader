@@ -78,6 +78,45 @@ export interface QueryPagination {
   offset: number;
 }
 
+/**
+ * This function will be called for each field at query resolution. The function will receive
+ * whatever value was passed in the {@link GraphQLQueryBuilder.context|context} method, a string list
+ * of queried fields from that entity, as well as the full selection object (GraphQL arguments and children) of
+ * the current entity
+ *
+ * @example
+ * ```typescript
+ * @Entity()
+ *
+ * const requireUserPredicate = (context, queriedFields, selection) => {
+ *   return context.requireUser || queriedFields.includes('userId') || selection.userId
+ * }
+ *
+ * class Author extends BaseEntity {
+ *
+ *   // This relation will never be fetched by the dataloader
+ *   @ConfigureLoader({ignore: (context) => context.ignoreBooks})
+ *   @OneToMany()
+ *   books: [Book]
+ *
+ *   // This relation will always be fetched by the dataloader
+ *   @ConfigureLoader({required: requireUserPredicate})
+ *   @OneToOne()
+ *   user: User
+ *
+ *   userId () {
+ *    return this.user.id
+ *   }
+ * }
+ *
+ * ```
+ */
+export type FieldConfigurationPredicate = (
+  context: any,
+  queriedFields: Array<string>,
+  selection: Hash<Selection>
+) => boolean;
+
 export interface LoaderFieldConfiguration {
   /**
    * When a field or relation is ignored, the loader will
@@ -94,7 +133,7 @@ export interface LoaderFieldConfiguration {
    * Please note that if a field is ignored, the entire sub-graph
    * will be ignored as well.
    */
-  ignore?: boolean;
+  ignore?: boolean | FieldConfigurationPredicate;
 
   /**
    * When a field or relation is required, the loader will always
@@ -114,7 +153,7 @@ export interface LoaderFieldConfiguration {
    * relation). It does not currently perform any recursive requires
    * for the joined relation.
    */
-  required?: boolean;
+  required?: boolean | FieldConfigurationPredicate;
 }
 
 /**
@@ -141,6 +180,7 @@ export interface QueueItem {
   entity: Function | string;
   pagination?: QueryPagination;
   alias?: string;
+  context?: any;
 }
 
 /**

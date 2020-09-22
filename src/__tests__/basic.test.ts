@@ -2,6 +2,7 @@ import * as chai from "chai";
 import { graphql } from "graphql";
 import { startup, TestHelpers } from "./util/testStartup";
 import { Author, Book } from "./entity";
+
 const deepEqualInAnyOrder = require("deep-equal-in-any-order");
 
 chai.use(deepEqualInAnyOrder);

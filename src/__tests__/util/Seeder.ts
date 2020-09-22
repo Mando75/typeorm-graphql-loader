@@ -127,12 +127,9 @@ export class Seeder {
     const decoratorTests: Array<Partial<DecoratorTest>> = [];
     for (let i = 1; i <= this.NUM_DECORATOR_TESTS; i++) {
       const dt: Partial<DecoratorTest> = {
-        requiredField: faker.lorem.words(1),
-        ignoredField: faker.lorem.words(1),
-        requiredRelation: authors[i % this.NUM_AUTHORS],
-        ignoredRelation: authors[i % this.NUM_AUTHORS],
-        requiredEmbed: Seeder.addressFactory(),
-        ignoredEmbed: Seeder.addressFactory()
+        testField: faker.lorem.words(1),
+        testRelation: authors[i % this.NUM_AUTHORS],
+        testEmbed: Seeder.addressFactory()
       };
       decoratorTests.push(dt);
     }

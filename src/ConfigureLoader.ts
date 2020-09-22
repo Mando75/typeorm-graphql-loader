@@ -1,5 +1,10 @@
 import "reflect-metadata";
-import { LoaderFieldConfiguration } from "./types";
+import {
+  FieldConfigurationPredicate,
+  Hash,
+  LoaderFieldConfiguration,
+  Selection
+} from "./types";
 
 /**
  * Internal keys for mapping entity metadata
@@ -44,7 +49,7 @@ const defaultLoaderFieldConfiguration: LoaderFieldConfiguration = {
  * }
  * ```
  *
- * @param options
+ * @param options - See {@link LoaderFieldConfiguration}
  */
 export const ConfigureLoader = (
   options: LoaderFieldConfiguration = defaultLoaderFieldConfiguration
@@ -55,8 +60,10 @@ export const ConfigureLoader = (
   };
 
   return (target: any, propertyKey: string) => {
-    const ignoreSettings: Map<string, boolean | undefined> =
-      Reflect.getMetadata(keys.IGNORE_FIELD, target.constructor) ?? new Map();
+    const ignoreSettings: Map<
+      string,
+      boolean | FieldConfigurationPredicate | undefined
+    > = Reflect.getMetadata(keys.IGNORE_FIELD, target.constructor) ?? new Map();
     ignoreSettings.set(propertyKey, ignore);
     Reflect.defineMetadata(
       keys.IGNORE_FIELD,
@@ -64,7 +71,10 @@ export const ConfigureLoader = (
       target.constructor
     );
 
-    const requiredSettings: Map<string, boolean | undefined> =
+    const requiredSettings: Map<
+      string,
+      boolean | FieldConfigurationPredicate | undefined
+    > =
       Reflect.getMetadata(keys.REQUIRED_FIELD, target.constructor) ?? new Map();
     requiredSettings.set(propertyKey, required);
     Reflect.defineMetadata(
@@ -82,7 +92,7 @@ export const ConfigureLoader = (
  */
 export const getLoaderRequiredFields = (
   target: any
-): Map<string, boolean | undefined> => {
+): Map<string, boolean | FieldConfigurationPredicate | undefined> => {
   return Reflect.getMetadata(keys.REQUIRED_FIELD, target) ?? new Map();
 };
 
@@ -93,6 +103,23 @@ export const getLoaderRequiredFields = (
  */
 export const getLoaderIgnoredFields = (
   target: any
-): Map<string, boolean | undefined> => {
+): Map<string, boolean | FieldConfigurationPredicate | undefined> => {
   return Reflect.getMetadata(keys.IGNORE_FIELD, target) ?? new Map();
 };
+
+/**
+ * Determines if predicate needs to be called as a function and passes
+ * the proper arguments if so
+ * @hidden
+ * @param predicate
+ * @param context
+ * @param selection
+ */
+export const resolvePredicate = (
+  predicate: boolean | FieldConfigurationPredicate | undefined,
+  context: any,
+  selection: Hash<Selection> | undefined
+): boolean | undefined =>
+  typeof predicate === "function"
+    ? predicate(context, Object.keys(selection ?? {}), selection ?? {})
+    : predicate;

@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn
 } from "typeorm";
 import { Book } from "./Book";
-import { Int, Field, ObjectType } from "type-graphql";
+import { Field, Int, ObjectType } from "type-graphql";
 
 @ObjectType()
 @Entity()

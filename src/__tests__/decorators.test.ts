@@ -5,13 +5,16 @@ import { DecoratorTest } from "./entity";
 import { graphql } from "graphql";
 
 const { expect } = chai;
-describe("Decorators", () => {
+
+describe("ConfigureLoader", () => {
   let helpers: TestHelpers;
   let dt: DecoratorTest | undefined;
 
   before(async () => {
-    helpers = await startup("decorators", { logging: false });
-    dt = await helpers.connection.getRepository(DecoratorTest).findOne();
+    helpers = await startup("configure_loader", { logging: false });
+    dt = await helpers.connection
+      .getRepository(DecoratorTest)
+      .findOne({ relations: ["testRelation"] });
   });
 
   it("Can successfully execute a query against an entity with decorators", async () => {
@@ -21,8 +24,13 @@ describe("Decorators", () => {
       query DecoratorTest($dtId: Int!) {
         decoratorTests(dtId: $dtId) {
           id
-          requiredField
-          ignoredField
+          testField
+          testRelation {
+            id
+          }
+          testEmbed {
+            street
+          }
         }
       }
     `;
@@ -31,11 +39,16 @@ describe("Decorators", () => {
 
     const expected = {
       id: dt?.id,
-      requiredField: dt?.requiredField,
-      ignoredField: null
+      testField: dt?.testField,
+      testRelation: {
+        id: dt?.testRelation.id
+      },
+      testEmbed: {
+        street: dt?.testEmbed.street
+      }
     };
 
-    expect(result).to.not.have.key("errors");
+    expect(result.errors).to.be.undefined;
     expect(result.data?.decoratorTests).to.deep.equal(expected);
   });
 
@@ -43,22 +56,34 @@ describe("Decorators", () => {
     const { schema, loader } = helpers;
 
     const query = `
-      query DecoratorTest($dtId: Int!, $validateRequired: Boolean) {
-        decoratorTests(dtId: $dtId, validateRequiredField: $validateRequired) {
+      query DecoratorTest($dtId: Int!, $requireField: Boolean) {
+        decoratorTests(dtId: $dtId, requireField: $requireField) {
           id
-          ignoredField
+          testRelation {
+            id
+          }
+          testEmbed {
+            street
+          }
         }
       }
     `;
-    const vars = { dtId: dt?.id, validateRequired: true };
+    const vars = { dtId: dt?.id, requireField: true };
+    // The resolver will throw an error if a required field is missing
+    // in the record response
     const result = await graphql(schema, query, {}, { loader }, vars);
 
     const expected = {
       id: dt?.id,
-      ignoredField: null
+      testRelation: {
+        id: dt?.testRelation.id
+      },
+      testEmbed: {
+        street: dt?.testEmbed.street
+      }
     };
 
-    expect(result).to.not.have.key("errors");
+    expect(result.errors).to.be.undefined;
     expect(result.data?.decoratorTests).to.deep.equal(expected);
   });
 
@@ -66,22 +91,62 @@ describe("Decorators", () => {
     const { schema, loader } = helpers;
 
     const query = `
-      query DecoratorTest($dtId: Int!, $validateRequiredRelation: Boolean) {
-        decoratorTests(dtId: $dtId, validateRequiredRelation: $validateRequiredRelation) {
+      query DecoratorTest($dtId: Int!, $requireRelation: Boolean) {
+        decoratorTests(dtId: $dtId, requireRelation: $requireRelation) {
           id
+          testField
+          testEmbed {
+            street
+          } 
         }
       }
     `;
 
-    const vars = { dtId: dt?.id, validateRequiredRelation: true };
+    const vars = { dtId: dt?.id, requireRelation: true };
 
+    // The resolver will throw an error if a required relation is missing
+    // in the record response
     const result = await graphql(schema, query, {}, { loader }, vars);
 
     const expected = {
-      id: dt?.id
+      id: dt?.id,
+      testField: dt?.testField,
+      testEmbed: {
+        street: dt?.testEmbed.street
+      }
     };
 
-    expect(result).to.not.have.key("errors");
+    expect(result.errors).to.be.undefined;
+    expect(result.data?.decoratorTests).to.deep.equal(expected);
+  });
+
+  it("loads a required embedded field even when not requested", async () => {
+    const { schema, loader } = helpers;
+
+    const query = `
+      query DecoratorTest($dtId: Int!, $requireEmbed: Boolean) {
+        decoratorTests(dtId: $dtId, requireEmbed: $requireEmbed) {
+          id
+          testField
+          testRelation {
+            id
+          }
+        }
+      } 
+    `;
+
+    const vars = { dtId: dt?.id, requireEmbed: true };
+    const result = await graphql(schema, query, {}, { loader }, vars);
+
+    const expected = {
+      id: dt?.id,
+      testField: dt?.testField,
+      testRelation: {
+        id: dt?.testRelation.id
+      }
+    };
+
+    expect(result.errors).to.be.undefined;
     expect(result.data?.decoratorTests).to.deep.equal(expected);
   });
 
@@ -89,27 +154,33 @@ describe("Decorators", () => {
     const { schema, loader } = helpers;
 
     const query = `
-      query DecoratorTest($dtId: Int!, $validateIgnore: Boolean) {
-        decoratorTests(dtId: $dtId, validateIgnoreField: $validateIgnore) {
+      query DecoratorTest($dtId: Int!, $ignoreField: Boolean) {
+        decoratorTests(dtId: $dtId, ignoreField: $ignoreField) {
           id
-          requiredField
-          ignoredField
+          testField
+          testRelation {
+            id
+          }
+          testEmbed {
+            street
+          }
         }
       }
     `;
-    const vars = { dtId: dt?.id, validateIgnore: true };
+    const vars = { dtId: dt?.id, ignoreField: true };
     const result = await graphql(schema, query, {}, { loader }, vars);
 
     const expected = {
       id: dt?.id,
-      requiredField: dt?.requiredField,
-      // Ignored is a non-nullable column on the db.
-      // even so, the field should be ignored in the query
-      // and return null.
-      ignoredField: null
+      testField: null,
+      testRelation: {
+        id: dt?.testRelation.id
+      },
+      testEmbed: {
+        street: dt?.testEmbed.street
+      }
     };
-
-    expect(result).to.not.have.key("errors");
+    expect(result.errors).to.be.undefined;
     expect(result.data?.decoratorTests).to.deep.equal(expected);
   });
 
@@ -117,51 +188,35 @@ describe("Decorators", () => {
     const { schema, loader } = helpers;
 
     const query = `
-      query DecoratorTest($dtId: Int!, $validateIgnore: Boolean) {
-        decoratorTests(dtId: $dtId, validateIgnoreRelation: $validateIgnore) {
+      query DecoratorTest($dtId: Int!, $ignoreRelation: Boolean) {
+        decoratorTests(dtId: $dtId, ignoreRelation: $ignoreRelation) {
           id
-          ignoredRelation {
+          testField
+          testRelation {
             id
+          }
+          testEmbed {
+            street
           }
         }
       }
     `;
-    const vars = { dtId: dt?.id, validateIgnore: true };
+    const vars = { dtId: dt?.id, ignoreRelation: true };
     const result = await graphql(schema, query, {}, { loader }, vars);
 
     const expected = {
       id: dt?.id,
+      testField: dt?.testField,
       // Ignored is a non-nullable column on the db.
       // even so, the field should be ignored in the query
       // and return null.
-      ignoredRelation: null
+      testRelation: null,
+      testEmbed: {
+        street: dt?.testEmbed.street
+      }
     };
 
-    expect(result).to.not.have.key("errors");
-    expect(result.data?.decoratorTests).to.deep.equal(expected);
-  });
-
-  it("requires embedded fields correctly", async () => {
-    const { schema, loader } = helpers;
-
-    const query = `
-      query DecoratorTest($dtId: Int!, $validateRequired: Boolean) {
-        decoratorTests(dtId: $dtId, validateRequiredEmbed: $validateRequired) {
-          id
-          requiredField
-        }
-      } 
-    `;
-
-    const vars = { dtId: dt?.id, validateRequired: true };
-    const result = await graphql(schema, query, {}, { loader }, vars);
-
-    const expected = {
-      id: dt?.id,
-      requiredField: dt?.requiredField
-    };
-
-    expect(result).to.not.have.key("errors");
+    expect(result.errors).to.be.undefined;
     expect(result.data?.decoratorTests).to.deep.equal(expected);
   });
 
@@ -169,36 +224,36 @@ describe("Decorators", () => {
     const { schema, loader } = helpers;
 
     const query = `
-      query DecoratorTest($dtId: Int!, $validateIgnore: Boolean) {
-        decoratorTests(dtId: $dtId, validateIgnoreEmbed: $validateIgnore) {
+      query DecoratorTest($dtId: Int!, $ignoreEmbed: Boolean) {
+        decoratorTests(dtId: $dtId, ignoreEmbed: $ignoreEmbed) {
           id
-          requiredEmbed {
-            street
-            city
+          testField
+          testRelation {
+            id
           }
-          ignoredEmbed {
-            street 
+          testEmbed {
+            street
             city
           }
         }
       }
     `;
-    const vars = { dtId: dt?.id, validateIgnore: true };
+    const vars = { dtId: dt?.id, ignoreEmbed: true };
     const result = await graphql(schema, query, {}, { loader }, vars);
 
     const expected = {
       id: dt?.id,
+      testField: dt?.testField,
+      testRelation: {
+        id: dt?.testRelation.id
+      },
       // Ignored is a non-nullable column on the db.
       // even so, the field should be ignored in the query
       // and return null.
-      ignoredEmbed: null,
-      requiredEmbed: {
-        city: dt?.requiredEmbed.city,
-        street: dt?.requiredEmbed.street
-      }
+      testEmbed: null
     };
 
-    expect(result).to.not.have.key("errors");
+    expect(result.errors).to.be.undefined;
     expect(result.data?.decoratorTests).to.deep.equal(expected);
   });
 });

@@ -12,6 +12,7 @@ import { Field, Int, ObjectType } from "type-graphql";
 import { ConfigureLoader } from "../../";
 import { Author } from "./Author";
 import { Address } from "./Address";
+import { DecoratorContext } from "../util/DecoratorContext";
 
 @ObjectType()
 @Entity()
@@ -22,35 +23,28 @@ export class DecoratorTest extends BaseEntity {
 
   @Field({ nullable: true })
   @Column("varchar", { nullable: false })
-  @ConfigureLoader({ ignore: true })
-  ignoredField?: string;
+  @ConfigureLoader({
+    ignore: (context: DecoratorContext) => context.ignoreField,
+    required: (context: DecoratorContext) => context.requireField
+  })
+  testField?: string;
 
-  @Column("varchar", { nullable: false })
-  @Field()
-  @ConfigureLoader({ required: true })
-  requiredField!: string;
-
-  @Field(type => Address)
+  @Field(type => Address, { nullable: true })
   @Column(type => Address)
-  @ConfigureLoader({ required: true })
-  requiredEmbed!: Address;
-
-  @OneToOne(type => Author)
-  @JoinColumn()
-  @Field(type => Author)
-  @ConfigureLoader({ required: true })
-  requiredRelation!: Author;
+  @ConfigureLoader({
+    ignore: (context: DecoratorContext) => context.ignoreEmbed,
+    required: (context: DecoratorContext) => context.requireEmbed
+  })
+  testEmbed!: Address;
 
   @OneToOne(type => Author)
   @JoinColumn()
   @Field(type => Author, { nullable: true })
-  @ConfigureLoader({ ignore: true })
-  ignoredRelation?: Author;
-
-  @Field(type => Address, { nullable: true })
-  @Column(type => Address)
-  @ConfigureLoader({ ignore: true })
-  ignoredEmbed?: Address;
+  @ConfigureLoader({
+    ignore: (context: DecoratorContext) => context.ignoreRelation,
+    required: (context: DecoratorContext) => context.requireRelation
+  })
+  testRelation!: Author;
 
   @Field()
   @CreateDateColumn()

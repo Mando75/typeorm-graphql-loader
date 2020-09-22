@@ -1,5 +1,10 @@
-import { Author, Book, Publisher, Review } from "../entity";
-import resolvers from "../resolvers";
+import { Author, Book, DecoratorTest, Publisher, Review } from "../entity";
+import {
+  AuthorResolver,
+  BookResolver,
+  DecoratorTestResolver,
+  ReviewResolver
+} from "../resolvers";
 import { Connection, createConnection } from "typeorm";
 import { Seeder } from "./Seeder";
 import { GraphQLDatabaseLoader } from "../../GraphQLDatabaseLoader";
@@ -7,7 +12,6 @@ import { LoaderOptions } from "../../types";
 import { buildSchema } from "type-graphql";
 import { GraphQLSchema, printSchema } from "graphql";
 import * as fs from "fs";
-import { DecoratorTest } from "../entity/DecoratorTest";
 
 export interface TestHelpers {
   schema: GraphQLSchema;
@@ -38,7 +42,14 @@ export async function startup(
   await seeder.seed();
 
   const loader = new GraphQLDatabaseLoader(connection, options?.loaderOptions);
-  const schema = await buildSchema({ resolvers });
+  const schema = await buildSchema({
+    resolvers: [
+      AuthorResolver,
+      BookResolver,
+      ReviewResolver,
+      DecoratorTestResolver
+    ]
+  });
 
   fs.writeFile("testSchema.graphql", printSchema(schema), err => {
     if (err) {
