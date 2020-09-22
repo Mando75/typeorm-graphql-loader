@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "prepare": "yarn build",
+    "prepare": "yarn build && yarn lint && yarn test",
     "build": "tsc --declaration",
     "publish:docs": "typedoc --options typedoc.json",
     "lint": "eslint 'src/**/*.ts'",
