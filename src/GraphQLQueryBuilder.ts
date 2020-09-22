@@ -108,7 +108,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    * Like the {@link GraphQLQueryBuilder.where|where} method, it uses the SelectQueryBuilder where syntax
    *
    * @example
-   * ```
+   * ```typescript
    *  loader
    *    .loadEntity(Book, "books")
    *    .info(info)

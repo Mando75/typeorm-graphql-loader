@@ -79,7 +79,37 @@ export interface QueryPagination {
 }
 
 /**
+ * This function will be called for each field at query resolution. The function will receive
+ * whatever value was passed in the {@link GraphQLQueryBuilder.context|context} method, a string list
+ * of queried fields from that entity, as well as the full selection object (GraphQL arguments and children) of
+ * the current entity
  *
+ * @example
+ * ```typescript
+ * @Entity()
+ *
+ * const requireUserPredicate = (context, queriedFields, selection) => {
+ *   return context.requireUser || queriedFields.includes('userId') || selection.userId
+ * }
+ *
+ * class Author extends BaseEntity {
+ *
+ *   // This relation will never be fetched by the dataloader
+ *   @ConfigureLoader({ignore: (context) => context.ignoreBooks})
+ *   @OneToMany()
+ *   books: [Book]
+ *
+ *   // This relation will always be fetched by the dataloader
+ *   @ConfigureLoader({required: requireUserPredicate})
+ *   @OneToOne()
+ *   user: User
+ *
+ *   userId () {
+ *    return this.user.id
+ *   }
+ * }
+ *
+ * ```
  */
 export type FieldConfigurationPredicate = (
   context: any,
