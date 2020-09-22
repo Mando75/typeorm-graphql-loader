@@ -355,8 +355,8 @@ export class GraphQLQueryManager {
     pagination: QueryPagination | undefined
   ): SelectQueryBuilder<{}> {
     if (pagination) {
-      queryBuilder = queryBuilder.offset(pagination.offset);
-      queryBuilder = queryBuilder.limit(pagination.limit);
+      queryBuilder = queryBuilder.skip(pagination.offset);
+      queryBuilder = queryBuilder.take(pagination.limit);
     }
     return queryBuilder;
   }
