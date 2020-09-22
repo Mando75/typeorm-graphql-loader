@@ -86,20 +86,20 @@ export interface QueryPagination {
  *
  * @example
  * ```typescript
- * @Entity()
  *
  * const requireUserPredicate = (context, queriedFields, selection) => {
  *   return context.requireUser || queriedFields.includes('userId') || selection.userId
  * }
  *
+ * @Entity()
  * class Author extends BaseEntity {
  *
- *   // This relation will never be fetched by the dataloader
+ *   // This relation will not be fetched if context value is false
  *   @ConfigureLoader({ignore: (context) => context.ignoreBooks})
  *   @OneToMany()
  *   books: [Book]
  *
- *   // This relation will always be fetched by the dataloader
+ *   // This relation will be joined if the predicate returns true
  *   @ConfigureLoader({required: requireUserPredicate})
  *   @OneToOne()
  *   user: User
