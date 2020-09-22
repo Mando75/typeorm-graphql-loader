@@ -86,12 +86,12 @@ export interface QueryPagination {
  *
  * @example
  * ```typescript
- * @Entity()
  *
  * const requireUserPredicate = (context, queriedFields, selection) => {
  *   return context.requireUser || queriedFields.includes('userId') || selection.userId
  * }
  *
+ * @Entity()
  * class Author extends BaseEntity {
  *
  *   // This relation will never be fetched by the dataloader
