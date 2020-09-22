@@ -1,5 +1,5 @@
 import { Arg, Ctx, Info, Int, Query, Resolver } from "type-graphql";
-import { DecoratorTest } from "../entity/DecoratorTest";
+import { DecoratorTest } from "../entity";
 import { GraphQLDatabaseLoader } from "../../GraphQLDatabaseLoader";
 import { GraphQLResolveInfo } from "graphql";
 import { DecoratorContext } from "../util/DecoratorContext";

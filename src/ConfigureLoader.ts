@@ -49,7 +49,7 @@ const defaultLoaderFieldConfiguration: LoaderFieldConfiguration = {
  * }
  * ```
  *
- * @param options
+ * @param options - See {@link LoaderFieldConfiguration}
  */
 export const ConfigureLoader = (
   options: LoaderFieldConfiguration = defaultLoaderFieldConfiguration
@@ -107,6 +107,14 @@ export const getLoaderIgnoredFields = (
   return Reflect.getMetadata(keys.IGNORE_FIELD, target) ?? new Map();
 };
 
+/**
+ * Determines if predicate needs to be called as a function and passes
+ * the proper arguments if so
+ * @hidden
+ * @param predicate
+ * @param context
+ * @param selection
+ */
 export const resolvePredicate = (
   predicate: boolean | FieldConfigurationPredicate | undefined,
   context: any,
