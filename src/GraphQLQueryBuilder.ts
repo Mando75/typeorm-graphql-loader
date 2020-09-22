@@ -184,9 +184,9 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    * function resolver(obj, args, context, info) {
    *   return context
    *     .loader
-   *     .loadEntity(User)
+   *     .loadEntity(User, 'user')
    *     .info(info)
-   *     .order({createdAt: 'ASC'})
+   *     .order({'user.createdAt': 'ASC'})
    *     .loadMany()
    * }
    * ```
