@@ -14,11 +14,11 @@ export class ReviewResolver {
     @Info() info: GraphQLResolveInfo
   ): Promise<PaginatedReviews> {
     const [reviews, count] = await loader
-      .loadEntity(Review, "review")
+      .loadEntity(Review)
       .info(info, "reviews")
       .paginate({ offset, limit })
       .selectFields(["rating"])
-      .order({ "review.rating": "DESC" })
+      .order({ rating: "DESC" })
       .loadPaginated();
 
     const nextOffset = offset + limit;
@@ -52,10 +52,10 @@ export class ReviewResolver {
     @Info() info: GraphQLResolveInfo
   ): Promise<PaginatedReviews> {
     const [reviews, count] = await loader
-      .loadEntity(Review, "review")
+      .loadEntity(Review)
       .info(info, "reviews")
       .paginate({ offset, limit })
-      .order({ "review.rating": "DESC" })
+      .order({ rating: "DESC" })
       .loadPaginated();
 
     const nextOffset = offset + limit;
