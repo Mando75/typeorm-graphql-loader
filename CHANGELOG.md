@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.4.1]
+
+Fixed issue with pagination manifesting from internal TypeORM bug in skip/take. Reverted back to using offset/limit
+
 ## [1.4.0]
 
 ### Fixed
