@@ -161,7 +161,7 @@ export class GraphQLQueryManager {
     const queue = this._queue.splice(0, this._queue.length);
     try {
       return await this._connection.transaction(async entityManager => {
-        queue.map(this._resolveQueueItem(entityManager));
+        await Promise.all(queue.map(this._resolveQueueItem(entityManager)));
       });
     } catch (e) {
       queue.forEach(q => {
