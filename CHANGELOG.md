@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.4.2]
+
+### Fixed
+
+Queries are no longer run in a transaction, preventing a transaction error in some dbs. Thanks to Andrey Vasilev for identifying the issue and providing the fix. 
+
 ## [1.4.1]
 
 Fixed issue with pagination manifesting from internal TypeORM bug in skip/take. Reverted back to using offset/limit
