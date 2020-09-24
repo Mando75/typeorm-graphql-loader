@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "prepare": "yarn build && yarn lint && yarn test",
-    "build": "rm -rf dist tsc --declaration",
+    "build": "rm -rf dist && tsc --declaration",
     "publish:docs": "typedoc --options typedoc.json",
     "lint": "eslint 'src/**/*.ts'",
     "test": "yarn build && nyc mocha -r ts-node/register -r tslib -r source-map-support/register --full-trace src/__tests__/**/*.test.ts --timeout 5000"
