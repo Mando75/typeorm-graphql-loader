@@ -159,16 +159,19 @@ export class GraphQLQueryManager {
   private async _processQueue(): Promise<any> {
     // Clear and capture the current queue
     const queue = this._queue.splice(0, this._queue.length);
+    const queryRunner = this._connection.createQueryRunner('slave')
+
     try {
-      return await this._connection.transaction(async entityManager => {
-        await Promise.all(queue.map(this._resolveQueueItem(entityManager)));
-      });
+      await queryRunner.connect();
+      await Promise.all(queue.map(this._resolveQueueItem(queryRunner.manager)));
     } catch (e) {
       queue.forEach(q => {
         q.reject(e);
         this._cache.delete(q.key);
       });
     }
+
+    await queryRunner.release()
   }
 
   /**
