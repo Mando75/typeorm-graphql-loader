@@ -6,7 +6,7 @@ import {
   getLoaderRequiredFields,
   resolvePredicate
 } from "../ConfigureLoader";
-import { Hash, Selection } from "../types";
+import {GraphQLEntityFields} from "../types";
 
 const spies = require("chai-spies");
 chai.use(spies);
@@ -57,7 +57,7 @@ describe("Decorator Utilities", () => {
   describe("resolvePredicate", () => {
     type TestContext = { key: boolean };
     const context: TestContext = { key: true };
-    const selection: Hash<Selection> = { testChild: { children: undefined } };
+    const selection: GraphQLEntityFields = { testChild: { children: {} } };
     const queriedFields = ["testChild"];
 
     it("correctly calls a predicate function", () => {

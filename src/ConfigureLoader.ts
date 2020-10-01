@@ -1,9 +1,7 @@
 import "reflect-metadata";
 import {
-  FieldConfigurationPredicate,
-  Hash,
+  FieldConfigurationPredicate, GraphQLEntityFields,
   LoaderFieldConfiguration,
-  Selection
 } from "./types";
 
 /**
@@ -118,7 +116,7 @@ export const getLoaderIgnoredFields = (
 export const resolvePredicate = (
   predicate: boolean | FieldConfigurationPredicate | undefined,
   context: any,
-  selection: Hash<Selection> | undefined
+  selection: GraphQLEntityFields | undefined
 ): boolean | undefined =>
   typeof predicate === "function"
     ? predicate(context, Object.keys(selection ?? {}), selection ?? {})

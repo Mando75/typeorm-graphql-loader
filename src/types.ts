@@ -114,7 +114,7 @@ export interface QueryPagination {
 export type FieldConfigurationPredicate = (
   context: any,
   queriedFields: Array<string>,
-  selection: Hash<Selection>
+  selection: GraphQLEntityFields
 ) => boolean;
 
 export interface LoaderFieldConfiguration {
@@ -173,7 +173,7 @@ export interface QueryPredicates {
 export interface QueueItem {
   many: boolean;
   key: string;
-  fields: Selection | null;
+  fields: GraphQLEntityFields | null;
   predicates: QueryPredicates;
   resolve: (value?: any) => any;
   reject: (reason: any) => void;
@@ -188,7 +188,7 @@ export interface QueueItem {
  */
 export interface QueryMeta {
   key: string;
-  fields: Selection | null;
+  fields: GraphQLEntityFields | null;
   found: boolean;
   item?: Promise<any>;
 }
@@ -196,17 +196,22 @@ export interface QueryMeta {
 /**
  * @hidden
  */
-export interface Hash<T> {
-  [key: string]: T;
+export interface GraphQLFieldArgs {
+  [key: string]: {
+    name: string,
+    value: any
+  };
 }
 
 /**
  * @hidden
  */
-export interface Selection {
-  arguments?: Hash<{ name: string; value: any }>;
-  children?: Hash<Selection>;
-}
+export type GraphQLEntityFields = {
+  [field: string]: {
+    children: GraphQLEntityFields,
+    arguments?: GraphQLFieldArgs;
+  }
+};
 
 /**
  * @hidden

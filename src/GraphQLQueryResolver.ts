@@ -1,4 +1,4 @@
-import { Hash, LoaderOptions, Selection } from "./types";
+import {GraphQLEntityFields, LoaderOptions} from "./types";
 import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
 import { Connection, EntityMetadata, SelectQueryBuilder } from "typeorm";
 import { Formatter } from "./lib/Formatter";
@@ -65,7 +65,7 @@ export class GraphQLQueryResolver {
    */
   public createQuery(
     model: Function | string,
-    selection: Selection | null,
+    selection: GraphQLEntityFields | null,
     connection: Connection,
     queryBuilder: SelectQueryBuilder<{}>,
     alias: string,
@@ -73,16 +73,16 @@ export class GraphQLQueryResolver {
     depth = 0
   ): SelectQueryBuilder<{}> {
     const meta = connection.getMetadata(model);
-    if (selection?.children) {
+    if (selection) {
       const ignoredFields = getLoaderIgnoredFields(meta.target);
       const fields = meta.columns.filter(
         field =>
           !resolvePredicate(
             ignoredFields.get(field.propertyName),
             context,
-            selection.children
+            selection
           ) &&
-          (field.isPrimary || field.propertyName in selection.children!)
+          (field.isPrimary || field.propertyName in selection)
       );
 
       const embeddedFields = meta.embeddeds.filter(
@@ -90,8 +90,8 @@ export class GraphQLQueryResolver {
           !resolvePredicate(
             ignoredFields.get(embed.propertyName),
             context,
-            selection.children
-          ) && embed.propertyName in selection.children!
+            selection
+          ) && embed.propertyName in selection
       );
 
       queryBuilder = this._selectFields(queryBuilder, fields, alias);
@@ -99,13 +99,13 @@ export class GraphQLQueryResolver {
       queryBuilder = this._selectEmbeddedFields(
         queryBuilder,
         embeddedFields,
-        selection.children,
+        selection,
         alias
       );
 
       queryBuilder = this._selectRequiredFields(
         queryBuilder,
-        selection.children,
+        selection,
         alias,
         meta,
         context
@@ -114,7 +114,7 @@ export class GraphQLQueryResolver {
       if (depth < this._maxDepth) {
         queryBuilder = this._selectRelations(
           queryBuilder,
-          selection.children,
+          selection,
           meta.relations,
           alias,
           context,
@@ -140,7 +140,7 @@ export class GraphQLQueryResolver {
   private _selectEmbeddedFields(
     queryBuilder: SelectQueryBuilder<{}>,
     embeddedFields: Array<EmbeddedMetadata>,
-    children: Hash<Selection>,
+    children: GraphQLEntityFields,
     alias: string
   ) {
     const embeddedFieldsToSelect: Array<Array<string>> = [];
@@ -266,7 +266,7 @@ export class GraphQLQueryResolver {
    */
   private _selectRelations(
     queryBuilder: SelectQueryBuilder<{}>,
-    children: Hash<Selection>,
+    children: GraphQLEntityFields,
     relations: Array<RelationMetadata>,
     alias: string,
     context: any,
@@ -324,7 +324,7 @@ export class GraphQLQueryResolver {
       // from this relation
       queryBuilder = this.createQuery(
         relation.inverseEntityMetadata.target,
-        children[relation.propertyName],
+        children[relation.propertyName]?.children,
         connection,
         queryBuilder,
         childAlias,
@@ -347,7 +347,7 @@ export class GraphQLQueryResolver {
    */
   private _selectRequiredFields(
     queryBuilder: SelectQueryBuilder<{}>,
-    children: Hash<Selection>,
+    children: GraphQLEntityFields,
     alias: string,
     meta: EntityMetadata,
     context: any

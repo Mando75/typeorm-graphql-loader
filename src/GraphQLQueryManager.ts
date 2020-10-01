@@ -1,5 +1,5 @@
 import {
-  FieldNodeInfo,
+  GraphQLEntityFields,
   LoaderOptions,
   QueryMeta,
   QueryPagination,
@@ -9,7 +9,6 @@ import {
 } from "./types";
 import { LoaderSearchMethod } from "./enums/LoaderSearchMethod";
 import { GraphQLInfoParser } from "./lib/GraphQLInfoParser";
-import { GraphQLResolveInfo } from "graphql";
 import * as crypto from "crypto";
 import {
   Brackets,
@@ -82,18 +81,16 @@ export class GraphQLQueryManager {
   /**
    * Looks up a query in the cache and returns
    * the existing promise if found.
-   * @param info
+   * @param fields
    * @param where
    */
   public processQueryMeta(
-    info: GraphQLResolveInfo | FieldNodeInfo,
+    fields: GraphQLEntityFields | null,
     where: Array<WhereExpression>
   ): QueryMeta {
     // Create a new md5 hash function
     const hash = crypto.createHash("md5");
 
-    // Get the fields queried by the graphql request
-    const fields = this._parser.graphqlFields(info);
     // Use the query parameters to generate a new hash for caching
     const key = hash
       .update(JSON.stringify([where, fields]))
