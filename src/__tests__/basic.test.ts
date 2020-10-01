@@ -1,7 +1,7 @@
 import * as chai from "chai";
 import { graphql } from "graphql";
 import { startup, TestHelpers } from "./util/testStartup";
-import { Author, Book } from "./entity";
+import {Author, Book, Publisher} from "./entity";
 
 const deepEqualInAnyOrder = require("deep-equal-in-any-order");
 
@@ -194,6 +194,195 @@ describe("Basic GraphQL queries", () => {
       };
       expect(result).to.not.have.key("errors");
       expect(result.data!.authorById).to.deep.equal(expected);
+    });
+
+    it("can resolve a query that contains fields with arguments", async () => {
+      const { connection, schema, loader } = helpers;
+      const author = await connection
+        .getRepository(Author)
+        .findOne({ relations: ["books", "books.publisher"] });
+
+      const query = `
+        query booksByAuthorId($id: Int!) {
+          booksByAuthorId(authorId: $id) {
+            id
+            title
+            transformedTitle(transform: "UPPERCASE")
+          }
+        }
+      `;
+      const vars = { id: author?.id };
+
+      const result = await graphql(
+        schema,
+        query,
+        {},
+        {
+          loader
+        },
+        vars
+      );
+
+      const expected = author!.books.filter(book => book.isPublished).map(book => ({
+        id: book.id,
+        title: book.title,
+        transformedTitle: book.title.toUpperCase()
+      }));
+      expect(result).to.not.have.key("errors");
+      expect(result.data!.booksByAuthorId).to.deep.equal(expected);
+    });
+
+    it("can resolve a mutation that contains multiple return types (union)", async () => {
+      const { connection, schema, loader } = helpers;
+      const bookCount = await connection
+        .getRepository(Book)
+        .count();
+      const author = await connection
+        .getRepository(Author)
+        .findOne();
+      const publisher = await connection
+        .getRepository(Publisher)
+        .findOne();
+
+      const query = `
+        fragment bookFragment on Book {
+          title
+          summary
+          publisher {
+            id
+          }
+          author {
+            id
+          }
+        }
+        mutation createBook($authorId: Int!, $publisherId: Int!, $summary: String!, $title: String!) {
+          createBook(authorId: $authorId, publisherId: $publisherId, summary: $summary, title: $title) {
+           ... on BookCreateSuccess {
+             data {
+               ...bookFragment
+             }
+           }
+           ... on BookCreateError {
+             message
+           }
+          }
+        }
+      `;
+      const vars = {
+        authorId: author?.id,
+        publisherId: publisher?.id,
+        title: 'Typescript Rules',
+        summary: 'A book of 300 pages only containing the phrase "Typescript Rules"'
+      };
+
+      const result = await graphql(
+        schema,
+        query,
+        {},
+        {
+          loader,
+          connection: helpers.connection
+        },
+        vars
+      );
+
+      const expected = {
+        data: {
+          title: vars.title,
+          summary: vars.summary,
+          author: {
+            id: vars.authorId
+          },
+          publisher: {
+            id: vars.publisherId
+          }
+        }
+      };
+
+      expect(result).to.not.have.key("errors");
+      expect(bookCount + 1).to.be.equal(await connection
+          .getRepository(Book)
+        .count()
+      );
+      expect(result.data!.createBook).to.deep.equal(expected);
+    });
+
+    it("can resolve a mutation that contains multiple return types (union) and nested fragments", async () => {
+      const { connection, schema, loader } = helpers;
+      const bookCount = await connection
+        .getRepository(Book)
+        .count();
+      const author = await connection
+        .getRepository(Author)
+        .findOne();
+      const publisher = await connection
+        .getRepository(Publisher)
+        .findOne();
+
+      const query = `
+        fragment bookFragment on Book {
+          title
+          summary
+          publisher {
+            id
+          }
+          author {
+            id
+          }
+        }
+        fragment bookCreateSuccess on BookCreateSuccess {
+          data {
+            ...bookFragment
+          }
+        }
+        mutation createBook($authorId: Int!, $publisherId: Int!, $summary: String!, $title: String!) {
+          createBook(authorId: $authorId, publisherId: $publisherId, summary: $summary, title: $title) {
+           ... on BookCreateSuccess {
+             ...bookCreateSuccess
+           }
+           ... on BookCreateError {
+             message
+           }
+          }
+        }
+      `;
+      const vars = {
+        authorId: author?.id,
+        publisherId: publisher?.id,
+        title: 'Typescript Rules',
+        summary: 'A book of 300 pages only containing the phrase "Typescript Rules"'
+      };
+
+      const result = await graphql(
+        schema,
+        query,
+        {},
+        {
+          loader,
+          connection: helpers.connection
+        },
+        vars
+      );
+
+      const expected = {
+        data: {
+          title: vars.title,
+          summary: vars.summary,
+          author: {
+            id: vars.authorId
+          },
+          publisher: {
+            id: vars.publisherId
+          }
+        }
+      };
+
+      expect(result).to.not.have.key("errors");
+      expect(bookCount + 1).to.be.equal(await connection
+        .getRepository(Book)
+        .count()
+      );
+      expect(result.data!.createBook).to.deep.equal(expected);
     });
   });
 

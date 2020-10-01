@@ -1,10 +1,24 @@
-import { Arg, Ctx, Info, Int, Query, Resolver } from "type-graphql";
-import { Book } from "../entity";
+import {Arg, Ctx, FieldResolver, Info, Int, Mutation, Query, Resolver, Root} from "type-graphql";
+import {Author, Book, Publisher} from "../entity";
 import { GraphQLDatabaseLoader } from "../../GraphQLDatabaseLoader";
 import { GraphQLResolveInfo } from "graphql";
+import {BookCreateError, BookCreateResultType, BookCreateSuccess} from "../entity/Book";
+import {Connection} from "typeorm";
+
+enum Transform {
+  UPPERCASE = "UPPERCASE", LOWERCASE = "LOWERCASE"
+}
 
 @Resolver(Book)
 export class BookResolver {
+  @FieldResolver(returns => String)
+  async transformedTitle(
+    @Arg("transform", type => String) transform: Transform,
+    @Root() book: Book
+  ) {
+    return transform === Transform.LOWERCASE ? book.title.toLowerCase() : book.title.toUpperCase();
+  }
+
   @Query(returns => [Book])
   async booksByAuthorId(
     @Arg("authorId", type => Int) authorId: number,
@@ -32,5 +46,45 @@ export class BookResolver {
       .orWhere("books.authorId = :authorId", { authorId })
       .info(info)
       .loadMany();
+  }
+
+  @Mutation(returns => BookCreateResultType)
+  async createBook(
+    @Arg("title", type => String) title: string,
+    @Arg("summary", type => String) summary: string,
+    @Arg("authorId", type => Int) authorId: number,
+    @Arg("publisherId", type => Int) publisherId: number,
+    @Ctx("loader") loader: GraphQLDatabaseLoader,
+    @Ctx("connection") connection: Connection,
+    @Info() info: GraphQLResolveInfo
+  ): Promise<typeof BookCreateResultType> {
+
+    let book = new Book();
+
+    book.author = new Author();
+    book.author.id = authorId;
+    book.publisher = new Publisher();
+    book.publisher.id = publisherId;
+
+    book.title = title;
+    book.createdAt = new Date();
+    book.updatedAt = new Date();
+    book.publishedDate = new Date();
+    book.isPublished = true;
+    book.summary = summary;
+
+    try {
+      book = await connection.getRepository(Book).save(book);
+    } catch (e) {
+      return new BookCreateError('Error creating book: ' + e);
+    }
+
+    return new BookCreateSuccess((await loader
+      .loadEntity(Book, "book")
+      .where("book.id = :id", {
+        id: book.id
+      })
+      .info(info, 'BookCreateSuccess.data')
+      .loadOne())!);
   }
 }

@@ -1,6 +1,6 @@
 import { GraphQLResolveInfo } from "graphql";
 import {
-  FieldNodeInfo,
+  FieldNodeInfo, GraphQLEntityFields,
   QueryPagination,
   QueryPredicates,
   SearchOptions,
@@ -9,10 +9,10 @@ import {
 } from "./types";
 import { GraphQLQueryManager } from "./GraphQLQueryManager";
 import { BaseEntity, ObjectLiteral, OrderByCondition } from "typeorm";
-import { GraphQLInfoParser } from "./lib/GraphQLInfoParser";
+import {GraphQLInfoParser} from "./lib/GraphQLInfoParser";
 
 export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
-  private _info: GraphQLResolveInfo | FieldNodeInfo | null = null;
+  private _info: GraphQLEntityFields | null = null;
   private _andWhereExpressions: Array<WhereExpression> = [];
   private _orWhereExpressions: Array<WhereExpression> = [];
   private _searchExpressions: Array<SearchOptions> = [];
@@ -54,11 +54,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
     info: GraphQLResolveInfo,
     fieldName?: string
   ): GraphQLQueryBuilder<T> {
-    if (fieldName) {
-      this._info = this._parser.getFieldNode(info, fieldName);
-    } else {
-      this._info = info;
-    }
+    this._info = this._parser.parseResolveInfoModels(info, fieldName);
     return this;
   }
 
@@ -401,8 +397,8 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    * Throw an error if the info object has not been defined for this query
    */
   private _validateInfo(
-    info?: GraphQLResolveInfo | FieldNodeInfo | null
-  ): asserts info is GraphQLResolveInfo | FieldNodeInfo {
+    info?: GraphQLEntityFields | null
+  ): asserts info is GraphQLEntityFields {
     if (!this._info) {
       throw new Error(
         "Missing GraphQL Resolve info. Please invoke `.info()` before calling this method"
