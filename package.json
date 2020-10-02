@@ -1,15 +1,15 @@
 {
   "name": "@mando75/typeorm-graphql-loader",
-  "version": "1.4.2",
+  "version": "1.5.0",
   "description": "A dataloader which intelligently selects/joins the fields/relations from your TypeORM entities needed to resolve a GraphQL query",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "prepublish": "yarn build && yarn lint && yarn test",
+    "pub": "yarn build && yarn lint && yarn test && npm publish",
     "prepare": "yarn build",
     "build": "rimraf -rf dist && tsc --declaration",
     "publish:docs": "typedoc --options typedoc.json",
-    "lint": "eslint \"./src/**/*.ts\"",
+    "lint": "eslint \"./src/**/*.ts\" --fix",
     "test": "yarn build && nyc mocha -r ts-node/register -r tslib -r source-map-support/register --full-trace src/__tests__/**/*.test.ts --timeout 5000"
   },
   "files": [
@@ -28,6 +28,7 @@
     "graphql",
     "data",
     "apollo",
+    "typegraphql",
     "loader",
     "batching",
     "caching",
@@ -39,7 +40,10 @@
   "bugs": {
     "url": "https://gitlab.com/Mando75/typeorm-graphql-loader/issues"
   },
-  "homepage": "https://gitlab.com/Mando75/typeorm-graphql-loader",
+  "homepage": "https://gql-loader.bmuller.net",
+  "dependencies": {
+    "graphql-parse-resolve-info": "^4.9.0"
+  },
   "devDependencies": {
     "@types/chai": "^4.2.3",
     "@types/chai-spies": "^1.0.2",
@@ -97,8 +101,5 @@
     ],
     "sourceMap": true,
     "instrument": true
-  },
-  "dependencies": {
-    "graphql-parse-resolve-info": "^4.9.0"
   }
 }
