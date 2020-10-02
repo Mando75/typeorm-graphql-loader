@@ -1,5 +1,16 @@
 # Change Log
 
+## [1.5.0]
+
+### Fixed 
+Fixed an issue with the loader not being able to load fragments on Union types. Thanks to Nico Britos for providing the fix for the issue.
+
+### Changed
+Internally the loader now uses the graphql-parse-resolve-info package to get the requested selection of
+fields instead of the home-grown method used before. 
+
+Some internal loader type definitions have changed due to the migration to the new info parser. It is for this reason I bumped the package a minor version over just a patch. 
+
 ## [1.4.2]
 
 ### Fixed
