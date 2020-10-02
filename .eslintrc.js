@@ -4,7 +4,7 @@ module.exports = {
   },
   parser: "@typescript-eslint/parser",
   parserOptions: {
-    project: "tsconfig.json",
+    project: "./tsconfig.json",
     sourceType: "module"
   },
   plugins: ["@typescript-eslint"],
@@ -46,42 +46,25 @@ module.exports = {
         ]
       }
     ],
-    "@typescript-eslint/quotes":
-      "off",
-    "@typescript-eslint/semi":
-      ["off", null],
-    "@typescript-eslint/type-annotation-spacing":
-      "off",
-    "arrow-parens":
-      ["off", "as-needed"],
-    "comma-dangle":
-      "off",
-    "eol-last":
-      "off",
-    "linebreak-style":
-      "off",
-    "max-len":
-      "off",
-    "new-parens":
-      "off",
-    "newline-per-chained-call":
-      "off",
-    "no-console":
-      "off",
-    "no-extra-semi":
-      "off",
-    "no-irregular-whitespace":
-      "off",
-    "no-multiple-empty-lines":
-      "off",
-    "no-trailing-spaces":
-      "off",
-    "quote-props":
-      "off",
-    "space-before-function-paren":
-      "off",
-    "space-in-parens":
-      ["off", "never"]
+    "@typescript-eslint/quotes": ["error", "double", { avoidEscape: true, allowTemplateLiterals: true }],
+    "@typescript-eslint/semi": ["error", "always"],
+    "@typescript-eslint/type-annotation-spacing": "off",
+    "arrow-parens": ["off", "as-needed"],
+    "comma-dangle": "off",
+    "eol-last": "off",
+    "linebreak-style": "off",
+    "max-len": "off",
+    "new-parens": "off",
+    "newline-per-chained-call": "off",
+    "no-console": "off",
+    "no-extra-semi": "off",
+    "no-irregular-whitespace": "off",
+    "no-multiple-empty-lines": "off",
+    "no-trailing-spaces": "off",
+    "object-curly-spacing": ["error", "always"],
+    "prefer-const": ["error"],
+    "quote-props": "off",
+    "space-before-function-paren": "off",
+    "space-in-parens": ["off", "never"],
   }
-}
-;
+};

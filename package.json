@@ -7,7 +7,7 @@
   "scripts": {
     "pub": "yarn build && yarn lint && yarn test && npm publish",
     "prepare": "yarn build",
-    "build": "rimraf -rf dist && tsc --declaration",
+    "build": "yarn lint && rimraf -rf dist && tsc --declaration",
     "publish:docs": "typedoc --options typedoc.json",
     "lint": "eslint \"./src/**/*.ts\" --fix",
     "test": "yarn build && nyc mocha -r ts-node/register -r tslib -r source-map-support/register --full-trace src/__tests__/**/*.test.ts --timeout 5000"
