@@ -1,6 +1,7 @@
 import { GraphQLResolveInfo } from "graphql";
 import {
-  FieldNodeInfo, GraphQLEntityFields,
+  FieldNodeInfo,
+  GraphQLEntityFields,
   QueryPagination,
   QueryPredicates,
   SearchOptions,
@@ -9,7 +10,7 @@ import {
 } from "./types";
 import { GraphQLQueryManager } from "./GraphQLQueryManager";
 import { BaseEntity, ObjectLiteral, OrderByCondition } from "typeorm";
-import {GraphQLInfoParser} from "./lib/GraphQLInfoParser";
+import { GraphQLInfoParser } from "./lib/GraphQLInfoParser";
 
 export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   private _info: GraphQLEntityFields | null = null;

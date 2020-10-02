@@ -198,8 +198,8 @@ export interface QueryMeta {
  */
 export interface GraphQLFieldArgs {
   [key: string]: {
-    name: string,
-    value: any
+    name: string;
+    value: any;
   };
 }
 
@@ -208,9 +208,9 @@ export interface GraphQLFieldArgs {
  */
 export type GraphQLEntityFields = {
   [field: string]: {
-    children: GraphQLEntityFields,
+    children: GraphQLEntityFields;
     arguments?: GraphQLFieldArgs;
-  }
+  };
 };
 
 /**

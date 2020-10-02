@@ -6,7 +6,7 @@ import {
   getLoaderRequiredFields,
   resolvePredicate
 } from "../ConfigureLoader";
-import {GraphQLEntityFields} from "../types";
+import { GraphQLEntityFields } from "../types";
 
 const spies = require("chai-spies");
 chai.use(spies);

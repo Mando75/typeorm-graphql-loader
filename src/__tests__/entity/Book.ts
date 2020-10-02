@@ -11,7 +11,7 @@ import {
 import { Author } from "./Author";
 import { Publisher } from "./Publisher";
 import { Review } from "./Review";
-import {createUnionType, Field, Int, ObjectType} from "type-graphql";
+import { createUnionType, Field, Int, ObjectType } from "type-graphql";
 
 @ObjectType()
 @Entity()
@@ -88,5 +88,5 @@ export class BookCreateError {
 
 export const BookCreateResultType = createUnionType({
   name: "BookCreateResult", // the name of the GraphQL union
-  types: () => [BookCreateSuccess, BookCreateError] as const, // function that returns tuple of object types classes
+  types: () => [BookCreateSuccess, BookCreateError] as const // function that returns tuple of object types classes
 });

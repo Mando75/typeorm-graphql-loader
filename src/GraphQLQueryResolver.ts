@@ -1,4 +1,4 @@
-import {GraphQLEntityFields, LoaderOptions} from "./types";
+import { GraphQLEntityFields, LoaderOptions } from "./types";
 import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
 import { Connection, EntityMetadata, SelectQueryBuilder } from "typeorm";
 import { Formatter } from "./lib/Formatter";

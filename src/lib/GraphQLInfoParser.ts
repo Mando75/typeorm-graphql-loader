@@ -1,17 +1,28 @@
-import {GraphQLResolveInfo} from 'graphql';
-import {FieldsByTypeName, parseResolveInfo, ResolveTree} from 'graphql-parse-resolve-info';
-import {GraphQLEntityFields, GraphQLFieldArgs} from "../types";
+import { GraphQLResolveInfo } from "graphql";
+import {
+  FieldsByTypeName,
+  parseResolveInfo,
+  ResolveTree
+} from "graphql-parse-resolve-info";
+import { GraphQLEntityFields, GraphQLFieldArgs } from "../types";
 
 export class GraphQLInfoParser {
-  public parseResolveInfoModels(info: GraphQLResolveInfo, fieldName?: string): GraphQLEntityFields {
-    let data: ResolveTree = <ResolveTree> parseResolveInfo(info);
+  public parseResolveInfoModels(
+    info: GraphQLResolveInfo,
+    fieldName?: string
+  ): GraphQLEntityFields {
+    let data: ResolveTree = <ResolveTree>parseResolveInfo(info);
     if (data != null && data.fieldsByTypeName != null)
-      return this.recursiveInfoParser(data, true, fieldName?.split('.'));
+      return this.recursiveInfoParser(data, true, fieldName?.split("."));
 
     return {};
   }
 
-  private recursiveInfoParser(data: ResolveTree, root: boolean, fieldNames?: string[]): GraphQLEntityFields {
+  private recursiveInfoParser(
+    data: ResolveTree,
+    root: boolean,
+    fieldNames?: string[]
+  ): GraphQLEntityFields {
     let result: GraphQLEntityFields = {};
     // Gets definition for all models present in the tree
     let models: FieldsByTypeName = data.fieldsByTypeName;
@@ -31,10 +42,13 @@ export class GraphQLInfoParser {
       // necessary to check the path
       if (root && modelsKeys.length > 1) {
         let subpath = fieldNames.shift();
-        if (!subpath)
-          throw new Error('Invalid path. Missing subpath');
+        if (!subpath) throw new Error("Invalid path. Missing subpath");
 
-        return this.recursiveInfoParser(models[path][subpath], false, fieldNames);
+        return this.recursiveInfoParser(
+          models[path][subpath],
+          false,
+          fieldNames
+        );
       }
     }
 
@@ -42,7 +56,11 @@ export class GraphQLInfoParser {
       let fieldKeys = Object.keys(models[modelName]);
 
       if (path) {
-        result = this.recursiveInfoParser(models[modelName][path], false, fieldNames);
+        result = this.recursiveInfoParser(
+          models[modelName][path],
+          false,
+          fieldNames
+        );
       } else {
         // We need to iterate for each field of each model present in the tree
         for (let fieldName of fieldKeys) {
@@ -56,7 +74,7 @@ export class GraphQLInfoParser {
               args[argName] = {
                 name: argName,
                 value: field.args[argName]
-              }
+              };
             }
           }
 
@@ -66,7 +84,11 @@ export class GraphQLInfoParser {
           };
 
           if (Object.keys(field).length > 0) {
-            result[fieldName].children = this.recursiveInfoParser(field, false, fieldNames);
+            result[fieldName].children = this.recursiveInfoParser(
+              field,
+              false,
+              fieldNames
+            );
           }
         }
       }
@@ -75,4 +97,3 @@ export class GraphQLInfoParser {
     return result;
   }
 }
-

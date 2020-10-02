@@ -1,12 +1,27 @@
-import {Arg, Ctx, FieldResolver, Info, Int, Mutation, Query, Resolver, Root} from "type-graphql";
-import {Author, Book, Publisher} from "../entity";
+import {
+  Arg,
+  Ctx,
+  FieldResolver,
+  Info,
+  Int,
+  Mutation,
+  Query,
+  Resolver,
+  Root
+} from "type-graphql";
+import { Author, Book, Publisher } from "../entity";
 import { GraphQLDatabaseLoader } from "../../GraphQLDatabaseLoader";
 import { GraphQLResolveInfo } from "graphql";
-import {BookCreateError, BookCreateResultType, BookCreateSuccess} from "../entity/Book";
-import {Connection} from "typeorm";
+import {
+  BookCreateError,
+  BookCreateResultType,
+  BookCreateSuccess
+} from "../entity/Book";
+import { Connection } from "typeorm";
 
 enum Transform {
-  UPPERCASE = "UPPERCASE", LOWERCASE = "LOWERCASE"
+  UPPERCASE = "UPPERCASE",
+  LOWERCASE = "LOWERCASE"
 }
 
 @Resolver(Book)
@@ -16,7 +31,9 @@ export class BookResolver {
     @Arg("transform", type => String) transform: Transform,
     @Root() book: Book
   ) {
-    return transform === Transform.LOWERCASE ? book.title.toLowerCase() : book.title.toUpperCase();
+    return transform === Transform.LOWERCASE
+      ? book.title.toLowerCase()
+      : book.title.toUpperCase();
   }
 
   @Query(returns => [Book])
@@ -58,7 +75,6 @@ export class BookResolver {
     @Ctx("connection") connection: Connection,
     @Info() info: GraphQLResolveInfo
   ): Promise<typeof BookCreateResultType> {
-
     let book = new Book();
 
     book.author = new Author();
@@ -76,15 +92,17 @@ export class BookResolver {
     try {
       book = await connection.getRepository(Book).save(book);
     } catch (e) {
-      return new BookCreateError('Error creating book: ' + e);
+      return new BookCreateError("Error creating book: " + e);
     }
 
-    return new BookCreateSuccess((await loader
-      .loadEntity(Book, "book")
-      .where("book.id = :id", {
-        id: book.id
-      })
-      .info(info, 'BookCreateSuccess.data')
-      .loadOne())!);
+    return new BookCreateSuccess(
+      (await loader
+        .loadEntity(Book, "book")
+        .where("book.id = :id", {
+          id: book.id
+        })
+        .info(info, "BookCreateSuccess.data")
+        .loadOne())!
+    );
   }
 }

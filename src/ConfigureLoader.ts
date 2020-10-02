@@ -1,7 +1,8 @@
 import "reflect-metadata";
 import {
-  FieldConfigurationPredicate, GraphQLEntityFields,
-  LoaderFieldConfiguration,
+  FieldConfigurationPredicate,
+  GraphQLEntityFields,
+  LoaderFieldConfiguration
 } from "./types";
 
 /**
