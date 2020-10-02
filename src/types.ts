@@ -197,10 +197,7 @@ export interface QueryMeta {
  * @hidden
  */
 export interface GraphQLFieldArgs {
-  [key: string]: {
-    name: string;
-    value: any;
-  };
+  [key: string]: any;
 }
 
 /**
