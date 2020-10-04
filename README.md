@@ -8,6 +8,9 @@ GraphQL query resolvers.
 ![npm](https://img.shields.io/npm/dm/@mando75/typeorm-graphql-loader)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![pipeline status](https://gitlab.com/Mando75/typeorm-graphql-loader/badges/master/pipeline.svg)](https://gitlab.com/Mando75/typeorm-graphql-loader/commits/master)
+[![coverage report](https://gitlab.com/Mando75/typeorm-graphql-loader/badges/master/coverage.svg)](https://gitlab.com/Mando75/typeorm-graphql-loader/-/commits/master)
+
+
 
 ## UPGRADE NOTICE
 
