@@ -1,5 +1,5 @@
 import { FieldNode, FragmentDefinitionNode } from "graphql";
-import {Brackets, ObjectLiteral, OrderByCondition, SelectQueryBuilder} from "typeorm";
+import { Brackets, ObjectLiteral, OrderByCondition, SelectQueryBuilder } from "typeorm";
 import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
 import { LoaderSearchMethod } from "./enums/LoaderSearchMethod";
 
