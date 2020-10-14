@@ -279,6 +279,24 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
     return this;
   }
 
+  /**
+   * Receives a callback that can be used to modify the TypeORM SelectQueryBuilder instance
+   * before the loader executes the database query.
+   *
+   * Please note that this callback is run AFTER the loader has already applied all provided conditions to the query builder
+   * (where conditions, pagination, order, etc). Be aware, as changes you make to the ejected query builder could conflict
+   * with loader applied settings. Some tips to avoid potential conflicts:
+   *
+   * - If you are using the eject callback to apply where conditions, move all of your where conditions to the callback.
+   *   This will prevent potential conflicts between where conditions applied via the loader wrapper being overwritten
+   *   by conditions applied via the eject callback. Keep all your where conditions in one place.
+   *
+   * - For most cases, if you plan on joining tables in the callback, be sure to [join WITHOUT selecting](https://typeorm.io/#/select-query-builder/join-without-selection).
+   *   This is to prevent issues with selecting data from the same table twice, and is generally more performant.
+   *   If you are wanting a relation or column to always be joined and selected, see the {@link ConfigureLoader} Decorator
+   *
+   * @param cb
+   */
   public ejectQueryBuilder(cb: EjectQueryCallback<T>): GraphQLQueryBuilder<T> {
     this._ejectQueryCallback = cb;
     return this;
