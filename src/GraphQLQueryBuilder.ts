@@ -1,5 +1,6 @@
 import { GraphQLResolveInfo } from "graphql";
 import {
+  EjectQueryCallback,
   GraphQLEntityFields,
   QueryPagination,
   QueryPredicates,
@@ -21,6 +22,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   private _pagination?: QueryPagination;
   private _parser: GraphQLInfoParser = new GraphQLInfoParser();
   private _context: any;
+  private _ejectQueryCallback: EjectQueryCallback<T> | null = null;
 
   constructor(
     private _manager: GraphQLQueryManager,
@@ -275,6 +277,11 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
     return this;
   }
 
+  public ejectQueryBuilder(cb: EjectQueryCallback<T>): GraphQLQueryBuilder<T> {
+    this._ejectQueryCallback = cb;
+    return this;
+  }
+
   /**
    * Load one record from the database.
    * This record will include all relations and fields requested
@@ -383,7 +390,8 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
         entity: this._entity,
         pagination: paginate ? this._pagination : undefined,
         alias: this._alias,
-        context: this._context
+        context: this._context,
+        ejectQueryCallback: this._ejectQueryCallback ?? (qb => qb)
       });
     };
 
