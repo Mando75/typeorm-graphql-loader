@@ -221,6 +221,8 @@ export class GraphQLQueryManager {
 
       queryBuilder = this._addPagination(queryBuilder, item.pagination);
 
+      queryBuilder = item.ejectQueryCallback(queryBuilder);
+
       let promise;
       if (item.pagination) {
         promise = queryBuilder.getManyAndCount();
