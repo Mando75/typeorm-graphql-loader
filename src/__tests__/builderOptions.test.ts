@@ -230,3 +230,51 @@ describe("Primary Key Backwards compatibility", () => {
     expect(result.data?.deprecatedPrimaryKey).to.deep.equal(expected);
   });
 });
+
+describe("ejectQueryBuilder", () => {
+  let helpers: TestHelpers;
+
+  before(async () => {
+    helpers = await startup("eject_builder", {
+      logging: false,
+    });
+  });
+
+  it("can successfully execute a query that had a custom eject callback", async () => {
+    const { connection, schema, loader } = helpers;
+    const publisher = await connection.getRepository(Publisher).findOne({ relations: ["books"] });
+
+    const query = `
+    query publisherByBookTitle($bookTitle: String!) {
+      publisherByBookTitle(bookTitle: $bookTitle) {
+        id
+        name
+        books {
+          id
+          title
+        }
+      }
+    }
+    `;
+    const vars = { bookTitle: publisher?.books?.[0].title };
+
+    const result = await graphql(
+      schema,
+      query,
+      {},
+      { loader },
+      vars
+    );
+
+    const expected = {
+      id: publisher?.id,
+      name: publisher?.name,
+      books: publisher?.books.map(({ id, title }) => ({ id, title }))
+    };
+
+    expect(result).to.not.have.key("errors");
+    // @ts-ignore
+    expect(result.data!.publisherByBookTitle).to.deep.equalInAnyOrder(expected);
+
+  });
+});
