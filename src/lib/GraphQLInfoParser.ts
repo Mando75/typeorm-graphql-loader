@@ -1,9 +1,5 @@
 import { GraphQLResolveInfo } from "graphql";
-import {
-  FieldsByTypeName,
-  parseResolveInfo,
-  ResolveTree
-} from "graphql-parse-resolve-info";
+import { FieldsByTypeName, parseResolveInfo, ResolveTree } from "graphql-parse-resolve-info";
 import { GraphQLEntityFields } from "../types";
 
 export class GraphQLInfoParser {

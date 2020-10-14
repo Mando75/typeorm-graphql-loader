@@ -36,9 +36,6 @@ export class Review extends BaseEntity {
   reviewerName!: string;
 
   @Field(type => Book)
-  @ManyToOne(
-    type => Book,
-    book => book.reviews
-  )
+  @ManyToOne(type => Book, book => book.reviews)
   book!: Book;
 }

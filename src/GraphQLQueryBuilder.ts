@@ -1,6 +1,5 @@
 import { GraphQLResolveInfo } from "graphql";
 import {
-  FieldNodeInfo,
   GraphQLEntityFields,
   QueryPagination,
   QueryPredicates,

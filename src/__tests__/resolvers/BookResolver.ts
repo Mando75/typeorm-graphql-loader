@@ -20,7 +20,6 @@ import {
 import { Connection } from "typeorm";
 
 enum Transform {
-  UPPERCASE = "UPPERCASE",
   LOWERCASE = "LOWERCASE"
 }
 

@@ -1,10 +1,5 @@
 import { Author, Book, DecoratorTest, Publisher, Review } from "../entity";
-import {
-  AuthorResolver,
-  BookResolver,
-  DecoratorTestResolver,
-  ReviewResolver
-} from "../resolvers";
+import { AuthorResolver, BookResolver, DecoratorTestResolver, ReviewResolver } from "../resolvers";
 import { Connection, createConnection } from "typeorm";
 import { Seeder } from "./Seeder";
 import { GraphQLDatabaseLoader } from "../../GraphQLDatabaseLoader";

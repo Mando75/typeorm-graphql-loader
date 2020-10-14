@@ -210,11 +210,3 @@ export type GraphQLEntityFields = {
   };
 };
 
-/**
- * @hidden
- */
-export interface FieldNodeInfo {
-  fieldNodes: FieldNode[];
-  fieldName: string;
-  fragments: { [key: string]: FragmentDefinitionNode };
-}
