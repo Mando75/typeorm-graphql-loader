@@ -99,11 +99,40 @@ describe("Query Builder options", () => {
     expect(result.data?.paginatedReviews).to.deep.equal(expected);
   });
 
-  it("can apply OR WHERE conditions", async () => {
+  it("can apply OR WHERE conditions with strings", async () => {
     const { connection, schema, loader } = helpers;
     const query = `
      query orWhere($authorId: Int!, $publisherId: Int!) {
        booksByAuthorOrPublisher(authorId: $authorId, publisherId: $publisherId) {
+         id
+         title
+       }
+     }
+    `;
+    const author = await connection.getRepository(Author).findOne();
+    const publisher = await connection.getRepository(Publisher).findOne();
+    const books = await connection
+      .getRepository(Book)
+      .createQueryBuilder("book")
+      .where("book.authorId = :authorId", { authorId: author?.id })
+      .orWhere("book.publisherId = :publisherId", {
+        publisherId: publisher?.id
+      })
+      .getMany();
+
+    const vars = { authorId: author?.id, publisherId: publisher?.id };
+
+    const result = await graphql(schema, query, {}, { loader }, vars);
+    const expected = books.map(({ id, title }) => ({ id, title }));
+    expect(result).to.not.have.key("errors");
+    expect(result.data?.booksByAuthorOrPublisher).to.deep.equal(expected);
+  });
+
+  it("can apply OR WHERE conditions with brackets", async () => {
+    const { connection, schema, loader } = helpers;
+    const query = `
+     query orWhere($authorId: Int!, $publisherId: Int!) {
+       booksByAuthorOrPublisher(authorId: $authorId, publisherId: $publisherId, useBrackets: true) {
          id
          title
        }
