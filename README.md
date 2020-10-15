@@ -27,7 +27,6 @@ For those upgrading, I highly recommend reading through the [new documentation](
 - [Usage](#Usage)
 - [Gotchas](#Gotchas)
 - [Roadmap](#Roadmap)
-- [API](#API)
 - [Contributing](#Contributing)
 - [Problem](#Problem)
 - [Solution](#Solution)
@@ -36,7 +35,7 @@ For those upgrading, I highly recommend reading through the [new documentation](
 ## Description <a name="Description">
 
 This package provides a `GraphQLDatabaseLoader` class, which is a caching
-loader that will trace through a GraphQL query info object and load the
+loader that will parse a GraphQL query info object and load the
 TypeORM fields and relations needed to resolve the query. For a more in-depth
 explanation, see the [Problem](#Problem) and [Solution](#Solution) sections below.
 
@@ -61,22 +60,23 @@ connection as the first argument, and a [LoaderOptions](https://gql-loader.bmull
 optional second parameter.
 
 ### Apollo Server Example
-```ts
+```typescript
 import { GraphQLDatabaseLoader } from '@mando75/typeorm-graphql-loader';
 const connection = createConnection({...}); // Create your TypeORM connection
 
 const apolloServer = new ApolloServer({
   schema,
   context: {
-    loader: new GraphQLDatabaseLoader(connection, {/** additional options if needed**})
+    loader: new GraphQLDatabaseLoader(connection, {/** additional options if needed**/})
   },
 });
 ```
 
 The loader will now appear in your resolver's context object:
 
-```ts
-Query: {
+```typescript
+{ 
+  Query: {
     getBookById(object: any, args: {id: string }, context: MyGraphQLContext, info: GraphQLResolveInfo) {
         return context.loader
             .loadEntity(Book, "book")
@@ -84,11 +84,21 @@ Query: {
             .info(info)
             .loadOne();
     }
+  }
 }
 ```
 
 Please note that the loader will only return the fields and relations that
 the client requested in the query. You can configure certain entity fields to be required or ignored via the [ConfigureLoader](https://gql-loader.bmuller.net/globals.html#configureloader) decorator.
+
+The loader provides a thin wrapper around the TypeORM SelectQueryBuilder
+with utility functions to help with things like adding where conditions, searching and pagination. 
+For more advanced query building, see the documentation for the 
+[ejectQueryBuilder](https://gql-loader.bmuller.net/classes/graphqlquerybuilder.html#ejectquerybuilder) 
+method.
+
+Please refer to the [full documentation](https://gql-loader.bmuller.net) for more details on what
+options and utilities the loader provides.
 
 ## Gotchas <a name="Gotchas">
 
@@ -113,10 +123,6 @@ Currently, the loader only supports offset pagination. I would like to add the a
 With the introduction of the `ConfigureLoader` decorator, I will soon be able to add the ability to remap GraphQL fields to entity fields. For example, say your TypeORM entity has a property called `computedTotal`, but you want that property to map to a field called `total` in your GraphQL schema. Currently, there is no way to accomplish that with the loader. I would like to add an option to the configuration decorator to perform such a mapping. 
 
 [Track Progress](https://gitlab.com/Mando75/typeorm-graphql-loader/-/issues/11)
-
-## API <a name="API"> 
-
-[Documentation for the Public API](https://gql-loader.bmuller.net)
 
 ## Contributing <a name="Contributing">
 
