@@ -295,6 +295,21 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    *   This is to prevent issues with selecting data from the same table twice, and is generally more performant.
    *   If you are wanting a relation or column to always be joined and selected, see the {@link ConfigureLoader} Decorator
    *
+   * @example
+   * ```typescript
+   * function resolve(obj, args, context, info) {
+   *   return context
+   *     .loader
+   *     .loadEntity(User, "user")
+   *     .info(info)
+   *     .ejectQueryBuilder(qb => {
+   *       return qb.innerJoin("user.group", "group")
+   *          .where("group.name = :groupName", { groupName: args.groupName })
+   *     })
+   *     .loadMany()
+   * }
+   * ```
+   *
    * @param cb
    */
   public ejectQueryBuilder(cb: EjectQueryCallback<T>): GraphQLQueryBuilder<T> {
