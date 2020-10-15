@@ -29,9 +29,6 @@ export class Publisher extends BaseEntity {
   poBox!: Address;
 
   @Field(type => [Book], { nullable: true })
-  @OneToMany(
-    type => Book,
-    book => book.publisher
-  )
+  @OneToMany(type => Book, book => book.publisher)
   books!: Book[];
 }

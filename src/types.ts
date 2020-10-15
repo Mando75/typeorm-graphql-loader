@@ -1,5 +1,5 @@
 import { FieldNode, FragmentDefinitionNode } from "graphql";
-import { Brackets, ObjectLiteral, OrderByCondition } from "typeorm";
+import { Brackets, ObjectLiteral, OrderByCondition, SelectQueryBuilder } from "typeorm";
 import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
 import { LoaderSearchMethod } from "./enums/LoaderSearchMethod";
 
@@ -156,6 +156,8 @@ export interface LoaderFieldConfiguration {
   required?: boolean | FieldConfigurationPredicate;
 }
 
+export type EjectQueryCallback<T> = <T>(qb: SelectQueryBuilder<T>) => SelectQueryBuilder<T>;
+
 /**
  * @hidden
  */
@@ -181,6 +183,7 @@ export interface QueueItem {
   pagination?: QueryPagination;
   alias?: string;
   context?: any;
+  ejectQueryCallback: EjectQueryCallback<any>
 }
 
 /**
@@ -210,11 +213,3 @@ export type GraphQLEntityFields = {
   };
 };
 
-/**
- * @hidden
- */
-export interface FieldNodeInfo {
-  fieldNodes: FieldNode[];
-  fieldName: string;
-  fragments: { [key: string]: FragmentDefinitionNode };
-}

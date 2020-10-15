@@ -1,6 +1,5 @@
-import { AuthorResolver } from "./AuthorResolver";
-import { BookResolver } from "./BookResolver";
-import { ReviewResolver } from "./ReviewResolver";
-import { DecoratorTestResolver } from "./DecoratorTestResolver";
-
-export { AuthorResolver, BookResolver, ReviewResolver, DecoratorTestResolver };
+export { AuthorResolver } from "./AuthorResolver";
+export { BookResolver } from "./BookResolver";
+export { ReviewResolver } from "./ReviewResolver";
+export { DecoratorTestResolver } from "./DecoratorTestResolver";
+export { PublisherResolver } from "./PublisherResolver";

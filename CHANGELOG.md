@@ -1,5 +1,15 @@
 # Change Log
 
+## [1.6.0]
+
+### Changed
+
+The `GraphQLQueryBuilder#orWhere` method now accepts an instance of Brackets as a parameter. This brings the loader back into parity with the TypeORM `SelectQueryBuilder#orWhere` method.
+
+### Added
+
+`GraphQLQueryBuilder#ejectQueryBuilder` method that accepts a callback which can be used to customize the TypeORM SelectQueryBuilder instance before executing against the database.
+
 ## [1.5.0]
 
 ### Fixed 

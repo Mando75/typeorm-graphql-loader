@@ -1,10 +1,5 @@
 import { Author, Book, DecoratorTest, Publisher, Review } from "../entity";
-import {
-  AuthorResolver,
-  BookResolver,
-  DecoratorTestResolver,
-  ReviewResolver
-} from "../resolvers";
+import { AuthorResolver, BookResolver, DecoratorTestResolver, PublisherResolver, ReviewResolver } from "../resolvers";
 import { Connection, createConnection } from "typeorm";
 import { Seeder } from "./Seeder";
 import { GraphQLDatabaseLoader } from "../../GraphQLDatabaseLoader";
@@ -47,7 +42,8 @@ export async function startup(
       AuthorResolver,
       BookResolver,
       ReviewResolver,
-      DecoratorTestResolver
+      DecoratorTestResolver,
+      PublisherResolver,
     ]
   });
 

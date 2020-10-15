@@ -17,10 +17,9 @@ import {
   BookCreateResultType,
   BookCreateSuccess
 } from "../entity/Book";
-import { Connection } from "typeorm";
+import { Brackets, Connection } from "typeorm";
 
 enum Transform {
-  UPPERCASE = "UPPERCASE",
   LOWERCASE = "LOWERCASE"
 }
 
@@ -54,13 +53,16 @@ export class BookResolver {
   async booksByAuthorOrPublisher(
     @Arg("publisherId", type => Int) publisherId: number,
     @Arg("authorId", type => Int) authorId: number,
+    @Arg("useBrackets", { nullable: true, defaultValue: false })
+    useBrackets: boolean = false,
     @Ctx("loader") loader: GraphQLDatabaseLoader,
     @Info() info: GraphQLResolveInfo
   ) {
+    const orWhere = useBrackets ? new Brackets(qb => qb.orWhere("books.authorId = :authorId", { authorId })) : "books.authorId = :authorId";
     return loader
       .loadEntity(Book, "books")
       .where("books.publisherId = :publisherId", { publisherId })
-      .orWhere("books.authorId = :authorId", { authorId })
+      .orWhere(orWhere, { authorId })
       .info(info)
       .loadMany();
   }

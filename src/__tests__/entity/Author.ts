@@ -39,10 +39,7 @@ export class Author extends BaseEntity {
   phone!: string;
 
   @Field(type => [Book])
-  @OneToMany(
-    type => Book,
-    book => book.author
-  )
+  @OneToMany(type => Book, book => book.author)
   books!: Book[];
 
   @Field()
