@@ -17,7 +17,7 @@ import {
   BookCreateResultType,
   BookCreateSuccess
 } from "../entity/Book";
-import {Brackets, Connection} from "typeorm";
+import { Brackets, Connection } from "typeorm";
 
 enum Transform {
   LOWERCASE = "LOWERCASE"
