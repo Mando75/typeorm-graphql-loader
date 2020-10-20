@@ -151,7 +151,8 @@ export class GraphQLQueryResolver {
       )
       .forEach(field => {
         // This is the name of the embedded entity on the TypeORM model
-        const embeddedFieldName = field.propertyName;
+        const embeddedFieldName =
+          graphQLFieldNames.get(field.propertyName) ?? field.propertyName;
 
         if (selection.hasOwnProperty(embeddedFieldName)) {
           const embeddedSelection = selection[embeddedFieldName];
@@ -166,8 +167,15 @@ export class GraphQLQueryResolver {
           // .addSelect('table.embeddedField.embeddedColumn')
           embeddedFieldsToSelect.push(
             embeddedFieldColumnNames
-              .filter(columnName => columnName in embeddedSelection.children!)
-              .map(columnName => `${embeddedFieldName}.${columnName}`)
+              .filter(columnName => {
+                const embeddedGraphQLFieldNames = getGraphQLFieldNames(
+                  field.type
+                );
+                const graphQLName =
+                  embeddedGraphQLFieldNames.get(columnName) ?? columnName;
+                return embeddedSelection.children.hasOwnProperty(graphQLName);
+              })
+              .map(columnName => `${field.propertyName}.${columnName}`)
           );
         }
       });

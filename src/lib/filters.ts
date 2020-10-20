@@ -30,7 +30,7 @@ export const requestedFieldsFilter = (
       context,
       selection
     ) &&
-    (column.isPrimary || fieldName in selection)
+    (column.isPrimary || selection.hasOwnProperty(fieldName))
   );
 };
 
@@ -57,7 +57,7 @@ export const requestedEmbeddedFieldsFilter = (
       ignoredFields.get(embed.propertyName),
       context,
       selection
-    ) && fieldName in selection
+    ) && selection.hasOwnProperty(fieldName)
   );
 };
 
@@ -88,7 +88,7 @@ export const requestedRelationFilter = (
       selection
     ) &&
     // check first to see if it was queried for
-    (fieldName in selection ||
+    (selection.hasOwnProperty(fieldName) ||
       // or if the field has been marked as required
       resolvePredicate(
         requiredFields.get(relation.propertyName),
