@@ -309,6 +309,7 @@ export class GraphQLQueryResolver {
 
     relations.filter(relationFilter).forEach(relation => {
       // Join each relation that was queried
+      const relationGraphQLName = graphQLFieldNames.get(relation.propertyName) ?? relation.propertyName;
       const childAlias = GraphQLQueryResolver._generateChildHash(
         alias,
         relation.propertyName,
@@ -337,7 +338,7 @@ export class GraphQLQueryResolver {
       // from this relation
       queryBuilder = this.createQuery(
         relation.inverseEntityMetadata.target,
-        children[relation.propertyName]?.children,
+        children[relationGraphQLName]?.children,
         connection,
         queryBuilder,
         childAlias,
