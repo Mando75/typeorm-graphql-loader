@@ -11,7 +11,7 @@ describe("ConfigureLoader", () => {
   let dt: DecoratorTest | undefined;
 
   before(async () => {
-    helpers = await startup("configure_loader", { logging: true });
+    helpers = await startup("configure_loader", { logging: false });
     dt = await helpers.connection
       .getRepository(DecoratorTest)
       .findOne({ relations: ["testRelation", "testRemappedRelation"] });
