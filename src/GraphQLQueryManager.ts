@@ -31,7 +31,6 @@ export class GraphQLQueryManager {
   private _cache: Map<string, Promise<any>> = new Map();
   private _immediate?: NodeJS.Immediate;
   private readonly _defaultLoaderSearchMethod: LoaderSearchMethod;
-  private _parser: GraphQLInfoParser = new GraphQLInfoParser();
   private _resolver: GraphQLQueryResolver;
   private _formatter: Formatter;
 

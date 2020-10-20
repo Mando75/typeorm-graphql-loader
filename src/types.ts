@@ -1,4 +1,3 @@
-import { FieldNode, FragmentDefinitionNode } from "graphql";
 import {
   Brackets,
   ObjectLiteral,
