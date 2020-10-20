@@ -26,10 +26,10 @@ export class GraphQLQueryResolver {
   private readonly _maxDepth: number;
 
   constructor({
-                primaryKeyColumn,
-                namingStrategy,
-                maxQueryDepth
-              }: LoaderOptions) {
+    primaryKeyColumn,
+    namingStrategy,
+    maxQueryDepth
+  }: LoaderOptions) {
     this._namingStrategy = namingStrategy ?? LoaderNamingStrategyEnum.CAMELCASE;
     this._primaryKeyColumn = primaryKeyColumn;
     this._formatter = new Formatter(this._namingStrategy);
@@ -75,42 +75,20 @@ export class GraphQLQueryResolver {
   ): SelectQueryBuilder<{}> {
     const meta = connection.getMetadata(model);
     if (selection) {
-      const ignoredFields = getLoaderIgnoredFields(meta.target);
-      const graphQLFieldNames = getGraphQLFieldNames(meta.target);
-      const fields = meta.columns.filter(
-        field => {
-          // Handle remapping of graphql -> typeorm field
-          const fieldName = graphQLFieldNames.get(field.propertyName) ?? field.propertyName;
-
-          // Ensure field is not ignored and that it is in the selection
-          return !resolvePredicate(
-            ignoredFields.get(field.propertyName),
-            context,
-            selection
-            ) &&
-            (field.isPrimary || fieldName in selection);
-        }
+      queryBuilder = this._selectFields(
+        queryBuilder,
+        selection,
+        meta,
+        alias,
+        context
       );
-
-      const embeddedFields = meta.embeddeds.filter(
-        embed => {
-          const fieldName = graphQLFieldNames.get(embed.propertyName) ?? embed.propertyName;
-
-          return !resolvePredicate(
-            ignoredFields.get(embed.propertyName),
-            context,
-            selection
-          ) && fieldName in selection;
-        }
-      );
-
-      queryBuilder = this._selectFields(queryBuilder, fields, alias);
 
       queryBuilder = this._selectEmbeddedFields(
         queryBuilder,
-        embeddedFields,
         selection,
-        alias
+        meta,
+        alias,
+        context
       );
 
       queryBuilder = this._selectRequiredFields(
@@ -125,10 +103,9 @@ export class GraphQLQueryResolver {
         queryBuilder = this._selectRelations(
           queryBuilder,
           selection,
-          meta.relations,
+          meta,
           alias,
           context,
-          meta,
           connection,
           depth
         );
@@ -142,24 +119,42 @@ export class GraphQLQueryResolver {
    * will find any GraphQL fields that map to embedded entities on the current
    * TypeORM model and add them to the SelectQuery
    * @param queryBuilder
-   * @param embeddedFields
-   * @param children
+   * @param selection
+   * @param meta
    * @param alias
+   * @param context
    * @private
    */
   private _selectEmbeddedFields(
     queryBuilder: SelectQueryBuilder<{}>,
-    embeddedFields: Array<EmbeddedMetadata>,
-    children: GraphQLEntityFields,
-    alias: string
+    selection: GraphQLEntityFields,
+    meta: EntityMetadata,
+    alias: string,
+    context: any
   ) {
+    const graphQLFieldNames = getGraphQLFieldNames(meta.target);
+    const ignoredFields = getLoaderIgnoredFields(meta.target);
+
+    const requestedEmbeds = meta.embeddeds.filter(embed => {
+      const fieldName =
+        graphQLFieldNames.get(embed.propertyName) ?? embed.propertyName;
+
+      return (
+        !resolvePredicate(
+          ignoredFields.get(embed.propertyName),
+          context,
+          selection
+        ) && fieldName in selection
+      );
+    });
+
     const embeddedFieldsToSelect: Array<Array<string>> = [];
-    embeddedFields.forEach(field => {
+    requestedEmbeds.forEach(field => {
       // This is the name of the embedded entity on the TypeORM model
       const embeddedFieldName = field.propertyName;
 
-      if (children.hasOwnProperty(embeddedFieldName)) {
-        const embeddedSelection = children[embeddedFieldName];
+      if (selection.hasOwnProperty(embeddedFieldName)) {
+        const embeddedSelection = selection[embeddedFieldName];
         // Extract the column names from the embedded field
         // so we can compare it to what was requested in the GraphQL query
         const embeddedFieldColumnNames = field.columns.map(
@@ -190,21 +185,44 @@ export class GraphQLQueryResolver {
    * Given a set of fields, adds them as a select to the
    * query builder if they exist on the entity.
    * @param queryBuilder
-   * @param fields
+   * @param selection
+   * @param meta
    * @param alias
+   * @param context
    * @private
    */
   private _selectFields(
     queryBuilder: SelectQueryBuilder<{}>,
-    fields: Array<ColumnMetadata>,
-    alias: string
+    selection: GraphQLEntityFields,
+    meta: EntityMetadata,
+    alias: string,
+    context: any
   ): SelectQueryBuilder<{}> {
+    const ignoredFields = getLoaderIgnoredFields(meta.target);
+    const graphQLFieldNames = getGraphQLFieldNames(meta.target);
+
+    const requestedFields = meta.columns.filter(field => {
+      // Handle remapping of graphql -> typeorm field
+      const fieldName =
+        graphQLFieldNames.get(field.propertyName) ?? field.propertyName;
+
+      // Ensure field is not ignored and that it is in the selection
+      return (
+        !resolvePredicate(
+          ignoredFields.get(field.propertyName),
+          context,
+          selection
+        ) &&
+        (field.isPrimary || fieldName in selection)
+      );
+    });
+
     // TODO Remove in 2.0
     // Ensure we select the primary key column
-    queryBuilder = this._selectPrimaryKey(queryBuilder, fields, alias);
+    queryBuilder = this._selectPrimaryKey(queryBuilder, requestedFields, alias);
 
     // Add a select for each field that was requested in the query
-    fields.forEach(field => {
+    requestedFields.forEach(field => {
       // Make sure we account for embedded types
       const propertyName: string = field.propertyName;
       const databaseName: string = field.databaseName;
@@ -266,7 +284,6 @@ export class GraphQLQueryResolver {
    * the subselection of fields required for that branch of the request.
    * @param queryBuilder
    * @param children
-   * @param relations
    * @param alias
    * @param context
    * @param meta
@@ -277,25 +294,27 @@ export class GraphQLQueryResolver {
   private _selectRelations(
     queryBuilder: SelectQueryBuilder<{}>,
     children: GraphQLEntityFields,
-    relations: Array<RelationMetadata>,
+    meta: EntityMetadata,
     alias: string,
     context: any,
-    meta: EntityMetadata,
     connection: Connection,
     depth: number
   ): SelectQueryBuilder<{}> {
+    const relations = meta.relations;
     const ignoredFields = getLoaderIgnoredFields(meta.target);
     const requiredFields = getLoaderRequiredFields(meta.target);
     const graphQLFieldNames = getGraphQLFieldNames(meta.target);
 
     // Filter function for pulling out the relations we need to join
     const relationFilter = (relation: RelationMetadata) => {
-      const fieldName = graphQLFieldNames.get(relation.propertyName) ?? relation.propertyName;
+      const fieldName =
+        graphQLFieldNames.get(relation.propertyName) ?? relation.propertyName;
       // Pass on ignored relations
-      return !resolvePredicate(
-        ignoredFields.get(relation.propertyName),
-        context,
-        children
+      return (
+        !resolvePredicate(
+          ignoredFields.get(relation.propertyName),
+          context,
+          children
         ) &&
         // check first to see if it was queried for
         (fieldName in children ||
@@ -304,12 +323,14 @@ export class GraphQLQueryResolver {
             requiredFields.get(relation.propertyName),
             context,
             children
-          ));
+          ))
+      );
     };
 
     relations.filter(relationFilter).forEach(relation => {
       // Join each relation that was queried
-      const relationGraphQLName = graphQLFieldNames.get(relation.propertyName) ?? relation.propertyName;
+      const relationGraphQLName =
+        graphQLFieldNames.get(relation.propertyName) ?? relation.propertyName;
       const childAlias = GraphQLQueryResolver._generateChildHash(
         alias,
         relation.propertyName,
