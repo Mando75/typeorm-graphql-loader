@@ -1,9 +1,5 @@
 import "reflect-metadata";
-import {
-  FieldConfigurationPredicate,
-  GraphQLEntityFields,
-  LoaderFieldConfiguration
-} from "./types";
+import { FieldConfigurationPredicate, GraphQLEntityFields, LoaderFieldConfiguration } from "./types";
 
 /**
  * Internal keys for mapping entity metadata
@@ -11,7 +7,8 @@ import {
  */
 const keys = {
   IGNORE_FIELD: Symbol("gqlLoader:ignoreField"),
-  REQUIRED_FIELD: Symbol("gqlLoader:requiredField")
+  REQUIRED_FIELD: Symbol("gqlLoader:requiredField"),
+  GRAPHQL_NAME: Symbol("gqlLoader:graphQLName"),
 };
 
 /**
@@ -20,7 +17,7 @@ const keys = {
  */
 const defaultLoaderFieldConfiguration: LoaderFieldConfiguration = {
   ignore: false,
-  required: false
+  required: false,
 };
 
 /**
@@ -53,16 +50,14 @@ const defaultLoaderFieldConfiguration: LoaderFieldConfiguration = {
 export const ConfigureLoader = (
   options: LoaderFieldConfiguration = defaultLoaderFieldConfiguration
 ) => {
-  const { required, ignore } = {
+  const { required, ignore, graphQLName } = {
     ...defaultLoaderFieldConfiguration,
     ...options
   };
 
   return (target: any, propertyKey: string) => {
-    const ignoreSettings: Map<
-      string,
-      boolean | FieldConfigurationPredicate | undefined
-    > = Reflect.getMetadata(keys.IGNORE_FIELD, target.constructor) ?? new Map();
+    const ignoreSettings: Map<string,
+      boolean | FieldConfigurationPredicate | undefined> = Reflect.getMetadata(keys.IGNORE_FIELD, target.constructor) ?? new Map();
     ignoreSettings.set(propertyKey, ignore);
     Reflect.defineMetadata(
       keys.IGNORE_FIELD,
@@ -70,15 +65,21 @@ export const ConfigureLoader = (
       target.constructor
     );
 
-    const requiredSettings: Map<
-      string,
-      boolean | FieldConfigurationPredicate | undefined
-    > =
+    const requiredSettings: Map<string,
+      boolean | FieldConfigurationPredicate | undefined> =
       Reflect.getMetadata(keys.REQUIRED_FIELD, target.constructor) ?? new Map();
     requiredSettings.set(propertyKey, required);
     Reflect.defineMetadata(
       keys.REQUIRED_FIELD,
       requiredSettings,
+      target.constructor
+    );
+
+    const graphQLFieldNames: Map<string, string> = Reflect.getMetadata(keys.GRAPHQL_NAME, target.constructor) ?? new Map();
+    graphQLFieldNames.set(propertyKey, graphQLName ?? propertyKey);
+    Reflect.defineMetadata(
+      keys.GRAPHQL_NAME,
+      graphQLFieldNames,
       target.constructor
     );
   };
@@ -104,6 +105,14 @@ export const getLoaderIgnoredFields = (
   target: any
 ): Map<string, boolean | FieldConfigurationPredicate | undefined> => {
   return Reflect.getMetadata(keys.IGNORE_FIELD, target) ?? new Map();
+};
+
+/**
+ * TODO
+ * @param target
+ */
+export const getGraphQLFieldNames = (target: any): Map<string, string> => {
+  return Reflect.getMetadata(keys.GRAPHQL_NAME, target) ?? new Map();
 };
 
 /**

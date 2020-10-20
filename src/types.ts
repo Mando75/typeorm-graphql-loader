@@ -154,6 +154,11 @@ export interface LoaderFieldConfiguration {
    * for the joined relation.
    */
   required?: boolean | FieldConfigurationPredicate;
+
+  /**
+   * TODO
+   */
+  graphQLName?: string;
 }
 
 export type EjectQueryCallback<T> = <T>(qb: SelectQueryBuilder<T>) => SelectQueryBuilder<T>;
