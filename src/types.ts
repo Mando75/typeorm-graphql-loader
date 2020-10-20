@@ -161,6 +161,8 @@ export interface LoaderFieldConfiguration {
   graphQLName?: string;
 }
 
+export type RequireOrIgnoreSettings = Map<string, boolean | FieldConfigurationPredicate | undefined>;
+
 export type EjectQueryCallback<T> = <T>(qb: SelectQueryBuilder<T>) => SelectQueryBuilder<T>;
 
 /**

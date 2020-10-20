@@ -1,5 +1,10 @@
 import "reflect-metadata";
-import { FieldConfigurationPredicate, GraphQLEntityFields, LoaderFieldConfiguration } from "./types";
+import {
+  FieldConfigurationPredicate,
+  GraphQLEntityFields,
+  LoaderFieldConfiguration,
+  RequireOrIgnoreSettings
+} from "./types";
 
 /**
  * Internal keys for mapping entity metadata
@@ -56,8 +61,7 @@ export const ConfigureLoader = (
   };
 
   return (target: any, propertyKey: string) => {
-    const ignoreSettings: Map<string,
-      boolean | FieldConfigurationPredicate | undefined> = Reflect.getMetadata(keys.IGNORE_FIELD, target.constructor) ?? new Map();
+    const ignoreSettings: RequireOrIgnoreSettings = Reflect.getMetadata(keys.IGNORE_FIELD, target.constructor) ?? new Map();
     ignoreSettings.set(propertyKey, ignore);
     Reflect.defineMetadata(
       keys.IGNORE_FIELD,
@@ -65,8 +69,7 @@ export const ConfigureLoader = (
       target.constructor
     );
 
-    const requiredSettings: Map<string,
-      boolean | FieldConfigurationPredicate | undefined> =
+    const requiredSettings: RequireOrIgnoreSettings =
       Reflect.getMetadata(keys.REQUIRED_FIELD, target.constructor) ?? new Map();
     requiredSettings.set(propertyKey, required);
     Reflect.defineMetadata(
@@ -92,7 +95,7 @@ export const ConfigureLoader = (
  */
 export const getLoaderRequiredFields = (
   target: any
-): Map<string, boolean | FieldConfigurationPredicate | undefined> => {
+): RequireOrIgnoreSettings => {
   return Reflect.getMetadata(keys.REQUIRED_FIELD, target) ?? new Map();
 };
 
@@ -103,7 +106,7 @@ export const getLoaderRequiredFields = (
  */
 export const getLoaderIgnoredFields = (
   target: any
-): Map<string, boolean | FieldConfigurationPredicate | undefined> => {
+): RequireOrIgnoreSettings => {
   return Reflect.getMetadata(keys.IGNORE_FIELD, target) ?? new Map();
 };
 
