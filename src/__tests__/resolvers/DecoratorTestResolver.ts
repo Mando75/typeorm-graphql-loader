@@ -1,8 +1,9 @@
-import { Arg, Ctx, Info, Int, Query, Resolver } from "type-graphql";
-import { DecoratorTest } from "../entity";
+import { Arg, Ctx, FieldResolver, Info, Int, Query, Resolver, Root } from "type-graphql";
+import { Author, DecoratorTest } from "../entity";
 import { GraphQLDatabaseLoader } from "../../GraphQLDatabaseLoader";
 import { GraphQLResolveInfo } from "graphql";
 import { DecoratorContext } from "../util/DecoratorContext";
+import { Address } from "../entity/Address";
 
 @Resolver(DecoratorTest)
 export class DecoratorTestResolver {
@@ -75,5 +76,20 @@ export class DecoratorTestResolver {
     }
 
     return record;
+  }
+
+  @FieldResolver()
+  remappedField(@Root() parent: DecoratorTest): string {
+    return parent.testRemappedField;
+  }
+
+  @FieldResolver()
+  remappedEmbed(@Root() parent: DecoratorTest): Address {
+    return parent.testRemappedEmbed;
+  }
+
+  @FieldResolver()
+  remappedRelation(@Root() parent: DecoratorTest): Author {
+    return parent.testRemappedRelation;
   }
 }

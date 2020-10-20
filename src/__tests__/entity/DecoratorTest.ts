@@ -29,6 +29,12 @@ export class DecoratorTest extends BaseEntity {
   })
   testField?: string;
 
+  @Column("varchar", { nullable: false })
+  @ConfigureLoader({
+    graphQLName: "remappedField"
+  })
+  testRemappedField!: string;
+
   @Field(type => Address, { nullable: true })
   @Column(type => Address)
   @ConfigureLoader({
@@ -36,6 +42,12 @@ export class DecoratorTest extends BaseEntity {
     required: (context: DecoratorContext) => context.requireEmbed
   })
   testEmbed!: Address;
+
+  @Column(type => Address)
+  @ConfigureLoader({
+    graphQLName: "remappedEmbed"
+  })
+  testRemappedEmbed!: Address;
 
   @OneToOne(type => Author)
   @JoinColumn()
@@ -45,6 +57,13 @@ export class DecoratorTest extends BaseEntity {
     required: (context: DecoratorContext) => context.requireRelation
   })
   testRelation!: Author;
+
+  @OneToOne(type => Author)
+  @JoinColumn()
+  @ConfigureLoader({
+    graphQLName: "remappedRelation"
+  })
+  testRemappedRelation!: Author;
 
   @Field()
   @CreateDateColumn()

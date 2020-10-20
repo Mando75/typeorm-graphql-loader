@@ -46,7 +46,10 @@ describe("Querying embedded entities", () => {
       lastName: author?.lastName,
       email: author?.email,
       address: {
-        ...author?.address
+        street: author?.address.street,
+        city: author?.address.city,
+        state: author?.address.state,
+        zip: author?.address.zip
       }
     };
 

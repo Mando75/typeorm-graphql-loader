@@ -14,6 +14,7 @@ export class Seeder {
   public static addressFactory() {
     return {
       street: faker.address.streetAddress(),
+      street2: faker.address.secondaryAddress(),
       city: faker.address.city(),
       state: faker.address.state(),
       zip: faker.address.zipCode()
@@ -129,7 +130,10 @@ export class Seeder {
       const dt: Partial<DecoratorTest> = {
         testField: faker.lorem.words(1),
         testRelation: authors[i % this.NUM_AUTHORS],
-        testEmbed: Seeder.addressFactory()
+        testEmbed: Seeder.addressFactory(),
+        testRemappedField: faker.lorem.words(1),
+        testRemappedEmbed: Seeder.addressFactory(),
+        testRemappedRelation: authors[i % this.NUM_AUTHORS],
       };
       decoratorTests.push(dt);
     }
