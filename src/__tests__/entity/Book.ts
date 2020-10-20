@@ -37,15 +37,24 @@ export class Book extends BaseEntity {
   publishedDate!: Date;
 
   @Field(type => Author)
-  @ManyToOne(type => Author, author => author.books)
+  @ManyToOne(
+    type => Author,
+    author => author.books
+  )
   author!: Author;
 
   @Field(type => Publisher)
-  @ManyToOne(type => Publisher, publisher => publisher.books)
+  @ManyToOne(
+    type => Publisher,
+    publisher => publisher.books
+  )
   publisher!: Publisher;
 
   @Field(type => [Review])
-  @OneToMany(t => Review, review => review.book)
+  @OneToMany(
+    t => Review,
+    review => review.book
+  )
   reviews!: Review[];
 
   @Field()

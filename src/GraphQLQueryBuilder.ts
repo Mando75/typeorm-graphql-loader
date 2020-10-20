@@ -28,8 +28,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
     private _manager: GraphQLQueryManager,
     private _entity: Function | string,
     private _alias?: string
-  ) {
-  }
+  ) {}
 
   /**
    * Provide the query builder with the GraphQL Query info you would like to resolve
@@ -390,11 +389,13 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   private async _genericLoad<U extends boolean, V extends boolean>(
     many: U,
     paginate: V
-  ): Promise<V extends true
-    ? [InstanceType<T>[], number]
-    : U extends true
+  ): Promise<
+    V extends true
+      ? [InstanceType<T>[], number]
+      : U extends true
       ? InstanceType<T>[]
-      : InstanceType<T> | undefined> {
+      : InstanceType<T> | undefined
+  > {
     // we need to validate an info object
     this._validateInfo(this._info);
     // Check if this query is already in the cache

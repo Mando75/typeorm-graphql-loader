@@ -13,7 +13,7 @@ import {
 const keys = {
   IGNORE_FIELD: Symbol("gqlLoader:ignoreField"),
   REQUIRED_FIELD: Symbol("gqlLoader:requiredField"),
-  GRAPHQL_NAME: Symbol("gqlLoader:graphQLName"),
+  GRAPHQL_NAME: Symbol("gqlLoader:graphQLName")
 };
 
 /**
@@ -22,7 +22,7 @@ const keys = {
  */
 const defaultLoaderFieldConfiguration: LoaderFieldConfiguration = {
   ignore: false,
-  required: false,
+  required: false
 };
 
 /**
@@ -61,7 +61,8 @@ export const ConfigureLoader = (
   };
 
   return (target: any, propertyKey: string) => {
-    const ignoreSettings: RequireOrIgnoreSettings = Reflect.getMetadata(keys.IGNORE_FIELD, target.constructor) ?? new Map();
+    const ignoreSettings: RequireOrIgnoreSettings =
+      Reflect.getMetadata(keys.IGNORE_FIELD, target.constructor) ?? new Map();
     ignoreSettings.set(propertyKey, ignore);
     Reflect.defineMetadata(
       keys.IGNORE_FIELD,
@@ -78,7 +79,8 @@ export const ConfigureLoader = (
       target.constructor
     );
 
-    const graphQLFieldNames: Map<string, string> = Reflect.getMetadata(keys.GRAPHQL_NAME, target.constructor) ?? new Map();
+    const graphQLFieldNames: Map<string, string> =
+      Reflect.getMetadata(keys.GRAPHQL_NAME, target.constructor) ?? new Map();
     graphQLFieldNames.set(propertyKey, graphQLName ?? propertyKey);
     Reflect.defineMetadata(
       keys.GRAPHQL_NAME,

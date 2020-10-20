@@ -1,5 +1,11 @@
 import { Author, Book, DecoratorTest, Publisher, Review } from "../entity";
-import { AuthorResolver, BookResolver, DecoratorTestResolver, PublisherResolver, ReviewResolver } from "../resolvers";
+import {
+  AuthorResolver,
+  BookResolver,
+  DecoratorTestResolver,
+  PublisherResolver,
+  ReviewResolver
+} from "../resolvers";
 import { Connection, createConnection } from "typeorm";
 import { Seeder } from "./Seeder";
 import { GraphQLDatabaseLoader } from "../../GraphQLDatabaseLoader";
@@ -7,7 +13,7 @@ import { LoaderOptions } from "../../types";
 import { buildSchema } from "type-graphql";
 import { GraphQLSchema, printSchema } from "graphql";
 import * as fs from "fs";
-import {AddressResolver} from "../resolvers/AddressResolver";
+import { AddressResolver } from "../resolvers/AddressResolver";
 
 export interface TestHelpers {
   schema: GraphQLSchema;
@@ -45,7 +51,7 @@ export async function startup(
       BookResolver,
       ReviewResolver,
       DecoratorTestResolver,
-      PublisherResolver,
+      PublisherResolver
     ]
   });
 

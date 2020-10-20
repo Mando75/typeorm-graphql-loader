@@ -133,7 +133,7 @@ export class Seeder {
         testEmbed: Seeder.addressFactory(),
         testRemappedField: faker.lorem.words(1),
         testRemappedEmbed: Seeder.addressFactory(),
-        testRemappedRelation: authors[i % this.NUM_AUTHORS],
+        testRemappedRelation: authors[i % this.NUM_AUTHORS]
       };
       decoratorTests.push(dt);
     }

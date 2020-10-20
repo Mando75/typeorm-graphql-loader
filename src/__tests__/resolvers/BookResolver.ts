@@ -58,7 +58,11 @@ export class BookResolver {
     @Ctx("loader") loader: GraphQLDatabaseLoader,
     @Info() info: GraphQLResolveInfo
   ) {
-    const orWhere = useBrackets ? new Brackets(qb => qb.orWhere("books.authorId = :authorId", { authorId })) : "books.authorId = :authorId";
+    const orWhere = useBrackets
+      ? new Brackets(qb =>
+          qb.orWhere("books.authorId = :authorId", { authorId })
+        )
+      : "books.authorId = :authorId";
     return loader
       .loadEntity(Book, "books")
       .where("books.publisherId = :publisherId", { publisherId })

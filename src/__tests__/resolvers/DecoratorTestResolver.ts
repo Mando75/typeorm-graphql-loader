@@ -1,4 +1,13 @@
-import { Arg, Ctx, FieldResolver, Info, Int, Query, Resolver, Root } from "type-graphql";
+import {
+  Arg,
+  Ctx,
+  FieldResolver,
+  Info,
+  Int,
+  Query,
+  Resolver,
+  Root
+} from "type-graphql";
 import { Author, DecoratorTest } from "../entity";
 import { GraphQLDatabaseLoader } from "../../GraphQLDatabaseLoader";
 import { GraphQLResolveInfo } from "graphql";
