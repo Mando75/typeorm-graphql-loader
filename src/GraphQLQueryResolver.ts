@@ -6,6 +6,7 @@ import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 import { EmbeddedMetadata } from "typeorm/metadata/EmbeddedMetadata";
 import {
+  getGraphQLFieldNames,
   getLoaderIgnoredFields,
   getLoaderRequiredFields,
   resolvePredicate
@@ -25,10 +26,10 @@ export class GraphQLQueryResolver {
   private readonly _maxDepth: number;
 
   constructor({
-    primaryKeyColumn,
-    namingStrategy,
-    maxQueryDepth
-  }: LoaderOptions) {
+                primaryKeyColumn,
+                namingStrategy,
+                maxQueryDepth
+              }: LoaderOptions) {
     this._namingStrategy = namingStrategy ?? LoaderNamingStrategyEnum.CAMELCASE;
     this._primaryKeyColumn = primaryKeyColumn;
     this._formatter = new Formatter(this._namingStrategy);
@@ -75,23 +76,32 @@ export class GraphQLQueryResolver {
     const meta = connection.getMetadata(model);
     if (selection) {
       const ignoredFields = getLoaderIgnoredFields(meta.target);
+      const graphQLFieldNames = getGraphQLFieldNames(meta.target);
       const fields = meta.columns.filter(
-        field =>
-          !resolvePredicate(
+        field => {
+          // Handle remapping of graphql -> typeorm field
+          const fieldName = graphQLFieldNames.get(field.propertyName) ?? field.propertyName;
+
+          // Ensure field is not ignored and that it is in the selection
+          return !resolvePredicate(
             ignoredFields.get(field.propertyName),
             context,
             selection
-          ) &&
-          (field.isPrimary || field.propertyName in selection)
+            ) &&
+            (field.isPrimary || fieldName in selection);
+        }
       );
 
       const embeddedFields = meta.embeddeds.filter(
-        embed =>
-          !resolvePredicate(
+        embed => {
+          const fieldName = graphQLFieldNames.get(embed.propertyName) ?? embed.propertyName;
+
+          return !resolvePredicate(
             ignoredFields.get(embed.propertyName),
             context,
             selection
-          ) && embed.propertyName in selection
+          ) && fieldName in selection;
+        }
       );
 
       queryBuilder = this._selectFields(queryBuilder, fields, alias);
@@ -276,23 +286,26 @@ export class GraphQLQueryResolver {
   ): SelectQueryBuilder<{}> {
     const ignoredFields = getLoaderIgnoredFields(meta.target);
     const requiredFields = getLoaderRequiredFields(meta.target);
+    const graphQLFieldNames = getGraphQLFieldNames(meta.target);
 
     // Filter function for pulling out the relations we need to join
-    const relationFilter = (relation: RelationMetadata) =>
+    const relationFilter = (relation: RelationMetadata) => {
+      const fieldName = graphQLFieldNames.get(relation.propertyName) ?? relation.propertyName;
       // Pass on ignored relations
-      !resolvePredicate(
+      return !resolvePredicate(
         ignoredFields.get(relation.propertyName),
         context,
         children
-      ) &&
-      // check first to see if it was queried for
-      (relation.propertyName in children ||
-        // or if the field has been marked as required
-        resolvePredicate(
-          requiredFields.get(relation.propertyName),
-          context,
-          children
-        ));
+        ) &&
+        // check first to see if it was queried for
+        (fieldName in children ||
+          // or if the field has been marked as required
+          resolvePredicate(
+            requiredFields.get(relation.propertyName),
+            context,
+            children
+          ));
+    };
 
     relations.filter(relationFilter).forEach(relation => {
       // Join each relation that was queried
