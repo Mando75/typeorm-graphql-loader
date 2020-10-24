@@ -1,13 +1,13 @@
 module.exports = {
   env: {
-    node: true
+    node: true,
   },
   parser: "@typescript-eslint/parser",
   parserOptions: {
     project: "./tsconfig.json",
-    sourceType: "module"
+    sourceType: "module",
   },
-  plugins: ["@typescript-eslint"],
+  plugins: ["@typescript-eslint", "prettier"],
   rules: {
     "@typescript-eslint/await-thenable": "error",
     "@typescript-eslint/indent": "off",
@@ -16,13 +16,13 @@ module.exports = {
       {
         multiline: {
           delimiter: "none",
-          requireLast: true
+          requireLast: true,
         },
         singleline: {
           delimiter: "semi",
-          requireLast: false
-        }
-      }
+          requireLast: false,
+        },
+      },
     ],
     "@typescript-eslint/member-ordering": [
       "error",
@@ -42,11 +42,15 @@ module.exports = {
           "private-static-method",
           "public-instance-method",
           "protected-instance-method",
-          "private-instance-method"
-        ]
-      }
+          "private-instance-method",
+        ],
+      },
     ],
-    "@typescript-eslint/quotes": ["error", "double", { avoidEscape: true, allowTemplateLiterals: true }],
+    "@typescript-eslint/quotes": [
+      "error",
+      "double",
+      { avoidEscape: true, allowTemplateLiterals: true },
+    ],
     "@typescript-eslint/semi": ["error", "always"],
     "@typescript-eslint/type-annotation-spacing": "off",
     "arrow-parens": ["off", "as-needed"],
@@ -66,5 +70,5 @@ module.exports = {
     "quote-props": "off",
     "space-before-function-paren": "off",
     "space-in-parens": ["off", "never"],
-  }
+  },
 };

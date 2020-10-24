@@ -41,11 +41,11 @@ describe("Query Builder options", () => {
     const expectedAuthor = {
       id: author?.id,
       firstName: author?.firstName,
-      lastName: author?.lastName
+      lastName: author?.lastName,
     };
     const expected = {
       first: expectedAuthor,
-      second: expectedAuthor
+      second: expectedAuthor,
     };
 
     expect(result).to.not.have.key("errors");
@@ -84,15 +84,15 @@ describe("Query Builder options", () => {
     const expected = {
       hasMore: true,
       offset: 10,
-      minRating: Math.min(...reviews.map(review => review.rating)),
-      maxRating: Math.max(...reviews.map(review => review.rating)),
+      minRating: Math.min(...reviews.map((review) => review.rating)),
+      maxRating: Math.max(...reviews.map((review) => review.rating)),
       reviews: reviews.map(({ id, title, body, reviewDate, reviewerName }) => ({
         id,
         title,
         body,
         reviewDate,
-        reviewerName
-      }))
+        reviewerName,
+      })),
     };
 
     expect(result).to.not.have.key("errors");
@@ -116,7 +116,7 @@ describe("Query Builder options", () => {
       .createQueryBuilder("book")
       .where("book.authorId = :authorId", { authorId: author?.id })
       .orWhere("book.publisherId = :publisherId", {
-        publisherId: publisher?.id
+        publisherId: publisher?.id,
       })
       .getMany();
 
@@ -145,7 +145,7 @@ describe("Query Builder options", () => {
       .createQueryBuilder("book")
       .where("book.authorId = :authorId", { authorId: author?.id })
       .orWhere("book.publisherId = :publisherId", {
-        publisherId: publisher?.id
+        publisherId: publisher?.id,
       })
       .getMany();
 
@@ -163,7 +163,7 @@ describe("Depth limiting", () => {
   before(async () => {
     helpers = await startup("max_depth", {
       logging: false,
-      loaderOptions: { maxQueryDepth: 2 }
+      loaderOptions: { maxQueryDepth: 2 },
     });
   });
 
@@ -202,7 +202,7 @@ describe("Primary Key Backwards compatibility", () => {
   before(async () => {
     helpers = await startup("deprecated_primary_key", {
       logging: false,
-      loaderOptions: { primaryKeyColumn: "rating" }
+      loaderOptions: { primaryKeyColumn: "rating" },
     });
   });
 
@@ -244,15 +244,15 @@ describe("Primary Key Backwards compatibility", () => {
     const expected = {
       hasMore: true,
       offset: 10,
-      minRating: Math.min(...reviews.map(review => review.rating)),
-      maxRating: Math.max(...reviews.map(review => review.rating)),
+      minRating: Math.min(...reviews.map((review) => review.rating)),
+      maxRating: Math.max(...reviews.map((review) => review.rating)),
       reviews: reviews.map(({ id, title, body, reviewDate, reviewerName }) => ({
         id,
         title,
         body,
         reviewDate,
-        reviewerName
-      }))
+        reviewerName,
+      })),
     };
 
     expect(result).to.not.have.key("errors");
@@ -271,7 +271,9 @@ describe("ejectQueryBuilder", () => {
 
   it("can successfully execute a query that had a custom eject callback", async () => {
     const { connection, schema, loader } = helpers;
-    const publisher = await connection.getRepository(Publisher).findOne({ relations: ["books"] });
+    const publisher = await connection
+      .getRepository(Publisher)
+      .findOne({ relations: ["books"] });
 
     const query = `
     query publisherByBookTitle($bookTitle: String!) {
@@ -287,23 +289,16 @@ describe("ejectQueryBuilder", () => {
     `;
     const vars = { bookTitle: publisher?.books?.[0].title };
 
-    const result = await graphql(
-      schema,
-      query,
-      {},
-      { loader },
-      vars
-    );
+    const result = await graphql(schema, query, {}, { loader }, vars);
 
     const expected = {
       id: publisher?.id,
       name: publisher?.name,
-      books: publisher?.books.map(({ id, title }) => ({ id, title }))
+      books: publisher?.books.map(({ id, title }) => ({ id, title })),
     };
 
     expect(result).to.not.have.key("errors");
     // @ts-ignore
     expect(result.data!.publisherByBookTitle).to.deep.equalInAnyOrder(expected);
-
   });
 });

@@ -24,7 +24,7 @@ describe("Search queries", () => {
       firstName: TEST_AUTHOR_FIRST_NAME,
       lastName: TEST_AUTHOR_LAST_NAME,
       address: Seeder.addressFactory(),
-      phone: TEST_AUTHOR_PHONE
+      phone: TEST_AUTHOR_PHONE,
     });
     author = await helpers.connection.createEntityManager().save(author);
   });
@@ -47,7 +47,7 @@ describe("Search queries", () => {
     const expected = {
       id: author.id,
       firstName: author.firstName,
-      lastName: author.lastName
+      lastName: author.lastName,
     };
 
     expect(result).to.not.have.key("errors");
@@ -73,7 +73,7 @@ describe("Search queries", () => {
     const expected = {
       id: author.id,
       firstName: author.firstName,
-      lastName: author.lastName
+      lastName: author.lastName,
     };
 
     const result = await graphql(schema, query, {}, { loader }, vars);
@@ -97,13 +97,13 @@ describe("Search queries", () => {
     `;
 
     const vars = {
-      firstName: author.firstName.slice(3, author.firstName.length)
+      firstName: author.firstName.slice(3, author.firstName.length),
     };
 
     const expected = {
       id: author.id,
       firstName: author.firstName,
-      lastName: author.lastName
+      lastName: author.lastName,
     };
 
     const result = await graphql(schema, query, {}, { loader }, vars);
@@ -127,13 +127,13 @@ describe("Search queries", () => {
     `;
 
     const vars = {
-      firstName: author.firstName + " " + author.lastName.slice(0, 3)
+      firstName: author.firstName + " " + author.lastName.slice(0, 3),
     };
 
     const expected = {
       id: author.id,
       firstName: author.firstName,
-      lastName: author.lastName
+      lastName: author.lastName,
     };
 
     const result = await graphql(schema, query, {}, { loader }, vars);

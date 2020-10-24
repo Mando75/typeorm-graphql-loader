@@ -6,10 +6,10 @@ import { Review } from "../entity";
 
 @Resolver(PaginatedReviews)
 export class ReviewResolver {
-  @Query(returns => PaginatedReviews)
+  @Query((returns) => PaginatedReviews)
   async paginatedReviews(
-    @Arg("offset", type => Int) offset: number,
-    @Arg("limit", type => Int) limit: number,
+    @Arg("offset", (type) => Int) offset: number,
+    @Arg("limit", (type) => Int) limit: number,
     @Ctx("loader") loader: GraphQLDatabaseLoader,
     @Info() info: GraphQLResolveInfo
   ): Promise<PaginatedReviews> {
@@ -27,7 +27,7 @@ export class ReviewResolver {
     return new PaginatedReviews(reviews, newOffset, newOffset !== count);
   }
 
-  @Query(returns => ReviewConnection)
+  @Query((returns) => ReviewConnection)
   async reviewConnection(
     @Ctx("loader") loader: GraphQLDatabaseLoader,
     @Info() info: GraphQLResolveInfo
@@ -41,13 +41,13 @@ export class ReviewResolver {
     return new ReviewConnection(count, reviews);
   }
 
-  @Query(returns => PaginatedReviews, {
+  @Query((returns) => PaginatedReviews, {
     deprecationReason:
-      "Only to test backwards compatibility with primary key option"
+      "Only to test backwards compatibility with primary key option",
   })
   async deprecatedPrimaryKey(
-    @Arg("offset", type => Int) offset: number,
-    @Arg("limit", type => Int) limit: number,
+    @Arg("offset", (type) => Int) offset: number,
+    @Arg("limit", (type) => Int) limit: number,
     @Ctx("loader") loader: GraphQLDatabaseLoader,
     @Info() info: GraphQLResolveInfo
   ): Promise<PaginatedReviews> {

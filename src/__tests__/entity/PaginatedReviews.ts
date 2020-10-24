@@ -3,10 +3,10 @@ import { Field, Int, ObjectType } from "type-graphql";
 
 @ObjectType()
 export class PaginatedReviews {
-  @Field(type => [Review])
+  @Field((type) => [Review])
   public readonly reviews: Review[];
 
-  @Field(type => Int)
+  @Field((type) => Int)
   public readonly offset: number;
 
   @Field()
@@ -20,34 +20,34 @@ export class PaginatedReviews {
 
   @Field()
   public maxRating(): number {
-    return Math.max(...this.reviews.map(review => review.rating));
+    return Math.max(...this.reviews.map((review) => review.rating));
   }
 
   @Field()
   public minRating(): number {
-    return Math.min(...this.reviews.map(review => review.rating));
+    return Math.min(...this.reviews.map((review) => review.rating));
   }
 }
 
 @ObjectType()
 export class ReviewConnection {
-  @Field(type => Int)
+  @Field((type) => Int)
   public readonly totalCount: number;
 
-  @Field(type => [ReviewEdge])
+  @Field((type) => [ReviewEdge])
   public readonly edges: ReviewEdge[];
 
   constructor(totalCount: number, records: Review[]) {
     this.totalCount = totalCount;
     this.edges = records.map(
-      review => new ReviewEdge(review, review.id.toString())
+      (review) => new ReviewEdge(review, review.id.toString())
     );
   }
 }
 
 @ObjectType()
 export class ReviewEdge {
-  @Field(type => Review)
+  @Field((type) => Review)
   public readonly node: Review;
 
   @Field()

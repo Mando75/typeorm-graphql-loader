@@ -3,7 +3,7 @@ import {
   Column,
   Entity,
   ManyToOne,
-  PrimaryGeneratedColumn
+  PrimaryGeneratedColumn,
 } from "typeorm";
 import { Book } from "./Book";
 import { Field, Int, ObjectType } from "type-graphql";
@@ -11,7 +11,7 @@ import { Field, Int, ObjectType } from "type-graphql";
 @ObjectType()
 @Entity()
 export class Review extends BaseEntity {
-  @Field(type => Int)
+  @Field((type) => Int)
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -23,7 +23,7 @@ export class Review extends BaseEntity {
   @Column("text")
   body!: string;
 
-  @Field(type => String)
+  @Field((type) => String)
   @Column("date")
   reviewDate!: Date;
 
@@ -35,7 +35,7 @@ export class Review extends BaseEntity {
   @Column("varchar")
   reviewerName!: string;
 
-  @Field(type => Book)
-  @ManyToOne(type => Book, book => book.reviews)
+  @Field((type) => Book)
+  @ManyToOne((type) => Book, (book) => book.reviews)
   book!: Book;
 }

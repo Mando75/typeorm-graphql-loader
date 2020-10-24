@@ -1,11 +1,16 @@
 import { Column } from "typeorm";
 import { Field, ObjectType } from "type-graphql";
+import { ConfigureLoader } from "../../ConfigureLoader";
 
 @ObjectType()
 export class Address {
   @Field()
   @Column()
   street!: string;
+
+  @Column()
+  @ConfigureLoader({ graphQLName: "unitNumber" })
+  street2!: string;
 
   @Field()
   @Column()

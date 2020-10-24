@@ -5,7 +5,7 @@ import { GraphQLResolveInfo } from "graphql";
 
 @Resolver(Publisher)
 export class PublisherResolver {
-  @Query(returns => Publisher)
+  @Query((returns) => Publisher)
   async publisherByBookTitle(
     @Arg("bookTitle") bookTitle: string,
     @Ctx("loader") loader: GraphQLDatabaseLoader,
@@ -13,7 +13,7 @@ export class PublisherResolver {
   ) {
     return loader
       .loadEntity(Publisher, "publisher")
-      .ejectQueryBuilder(qb => {
+      .ejectQueryBuilder((qb) => {
         qb.innerJoin("publisher.books", "book").where(
           "book.title = :bookTitle",
           { bookTitle }

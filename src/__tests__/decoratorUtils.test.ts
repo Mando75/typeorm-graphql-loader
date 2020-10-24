@@ -4,7 +4,7 @@ import { DecoratorTest } from "./entity";
 import {
   getLoaderIgnoredFields,
   getLoaderRequiredFields,
-  resolvePredicate
+  resolvePredicate,
 } from "../ConfigureLoader";
 import { GraphQLEntityFields } from "../types";
 
@@ -15,8 +15,19 @@ const { expect } = chai;
 
 describe("Decorator Utilities", () => {
   let helpers: TestHelpers;
-  const customizedFields = ["testField", "testRelation", "testEmbed"];
-  const untouchedFields = ["id", "createdAt", "updatedAt"];
+  const customizedFields: Array<keyof DecoratorTest> = [
+    "testField",
+    "testRelation",
+    "testEmbed",
+    "testRemappedField",
+    "testRemappedRelation",
+    "testRemappedEmbed",
+  ];
+  const untouchedFields: Array<keyof DecoratorTest> = [
+    "id",
+    "createdAt",
+    "updatedAt",
+  ];
 
   before(async () => {
     helpers = await startup("decorator_utils", { logging: false });

@@ -7,7 +7,7 @@ import {
   Mutation,
   Query,
   Resolver,
-  Root
+  Root,
 } from "type-graphql";
 import { Author, Book, Publisher } from "../entity";
 import { GraphQLDatabaseLoader } from "../../GraphQLDatabaseLoader";
@@ -15,19 +15,19 @@ import { GraphQLResolveInfo } from "graphql";
 import {
   BookCreateError,
   BookCreateResultType,
-  BookCreateSuccess
+  BookCreateSuccess,
 } from "../entity/Book";
 import { Brackets, Connection } from "typeorm";
 
 enum Transform {
-  LOWERCASE = "LOWERCASE"
+  LOWERCASE = "LOWERCASE",
 }
 
 @Resolver(Book)
 export class BookResolver {
-  @FieldResolver(returns => String)
+  @FieldResolver((returns) => String)
   async transformedTitle(
-    @Arg("transform", type => String) transform: Transform,
+    @Arg("transform", (type) => String) transform: Transform,
     @Root() book: Book
   ) {
     return transform === Transform.LOWERCASE
@@ -35,9 +35,9 @@ export class BookResolver {
       : book.title.toUpperCase();
   }
 
-  @Query(returns => [Book])
+  @Query((returns) => [Book])
   async booksByAuthorId(
-    @Arg("authorId", type => Int) authorId: number,
+    @Arg("authorId", (type) => Int) authorId: number,
     @Ctx("loader") loader: GraphQLDatabaseLoader,
     @Info() info: GraphQLResolveInfo
   ) {
@@ -49,16 +49,20 @@ export class BookResolver {
       .loadMany();
   }
 
-  @Query(returns => [Book])
+  @Query((returns) => [Book])
   async booksByAuthorOrPublisher(
-    @Arg("publisherId", type => Int) publisherId: number,
-    @Arg("authorId", type => Int) authorId: number,
+    @Arg("publisherId", (type) => Int) publisherId: number,
+    @Arg("authorId", (type) => Int) authorId: number,
     @Arg("useBrackets", { nullable: true, defaultValue: false })
     useBrackets: boolean = false,
     @Ctx("loader") loader: GraphQLDatabaseLoader,
     @Info() info: GraphQLResolveInfo
   ) {
-    const orWhere = useBrackets ? new Brackets(qb => qb.orWhere("books.authorId = :authorId", { authorId })) : "books.authorId = :authorId";
+    const orWhere = useBrackets
+      ? new Brackets((qb) =>
+          qb.orWhere("books.authorId = :authorId", { authorId })
+        )
+      : "books.authorId = :authorId";
     return loader
       .loadEntity(Book, "books")
       .where("books.publisherId = :publisherId", { publisherId })
@@ -67,12 +71,12 @@ export class BookResolver {
       .loadMany();
   }
 
-  @Mutation(returns => BookCreateResultType)
+  @Mutation((returns) => BookCreateResultType)
   async createBook(
-    @Arg("title", type => String) title: string,
-    @Arg("summary", type => String) summary: string,
-    @Arg("authorId", type => Int) authorId: number,
-    @Arg("publisherId", type => Int) publisherId: number,
+    @Arg("title", (type) => String) title: string,
+    @Arg("summary", (type) => String) summary: string,
+    @Arg("authorId", (type) => Int) authorId: number,
+    @Arg("publisherId", (type) => Int) publisherId: number,
     @Ctx("loader") loader: GraphQLDatabaseLoader,
     @Ctx("connection") connection: Connection,
     @Info() info: GraphQLResolveInfo
@@ -101,7 +105,7 @@ export class BookResolver {
       (await loader
         .loadEntity(Book, "book")
         .where("book.id = :id", {
-          id: book.id
+          id: book.id,
         })
         .info(info, "BookCreateSuccess.data")
         .loadOne())!

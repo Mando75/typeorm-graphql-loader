@@ -10,5 +10,5 @@ export enum LoaderSearchMethod {
   /**
    * Uses `LIKE '%mysearch'`
    */
-  ENDS_WITH
+  ENDS_WITH,
 }

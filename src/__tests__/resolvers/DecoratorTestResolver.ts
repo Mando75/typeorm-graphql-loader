@@ -1,14 +1,24 @@
-import { Arg, Ctx, Info, Int, Query, Resolver } from "type-graphql";
-import { DecoratorTest } from "../entity";
+import {
+  Arg,
+  Ctx,
+  FieldResolver,
+  Info,
+  Int,
+  Query,
+  Resolver,
+  Root,
+} from "type-graphql";
+import { Author, DecoratorTest } from "../entity";
 import { GraphQLDatabaseLoader } from "../../GraphQLDatabaseLoader";
 import { GraphQLResolveInfo } from "graphql";
 import { DecoratorContext } from "../util/DecoratorContext";
+import { Address } from "../entity/Address";
 
 @Resolver(DecoratorTest)
 export class DecoratorTestResolver {
-  @Query(returns => DecoratorTest)
+  @Query((returns) => DecoratorTest)
   async decoratorTests(
-    @Arg("dtId", type => Int) dtId: number,
+    @Arg("dtId", (type) => Int) dtId: number,
     @Arg("ignoreField", { nullable: true, defaultValue: false })
     ignoreField: boolean,
     @Arg("requireField", { nullable: true, defaultValue: false })
@@ -33,7 +43,7 @@ export class DecoratorTestResolver {
         ignoreField,
         requireRelation,
         requireField,
-        requireEmbed
+        requireEmbed,
       })
       .where("dt.id = :id", { id: dtId })
       .loadOne();
@@ -75,5 +85,20 @@ export class DecoratorTestResolver {
     }
 
     return record;
+  }
+
+  @FieldResolver()
+  remappedField(@Root() parent: DecoratorTest): string {
+    return parent.testRemappedField;
+  }
+
+  @FieldResolver()
+  remappedEmbed(@Root() parent: DecoratorTest): Address {
+    return parent.testRemappedEmbed;
+  }
+
+  @FieldResolver()
+  remappedRelation(@Root() parent: DecoratorTest): Author {
+    return parent.testRemappedRelation;
   }
 }

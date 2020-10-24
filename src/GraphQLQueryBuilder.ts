@@ -6,7 +6,7 @@ import {
   QueryPredicates,
   SearchOptions,
   WhereArgument,
-  WhereExpression
+  WhereExpression,
 } from "./types";
 import { GraphQLQueryManager } from "./GraphQLQueryManager";
 import { BaseEntity, ObjectLiteral, OrderByCondition } from "typeorm";
@@ -28,8 +28,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
     private _manager: GraphQLQueryManager,
     private _entity: Function | string,
     private _alias?: string
-  ) {
-  }
+  ) {}
 
   /**
    * Provide the query builder with the GraphQL Query info you would like to resolve
@@ -91,7 +90,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
     if (typeof where === "string") {
       this._andWhereExpressions.push({
         condition: where,
-        params
+        params,
       });
     } else {
       this._andWhereExpressions.push(where);
@@ -390,11 +389,13 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   private async _genericLoad<U extends boolean, V extends boolean>(
     many: U,
     paginate: V
-  ): Promise<V extends true
-    ? [InstanceType<T>[], number]
-    : U extends true
+  ): Promise<
+    V extends true
+      ? [InstanceType<T>[], number]
+      : U extends true
       ? InstanceType<T>[]
-      : InstanceType<T> | undefined> {
+      : InstanceType<T> | undefined
+  > {
     // we need to validate an info object
     this._validateInfo(this._info);
     // Check if this query is already in the cache
@@ -424,7 +425,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
         pagination: paginate ? this._pagination : undefined,
         alias: this._alias,
         context: this._context,
-        ejectQueryCallback: this._ejectQueryCallback ?? (qb => qb)
+        ejectQueryCallback: this._ejectQueryCallback ?? ((qb) => qb),
       });
     };
 
@@ -458,7 +459,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
       andWhere: this._andWhereExpressions,
       orWhere: this._orWhereExpressions,
       order: this._order,
-      selectFields: this._selectFields.flat()
+      selectFields: this._selectFields.flat(),
     };
   }
 }

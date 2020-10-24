@@ -3,7 +3,7 @@ import {
   Column,
   Entity,
   OneToMany,
-  PrimaryGeneratedColumn
+  PrimaryGeneratedColumn,
 } from "typeorm";
 import { Book } from "./Book";
 import { Field, Int, ObjectType } from "type-graphql";
@@ -12,7 +12,7 @@ import { Address } from "./Address";
 @ObjectType()
 @Entity()
 export class Publisher extends BaseEntity {
-  @Field(type => Int)
+  @Field((type) => Int)
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -20,15 +20,15 @@ export class Publisher extends BaseEntity {
   @Column("varchar")
   name!: string;
 
-  @Field(type => Address)
-  @Column(type => Address)
+  @Field((type) => Address)
+  @Column((type) => Address)
   address!: Address;
 
-  @Field(type => Address)
-  @Column(type => Address)
+  @Field((type) => Address)
+  @Column((type) => Address)
   poBox!: Address;
 
-  @Field(type => [Book], { nullable: true })
-  @OneToMany(type => Book, book => book.publisher)
+  @Field((type) => [Book], { nullable: true })
+  @OneToMany((type) => Book, (book) => book.publisher)
   books!: Book[];
 }
