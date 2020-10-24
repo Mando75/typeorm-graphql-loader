@@ -1,5 +1,18 @@
 # Change Log
 
+## [1.70]
+
+### Fixed
+
+Not all types were not being exported properly. This should be addressed.
+
+DecoratorResolverPredict was getting an empty list for requested fields. This was a bug introduced during the refactor of the InfoParser and has been fixed.
+
+### Added
+
+`graphQLName` option to `ConfigureLoader` decorator. Allows consumers to specify the name of a TypeORM
+entity field in the GraphQL schema so that it is properly selected if requested.
+
 ## [1.6.0]
 
 ### Changed
