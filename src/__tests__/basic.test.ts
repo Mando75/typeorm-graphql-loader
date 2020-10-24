@@ -36,7 +36,7 @@ describe("Basic GraphQL queries", () => {
         query,
         {},
         {
-          loader
+          loader,
         },
         vars
       );
@@ -45,7 +45,7 @@ describe("Basic GraphQL queries", () => {
         id: author?.id,
         firstName: author?.firstName,
         lastName: author?.lastName,
-        email: author?.email
+        email: author?.email,
       };
       expect(result).to.not.have.key("errors");
       expect(result.data!.authorById).to.deep.equal(expected);
@@ -72,7 +72,7 @@ describe("Basic GraphQL queries", () => {
         query,
         {},
         {
-          loader
+          loader,
         },
         vars
       );
@@ -82,7 +82,7 @@ describe("Basic GraphQL queries", () => {
         firstName: author?.firstName,
         lastName: author?.lastName,
         email: author?.email,
-        phone: author?.phone
+        phone: author?.phone,
       };
       expect(result).to.not.have.key("errors");
       expect(result.data!.authorById).to.deep.equal(expected);
@@ -118,7 +118,7 @@ describe("Basic GraphQL queries", () => {
         query,
         {},
         {
-          loader
+          loader,
         },
         vars
       );
@@ -128,14 +128,14 @@ describe("Basic GraphQL queries", () => {
         firstName: author?.firstName,
         lastName: author?.lastName,
         email: author?.email,
-        books: author?.books.map(book => ({
+        books: author?.books.map((book) => ({
           id: book.id,
           title: book.title,
           summary: book.summary,
           publisher: {
-            id: book.publisher.id
-          }
-        }))
+            id: book.publisher.id,
+          },
+        })),
       };
       expect(result).to.not.have.key("errors");
       expect(result.data!.authorById).to.deep.equal(expected);
@@ -175,7 +175,7 @@ describe("Basic GraphQL queries", () => {
         query,
         {},
         {
-          loader
+          loader,
         },
         vars
       );
@@ -184,13 +184,13 @@ describe("Basic GraphQL queries", () => {
         firstName: author?.firstName,
         lastName: author?.lastName,
         email: author?.email,
-        books: author?.books.map(book => ({
+        books: author?.books.map((book) => ({
           title: book.title,
           summary: book.summary,
           publisher: {
-            id: book.publisher.id
-          }
-        }))
+            id: book.publisher.id,
+          },
+        })),
       };
       expect(result).to.not.have.key("errors");
       expect(result.data!.authorById).to.deep.equal(expected);
@@ -218,17 +218,17 @@ describe("Basic GraphQL queries", () => {
         query,
         {},
         {
-          loader
+          loader,
         },
         vars
       );
 
       const expected = author!.books
-        .filter(book => book.isPublished)
-        .map(book => ({
+        .filter((book) => book.isPublished)
+        .map((book) => ({
           id: book.id,
           title: book.title,
-          transformedTitle: book.title.toUpperCase()
+          transformedTitle: book.title.toUpperCase(),
         }));
       expect(result).to.not.have.key("errors");
       expect(result.data!.booksByAuthorId).to.deep.equal(expected);
@@ -269,7 +269,7 @@ describe("Basic GraphQL queries", () => {
         publisherId: publisher?.id,
         title: "Typescript Rules",
         summary:
-          'A book of 300 pages only containing the phrase "Typescript Rules"'
+          'A book of 300 pages only containing the phrase "Typescript Rules"',
       };
 
       const result = await graphql(
@@ -278,7 +278,7 @@ describe("Basic GraphQL queries", () => {
         {},
         {
           loader,
-          connection: helpers.connection
+          connection: helpers.connection,
         },
         vars
       );
@@ -288,12 +288,12 @@ describe("Basic GraphQL queries", () => {
           title: vars.title,
           summary: vars.summary,
           author: {
-            id: vars.authorId
+            id: vars.authorId,
           },
           publisher: {
-            id: vars.publisherId
-          }
-        }
+            id: vars.publisherId,
+          },
+        },
       };
 
       expect(result).to.not.have.key("errors");
@@ -341,7 +341,7 @@ describe("Basic GraphQL queries", () => {
         publisherId: publisher?.id,
         title: "Typescript Rules",
         summary:
-          'A book of 300 pages only containing the phrase "Typescript Rules"'
+          'A book of 300 pages only containing the phrase "Typescript Rules"',
       };
 
       const result = await graphql(
@@ -350,7 +350,7 @@ describe("Basic GraphQL queries", () => {
         {},
         {
           loader,
-          connection: helpers.connection
+          connection: helpers.connection,
         },
         vars
       );
@@ -360,12 +360,12 @@ describe("Basic GraphQL queries", () => {
           title: vars.title,
           summary: vars.summary,
           author: {
-            id: vars.authorId
+            id: vars.authorId,
           },
           publisher: {
-            id: vars.publisherId
-          }
-        }
+            id: vars.publisherId,
+          },
+        },
       };
 
       expect(result).to.not.have.key("errors");
@@ -408,7 +408,7 @@ describe("Basic GraphQL queries", () => {
       const { connection, schema, loader } = helpers;
       const books = await connection.getRepository(Book).find({
         where: { author: { id: 1 }, isPublished: true },
-        relations: ["author", "publisher", "reviews"]
+        relations: ["author", "publisher", "reviews"],
       });
 
       const query = `
@@ -443,12 +443,12 @@ describe("Basic GraphQL queries", () => {
           author: {
             id: 1,
             firstName: author.firstName,
-            lastName: author.lastName
+            lastName: author.lastName,
           },
           publisher: {
-            name: publisher.name
+            name: publisher.name,
           },
-          reviews: reviews.map(review => ({ rating: review.rating }))
+          reviews: reviews.map((review) => ({ rating: review.rating })),
         })
       );
 

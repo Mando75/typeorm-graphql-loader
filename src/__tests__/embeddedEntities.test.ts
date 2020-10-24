@@ -49,8 +49,8 @@ describe("Querying embedded entities", () => {
         street: author?.address.street,
         city: author?.address.city,
         state: author?.address.state,
-        zip: author?.address.zip
-      }
+        zip: author?.address.zip,
+      },
     };
 
     expect(result).to.not.have.key("errors");
@@ -86,20 +86,20 @@ describe("Querying embedded entities", () => {
     const result = await graphql(schema, query, {}, { loader }, vars);
 
     const expected = author?.books
-      .filter(book => book.isPublished)
-      .map(book => ({
+      .filter((book) => book.isPublished)
+      .map((book) => ({
         id: book.id,
         publisher: {
           address: {
             street: book.publisher.address.street,
             city: book.publisher.address.city,
-            state: book.publisher.address.state
+            state: book.publisher.address.state,
           },
           poBox: {
             street: book.publisher.poBox.street,
-            zip: book.publisher.poBox.zip
-          }
-        }
+            zip: book.publisher.poBox.zip,
+          },
+        },
       }));
 
     expect(result).to.not.have.key("errors");

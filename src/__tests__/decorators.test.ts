@@ -41,11 +41,11 @@ describe("ConfigureLoader", () => {
       id: dt?.id,
       testField: dt?.testField,
       testRelation: {
-        id: dt?.testRelation.id
+        id: dt?.testRelation.id,
       },
       testEmbed: {
-        street: dt?.testEmbed.street
-      }
+        street: dt?.testEmbed.street,
+      },
     };
 
     expect(result.errors).to.be.undefined;
@@ -77,11 +77,11 @@ describe("ConfigureLoader", () => {
       const expected = {
         id: dt?.id,
         testRelation: {
-          id: dt?.testRelation.id
+          id: dt?.testRelation.id,
         },
         testEmbed: {
-          street: dt?.testEmbed.street
-        }
+          street: dt?.testEmbed.street,
+        },
       };
 
       expect(result.errors).to.be.undefined;
@@ -113,8 +113,8 @@ describe("ConfigureLoader", () => {
         id: dt?.id,
         testField: dt?.testField,
         testEmbed: {
-          street: dt?.testEmbed.street
-        }
+          street: dt?.testEmbed.street,
+        },
       };
 
       expect(result.errors).to.be.undefined;
@@ -143,8 +143,8 @@ describe("ConfigureLoader", () => {
         id: dt?.id,
         testField: dt?.testField,
         testRelation: {
-          id: dt?.testRelation.id
-        }
+          id: dt?.testRelation.id,
+        },
       };
 
       expect(result.errors).to.be.undefined;
@@ -177,11 +177,11 @@ describe("ConfigureLoader", () => {
         id: dt?.id,
         testField: null,
         testRelation: {
-          id: dt?.testRelation.id
+          id: dt?.testRelation.id,
         },
         testEmbed: {
-          street: dt?.testEmbed.street
-        }
+          street: dt?.testEmbed.street,
+        },
       };
       expect(result.errors).to.be.undefined;
       expect(result.data?.decoratorTests).to.deep.equal(expected);
@@ -215,8 +215,8 @@ describe("ConfigureLoader", () => {
         // and return null.
         testRelation: null,
         testEmbed: {
-          street: dt?.testEmbed.street
-        }
+          street: dt?.testEmbed.street,
+        },
       };
 
       expect(result.errors).to.be.undefined;
@@ -248,12 +248,12 @@ describe("ConfigureLoader", () => {
         id: dt?.id,
         testField: dt?.testField,
         testRelation: {
-          id: dt?.testRelation.id
+          id: dt?.testRelation.id,
         },
         // Ignored is a non-nullable column on the db.
         // even so, the field should be ignored in the query
         // and return null.
-        testEmbed: null
+        testEmbed: null,
       };
 
       expect(result.errors).to.be.undefined;
@@ -279,7 +279,7 @@ describe("ConfigureLoader", () => {
 
       const expected = {
         id: dt?.id,
-        remappedField: dt?.testRemappedField
+        remappedField: dt?.testRemappedField,
       };
 
       expect(result.errors).to.be.undefined;
@@ -308,8 +308,8 @@ describe("ConfigureLoader", () => {
         id: dt?.id,
         remappedRelation: {
           id: dt?.testRemappedRelation.id,
-          firstName: dt?.testRemappedRelation.firstName
-        }
+          firstName: dt?.testRemappedRelation.firstName,
+        },
       };
 
       expect(result.errors).to.be.undefined;
@@ -338,8 +338,8 @@ describe("ConfigureLoader", () => {
         id: dt?.id,
         remappedEmbed: {
           street: dt?.testRemappedEmbed.street,
-          city: dt?.testRemappedEmbed.city
-        }
+          city: dt?.testRemappedEmbed.city,
+        },
       };
 
       expect(result.errors).to.be.undefined;
@@ -370,8 +370,8 @@ describe("ConfigureLoader", () => {
         remappedEmbed: {
           street: dt?.testRemappedEmbed.street,
           city: dt?.testRemappedEmbed.city,
-          unitNumber: dt?.testRemappedEmbed.street2
-        }
+          unitNumber: dt?.testRemappedEmbed.street2,
+        },
       };
 
       expect(result.errors).to.be.undefined;

@@ -5,17 +5,16 @@ import {
   QueryPagination,
   QueueItem,
   SearchOptions,
-  WhereExpression
+  WhereExpression,
 } from "./types";
 import { LoaderSearchMethod } from "./enums/LoaderSearchMethod";
-import { GraphQLInfoParser } from "./lib/GraphQLInfoParser";
 import * as crypto from "crypto";
 import {
   Brackets,
   Connection,
   EntityManager,
   OrderByCondition,
-  SelectQueryBuilder
+  SelectQueryBuilder,
 } from "typeorm";
 import { GraphQLQueryResolver } from "./GraphQLQueryResolver";
 import { Formatter } from "./lib/Formatter";
@@ -102,7 +101,7 @@ export class GraphQLQueryManager {
         fields,
         key: "",
         item: this._cache.get(key),
-        found: true
+        found: true,
       };
     }
 
@@ -116,7 +115,7 @@ export class GraphQLQueryManager {
     return {
       fields,
       key,
-      found: false
+      found: false,
     };
   }
 
@@ -161,7 +160,7 @@ export class GraphQLQueryManager {
       await queryRunner.connect();
       await Promise.all(queue.map(this._resolveQueueItem(queryRunner.manager)));
     } catch (e) {
-      queue.forEach(q => {
+      queue.forEach((q) => {
         q.reject(e);
         this._cache.delete(q.key);
       });
@@ -256,7 +255,7 @@ export class GraphQLQueryManager {
     );
     qb = qb.where(where, params);
 
-    conditions.forEach(condition => {
+    conditions.forEach((condition) => {
       const { where, params } = GraphQLQueryManager._breakDownWhereExpression(
         condition
       );
@@ -276,7 +275,7 @@ export class GraphQLQueryManager {
     qb: SelectQueryBuilder<{}>,
     conditions: Array<WhereExpression>
   ): SelectQueryBuilder<{}> {
-    conditions.forEach(condition => {
+    conditions.forEach((condition) => {
       const { where, params } = GraphQLQueryManager._breakDownWhereExpression(
         condition
       );
@@ -339,7 +338,7 @@ export class GraphQLQueryManager {
         // to the query builder without providing for SQL injection
         return {
           query: `(${likeQueryStrings.join(" OR ")})`,
-          params: { searchText: searchTextParam }
+          params: { searchText: searchTextParam },
         };
       }
     );
@@ -388,7 +387,7 @@ export class GraphQLQueryManager {
     alias: string,
     selectFields: Array<string>
   ): SelectQueryBuilder<{}> {
-    selectFields.forEach(field => {
+    selectFields.forEach((field) => {
       queryBuilder = queryBuilder.addSelect(
         this._formatter.columnSelection(alias, field),
         this._formatter.aliasField(alias, field)

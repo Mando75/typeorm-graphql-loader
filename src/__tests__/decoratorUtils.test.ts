@@ -4,7 +4,7 @@ import { DecoratorTest } from "./entity";
 import {
   getLoaderIgnoredFields,
   getLoaderRequiredFields,
-  resolvePredicate
+  resolvePredicate,
 } from "../ConfigureLoader";
 import { GraphQLEntityFields } from "../types";
 
@@ -21,12 +21,12 @@ describe("Decorator Utilities", () => {
     "testEmbed",
     "testRemappedField",
     "testRemappedRelation",
-    "testRemappedEmbed"
+    "testRemappedEmbed",
   ];
   const untouchedFields: Array<keyof DecoratorTest> = [
     "id",
     "createdAt",
-    "updatedAt"
+    "updatedAt",
   ];
 
   before(async () => {

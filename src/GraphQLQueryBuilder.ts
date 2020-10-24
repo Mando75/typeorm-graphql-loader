@@ -6,7 +6,7 @@ import {
   QueryPredicates,
   SearchOptions,
   WhereArgument,
-  WhereExpression
+  WhereExpression,
 } from "./types";
 import { GraphQLQueryManager } from "./GraphQLQueryManager";
 import { BaseEntity, ObjectLiteral, OrderByCondition } from "typeorm";
@@ -90,7 +90,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
     if (typeof where === "string") {
       this._andWhereExpressions.push({
         condition: where,
-        params
+        params,
       });
     } else {
       this._andWhereExpressions.push(where);
@@ -425,7 +425,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
         pagination: paginate ? this._pagination : undefined,
         alias: this._alias,
         context: this._context,
-        ejectQueryCallback: this._ejectQueryCallback ?? (qb => qb)
+        ejectQueryCallback: this._ejectQueryCallback ?? ((qb) => qb),
       });
     };
 
@@ -459,7 +459,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
       andWhere: this._andWhereExpressions,
       orWhere: this._orWhereExpressions,
       order: this._order,
-      selectFields: this._selectFields.flat()
+      selectFields: this._selectFields.flat(),
     };
   }
 }

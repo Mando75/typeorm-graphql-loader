@@ -8,6 +8,7 @@ import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
  * A filter function used to extract the column metadata
  * of columns requested in the GraphQL query taking into
  * account ignored and remapped fields.
+ * @hidden
  * @param ignoredFields
  * @param graphQLFieldNames
  * @param selection
@@ -38,6 +39,7 @@ export const requestedFieldsFilter = (
  * A filter function used to extract the embedded metadata
  * for embedded fields requested in a GraphQL query taking into
  * account ignore, and remapped fields
+ * @hidden
  * @param ignoredFields
  * @param graphQLFieldNames
  * @param selection
@@ -65,6 +67,7 @@ export const requestedEmbeddedFieldsFilter = (
  * A filter function used to extract the relation metadata
  * for relations requested in a GraphQL query taking into
  * account ignored, required, and remapped fields.
+ * @hidden
  * @param ignoredFields
  * @param requiredFields
  * @param graphQLFieldNames

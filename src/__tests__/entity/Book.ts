@@ -6,7 +6,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
 import { Author } from "./Author";
 import { Publisher } from "./Publisher";
@@ -16,11 +16,11 @@ import { createUnionType, Field, Int, ObjectType } from "type-graphql";
 @ObjectType()
 @Entity()
 export class Book extends BaseEntity {
-  @Field(type => Int)
+  @Field((type) => Int)
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Field(type => Boolean)
+  @Field((type) => Boolean)
   @Column("boolean")
   isPublished!: boolean;
 
@@ -32,29 +32,20 @@ export class Book extends BaseEntity {
   @Column("text")
   summary!: string;
 
-  @Field(type => String)
+  @Field((type) => String)
   @Column("date")
   publishedDate!: Date;
 
-  @Field(type => Author)
-  @ManyToOne(
-    type => Author,
-    author => author.books
-  )
+  @Field((type) => Author)
+  @ManyToOne((type) => Author, (author) => author.books)
   author!: Author;
 
-  @Field(type => Publisher)
-  @ManyToOne(
-    type => Publisher,
-    publisher => publisher.books
-  )
+  @Field((type) => Publisher)
+  @ManyToOne((type) => Publisher, (publisher) => publisher.books)
   publisher!: Publisher;
 
-  @Field(type => [Review])
-  @OneToMany(
-    t => Review,
-    review => review.book
-  )
+  @Field((type) => [Review])
+  @OneToMany((t) => Review, (review) => review.book)
   reviews!: Review[];
 
   @Field()
@@ -68,7 +59,7 @@ export class Book extends BaseEntity {
 
 @ObjectType()
 export class BookCreateSuccess {
-  @Field(data => Book)
+  @Field((data) => Book)
   public readonly data: Book;
 
   constructor(data: Book) {
@@ -78,7 +69,7 @@ export class BookCreateSuccess {
 
 @ObjectType()
 export class BookCreateError {
-  @Field(message => String)
+  @Field((message) => String)
   public readonly message: string;
 
   constructor(message: string) {
@@ -88,5 +79,5 @@ export class BookCreateError {
 
 export const BookCreateResultType = createUnionType({
   name: "BookCreateResult", // the name of the GraphQL union
-  types: () => [BookCreateSuccess, BookCreateError] as const // function that returns tuple of object types classes
+  types: () => [BookCreateSuccess, BookCreateError] as const, // function that returns tuple of object types classes
 });

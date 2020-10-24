@@ -2,7 +2,7 @@ import { GraphQLResolveInfo } from "graphql";
 import {
   FieldsByTypeName,
   parseResolveInfo,
-  ResolveTree
+  ResolveTree,
 } from "graphql-parse-resolve-info";
 import { GraphQLEntityFields } from "../types";
 
@@ -49,7 +49,7 @@ export class GraphQLInfoParser {
       }
     }
 
-    Object.values(requestedFieldsByTypeName).forEach(childFields => {
+    Object.values(requestedFieldsByTypeName).forEach((childFields) => {
       if (path) {
         result = this.recursiveInfoParser(childFields[path], false, fieldNames);
       } else {
@@ -59,9 +59,9 @@ export class GraphQLInfoParser {
               children: Object.keys(field).length
                 ? this.recursiveInfoParser(field, false, fieldNames)
                 : {},
-              arguments: field.args
+              arguments: field.args,
             },
-            writable: false
+            writable: false,
           });
         });
       }

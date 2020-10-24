@@ -2,7 +2,7 @@ import {
   Brackets,
   ObjectLiteral,
   OrderByCondition,
-  SelectQueryBuilder
+  SelectQueryBuilder,
 } from "typeorm";
 import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
 import { LoaderSearchMethod } from "./enums/LoaderSearchMethod";
@@ -160,7 +160,45 @@ export interface LoaderFieldConfiguration {
   required?: boolean | FieldConfigurationPredicate;
 
   /**
-   * TODO
+   * The name of this field in the GraphQL schema. If the given graphQLName
+   * is found in a query, the loader will select this field. Please note that the
+   * loader DOES NOT change the name on the returned TypeORM entity. You will need to provide
+   * a field resolver to perform that mapping in your schema. This is behavior is to ensure
+   * that the loader always returns a valid TypeORM entity.
+   *
+   * @example
+   * ```typescript
+   * // Entity Class
+   * @Entity()
+   * class User extends BaseEntity {
+   *
+   *   @ConfigureLoader({ graphQLName: 'username' })
+   *   @Column()
+   *   email: string
+   * }
+   *
+   * // Resolvers
+   *
+   * const resolvers = {
+   *   Query: {
+   *     userQuery (root, args, context, info) {
+   *       return context.loader
+   *         .loadEntity(User, 'user')
+   *         .info(info)
+   *         .where('user.id = :id', { id: args.id })
+   *         .loadOne()
+   *     }
+   *   },
+   *   User: {
+   *     username (root: User) {
+   *       // If username is queried, the loader will
+   *       // include a select for the email column
+   *       // which can be resolved here.
+   *       return root.email
+   *     }
+   *   }
+   * }
+   * ```
    */
   graphQLName?: string;
 }
@@ -220,7 +258,8 @@ export interface GraphQLFieldArgs {
 }
 
 /**
- * @hidden
+ * An object containing the requested entity fields
+ * and arguments for a graphql query
  */
 export type GraphQLEntityFields = {
   [field: string]: {

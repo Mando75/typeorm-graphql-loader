@@ -3,7 +3,7 @@ import {
   FieldConfigurationPredicate,
   GraphQLEntityFields,
   LoaderFieldConfiguration,
-  RequireOrIgnoreSettings
+  RequireOrIgnoreSettings,
 } from "./types";
 
 /**
@@ -13,7 +13,7 @@ import {
 const keys = {
   IGNORE_FIELD: Symbol("gqlLoader:ignoreField"),
   REQUIRED_FIELD: Symbol("gqlLoader:requiredField"),
-  GRAPHQL_NAME: Symbol("gqlLoader:graphQLName")
+  GRAPHQL_NAME: Symbol("gqlLoader:graphQLName"),
 };
 
 /**
@@ -22,7 +22,7 @@ const keys = {
  */
 const defaultLoaderFieldConfiguration: LoaderFieldConfiguration = {
   ignore: false,
-  required: false
+  required: false,
 };
 
 /**
@@ -57,7 +57,7 @@ export const ConfigureLoader = (
 ) => {
   const { required, ignore, graphQLName } = {
     ...defaultLoaderFieldConfiguration,
-    ...options
+    ...options,
   };
 
   return (target: any, propertyKey: string) => {
@@ -113,7 +113,8 @@ export const getLoaderIgnoredFields = (
 };
 
 /**
- * TODO
+ * Returns mapping of TypeORM entity fields with their GraphQL schema names
+ * @hidden
  * @param target
  */
 export const getGraphQLFieldNames = (target: any): Map<string, string> => {

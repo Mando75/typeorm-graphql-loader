@@ -6,7 +6,7 @@ import {
   Int,
   Query,
   Resolver,
-  Root
+  Root,
 } from "type-graphql";
 import { Author, DecoratorTest } from "../entity";
 import { GraphQLDatabaseLoader } from "../../GraphQLDatabaseLoader";
@@ -16,9 +16,9 @@ import { Address } from "../entity/Address";
 
 @Resolver(DecoratorTest)
 export class DecoratorTestResolver {
-  @Query(returns => DecoratorTest)
+  @Query((returns) => DecoratorTest)
   async decoratorTests(
-    @Arg("dtId", type => Int) dtId: number,
+    @Arg("dtId", (type) => Int) dtId: number,
     @Arg("ignoreField", { nullable: true, defaultValue: false })
     ignoreField: boolean,
     @Arg("requireField", { nullable: true, defaultValue: false })
@@ -43,7 +43,7 @@ export class DecoratorTestResolver {
         ignoreField,
         requireRelation,
         requireField,
-        requireEmbed
+        requireEmbed,
       })
       .where("dt.id = :id", { id: dtId })
       .loadOne();

@@ -6,5 +6,5 @@ export enum LoaderNamingStrategyEnum {
   /**
    * SQL Table columns formatted as first_name
    */
-  SNAKECASE
+  SNAKECASE,
 }

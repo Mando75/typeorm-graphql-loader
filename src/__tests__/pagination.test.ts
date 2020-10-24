@@ -55,9 +55,9 @@ describe("Pagination", () => {
           body,
           reviewDate,
           rating,
-          reviewerName
+          reviewerName,
         })
-      )
+      ),
     };
 
     expect(result).to.not.have.key("errors");
@@ -105,10 +105,10 @@ describe("Pagination", () => {
           reviewerName,
           book: {
             id: book.id,
-            title: book.title
-          }
+            title: book.title,
+          },
         })
-      )
+      ),
     };
 
     expect(result).to.not.have.key("errors");
@@ -161,8 +161,8 @@ describe("Pagination", () => {
         reviewerName,
         book: {
           id: book.id,
-          title: book.title
-        }
+          title: book.title,
+        },
       })
     );
 

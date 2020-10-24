@@ -4,7 +4,7 @@ import {
   BookResolver,
   DecoratorTestResolver,
   PublisherResolver,
-  ReviewResolver
+  ReviewResolver,
 } from "../resolvers";
 import { Connection, createConnection } from "typeorm";
 import { Seeder } from "./Seeder";
@@ -37,7 +37,7 @@ export async function startup(
     synchronize: true,
     dropSchema: true,
     entities: [Author, Book, Publisher, Review, DecoratorTest],
-    logging: !!options?.logging
+    logging: !!options?.logging,
   });
 
   const seeder = new Seeder(connection);
@@ -51,11 +51,11 @@ export async function startup(
       BookResolver,
       ReviewResolver,
       DecoratorTestResolver,
-      PublisherResolver
-    ]
+      PublisherResolver,
+    ],
   });
 
-  fs.writeFile("testSchema.graphql", printSchema(schema), err => {
+  fs.writeFile("testSchema.graphql", printSchema(schema), (err) => {
     if (err) {
       console.error(err);
     }

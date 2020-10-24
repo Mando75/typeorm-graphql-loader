@@ -8,13 +8,13 @@ import {
   getGraphQLFieldNames,
   getLoaderIgnoredFields,
   getLoaderRequiredFields,
-  resolvePredicate
+  resolvePredicate,
 } from "./ConfigureLoader";
 import * as crypto from "crypto";
 import {
   requestedEmbeddedFieldsFilter,
   requestedFieldsFilter,
-  requestedRelationFilter
+  requestedRelationFilter,
 } from "./lib/filters";
 
 /**
@@ -32,7 +32,7 @@ export class GraphQLQueryResolver {
   constructor({
     primaryKeyColumn,
     namingStrategy,
-    maxQueryDepth
+    maxQueryDepth,
   }: LoaderOptions) {
     this._namingStrategy = namingStrategy ?? LoaderNamingStrategyEnum.CAMELCASE;
     this._primaryKeyColumn = primaryKeyColumn;
@@ -149,7 +149,7 @@ export class GraphQLQueryResolver {
           context
         )
       )
-      .forEach(field => {
+      .forEach((field) => {
         // This is the name of the embedded entity on the TypeORM model
         const embeddedFieldName =
           graphQLFieldNames.get(field.propertyName) ?? field.propertyName;
@@ -159,7 +159,7 @@ export class GraphQLQueryResolver {
           // Extract the column names from the embedded field
           // so we can compare it to what was requested in the GraphQL query
           const embeddedFieldColumnNames = field.columns.map(
-            column => column.propertyName
+            (column) => column.propertyName
           );
           // Filter out any columns that weren't requested in GQL
           // and format them in a way that TypeORM can understand.
@@ -167,7 +167,7 @@ export class GraphQLQueryResolver {
           // .addSelect('table.embeddedField.embeddedColumn')
           embeddedFieldsToSelect.push(
             embeddedFieldColumnNames
-              .filter(columnName => {
+              .filter((columnName) => {
                 const embeddedGraphQLFieldNames = getGraphQLFieldNames(
                   field.type
                 );
@@ -175,13 +175,13 @@ export class GraphQLQueryResolver {
                   embeddedGraphQLFieldNames.get(columnName) ?? columnName;
                 return embeddedSelection.children.hasOwnProperty(graphQLName);
               })
-              .map(columnName => `${field.propertyName}.${columnName}`)
+              .map((columnName) => `${field.propertyName}.${columnName}`)
           );
         }
       });
 
     // Now add each embedded select statement on to the query builder
-    embeddedFieldsToSelect.flat().forEach(field => {
+    embeddedFieldsToSelect.flat().forEach((field) => {
       queryBuilder = queryBuilder.addSelect(
         this._formatter.columnSelection(alias, field)
       );
@@ -223,7 +223,7 @@ export class GraphQLQueryResolver {
     queryBuilder = this._selectPrimaryKey(queryBuilder, requestedFields, alias);
 
     // Add a select for each field that was requested in the query
-    requestedFields.forEach(field => {
+    requestedFields.forEach((field) => {
       // Make sure we account for embedded types
       const propertyName: string = field.propertyName;
       const databaseName: string = field.databaseName;
@@ -260,7 +260,7 @@ export class GraphQLQueryResolver {
 
     // Did they already include the primary key column in their query?
     const queriedPrimaryKey = fields.find(
-      field => field.propertyName === this._primaryKeyColumn
+      (field) => field.propertyName === this._primaryKeyColumn
     );
 
     // This will have already been selected
@@ -316,7 +316,7 @@ export class GraphQLQueryResolver {
           context
         )
       )
-      .forEach(relation => {
+      .forEach((relation) => {
         // Join each relation that was queried
         const relationGraphQLName =
           graphQLFieldNames.get(relation.propertyName) ?? relation.propertyName;
@@ -379,7 +379,7 @@ export class GraphQLQueryResolver {
     const requiredFields = getLoaderRequiredFields(meta.target);
 
     // We will use columns to attach properties and relations
-    const columns = meta.columns.filter(col => {
+    const columns = meta.columns.filter((col) => {
       const predicate = requiredFields.get(col.propertyName);
       return (
         !col.relationMetadata && resolvePredicate(predicate, context, children)
@@ -387,7 +387,7 @@ export class GraphQLQueryResolver {
     });
 
     // Used to attach embedded columns
-    const embeds = meta.embeddeds.filter(embed => {
+    const embeds = meta.embeddeds.filter((embed) => {
       const predicate = requiredFields.get(embed.propertyName);
       return resolvePredicate(predicate, context, children);
     });
@@ -410,7 +410,7 @@ export class GraphQLQueryResolver {
     columns: Array<ColumnMetadata>,
     alias: string
   ): SelectQueryBuilder<{}> {
-    columns.forEach(col => {
+    columns.forEach((col) => {
       const { propertyName, databaseName } = col;
       // If relation metadata is present, this is a joinable column
       if (!col.relationMetadata) {
@@ -437,7 +437,7 @@ export class GraphQLQueryResolver {
     embeds: Array<EmbeddedMetadata>,
     alias: string
   ): SelectQueryBuilder<{}> {
-    embeds.forEach(embed => {
+    embeds.forEach((embed) => {
       // Select embed
       const { propertyName: embedName, columns: embedColumns } = embed;
 

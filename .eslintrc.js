@@ -7,8 +7,9 @@ module.exports = {
     project: "./tsconfig.json",
     sourceType: "module"
   },
-  plugins: ["@typescript-eslint"],
+  plugins: ["@typescript-eslint", "prettier"],
   rules: {
+    "prettier/prettier": "error",
     "@typescript-eslint/await-thenable": "error",
     "@typescript-eslint/indent": "off",
     "@typescript-eslint/member-delimiter-style": [

@@ -6,7 +6,7 @@ import {
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from "typeorm";
 import { Field, Int, ObjectType } from "type-graphql";
 import { ConfigureLoader } from "../../";
@@ -17,7 +17,7 @@ import { DecoratorContext } from "../util/DecoratorContext";
 @ObjectType()
 @Entity()
 export class DecoratorTest extends BaseEntity {
-  @Field(type => Int)
+  @Field((type) => Int)
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -25,43 +25,43 @@ export class DecoratorTest extends BaseEntity {
   @Column("varchar", { nullable: false })
   @ConfigureLoader({
     ignore: (context: DecoratorContext) => context.ignoreField,
-    required: (context: DecoratorContext) => context.requireField
+    required: (context: DecoratorContext) => context.requireField,
   })
   testField?: string;
 
   @Column("varchar", { nullable: false })
   @ConfigureLoader({
-    graphQLName: "remappedField"
+    graphQLName: "remappedField",
   })
   testRemappedField!: string;
 
-  @Field(type => Address, { nullable: true })
-  @Column(type => Address)
+  @Field((type) => Address, { nullable: true })
+  @Column((type) => Address)
   @ConfigureLoader({
     ignore: (context: DecoratorContext) => context.ignoreEmbed,
-    required: (context: DecoratorContext) => context.requireEmbed
+    required: (context: DecoratorContext) => context.requireEmbed,
   })
   testEmbed!: Address;
 
-  @Column(type => Address)
+  @Column((type) => Address)
   @ConfigureLoader({
-    graphQLName: "remappedEmbed"
+    graphQLName: "remappedEmbed",
   })
   testRemappedEmbed!: Address;
 
-  @OneToOne(type => Author)
+  @OneToOne((type) => Author)
   @JoinColumn()
-  @Field(type => Author, { nullable: true })
+  @Field((type) => Author, { nullable: true })
   @ConfigureLoader({
     ignore: (context: DecoratorContext) => context.ignoreRelation,
-    required: (context: DecoratorContext) => context.requireRelation
+    required: (context: DecoratorContext) => context.requireRelation,
   })
   testRelation!: Author;
 
-  @OneToOne(type => Author)
+  @OneToOne((type) => Author)
   @JoinColumn()
   @ConfigureLoader({
-    graphQLName: "remappedRelation"
+    graphQLName: "remappedRelation",
   })
   testRemappedRelation!: Author;
 

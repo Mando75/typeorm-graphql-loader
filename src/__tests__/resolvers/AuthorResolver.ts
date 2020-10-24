@@ -5,7 +5,7 @@ import {
   Int,
   Query,
   registerEnumType,
-  Resolver
+  Resolver,
 } from "type-graphql";
 import { Author } from "../entity";
 import { GraphQLDatabaseLoader } from "../../GraphQLDatabaseLoader";
@@ -13,14 +13,14 @@ import { GraphQLResolveInfo } from "graphql";
 import { LoaderSearchMethod } from "../..";
 
 registerEnumType(LoaderSearchMethod, {
-  name: "LoaderSearchMethod"
+  name: "LoaderSearchMethod",
 });
 
 @Resolver(Author)
 export class AuthorResolver {
-  @Query(returns => Author)
+  @Query((returns) => Author)
   async authorById(
-    @Arg("id", type => Int) id: number,
+    @Arg("id", (type) => Int) id: number,
     @Ctx("loader") loader: GraphQLDatabaseLoader,
     @Info() info: GraphQLResolveInfo
   ) {
@@ -36,16 +36,16 @@ export class AuthorResolver {
     return author;
   }
 
-  @Query(returns => [Author])
+  @Query((returns) => [Author])
   searchAuthors(
     @Ctx("loader") loader: GraphQLDatabaseLoader,
     @Info() info: GraphQLResolveInfo,
-    @Arg("searchText", type => String) searchText: string,
-    @Arg("searchMethod", type => LoaderSearchMethod, { nullable: true })
+    @Arg("searchText", (type) => String) searchText: string,
+    @Arg("searchMethod", (type) => LoaderSearchMethod, { nullable: true })
     searchMethod?: LoaderSearchMethod,
-    @Arg("caseSensitive", type => Boolean, { nullable: true })
+    @Arg("caseSensitive", (type) => Boolean, { nullable: true })
     caseSensitive?: boolean,
-    @Arg("searchCombinedName", type => Boolean, { nullable: true })
+    @Arg("searchCombinedName", (type) => Boolean, { nullable: true })
     searchCombinedName?: boolean
   ) {
     const searchColumns = searchCombinedName
@@ -58,7 +58,7 @@ export class AuthorResolver {
         searchText,
         searchColumns,
         searchMethod,
-        caseSensitive
+        caseSensitive,
       })
       .loadMany();
   }
