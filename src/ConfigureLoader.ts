@@ -135,5 +135,5 @@ export const resolvePredicate = (
   selection: GraphQLEntityFields | undefined
 ): boolean | undefined =>
   typeof predicate === "function"
-    ? predicate(context, Object.keys(selection ?? {}), selection ?? {})
+    ? predicate(context, Object.getOwnPropertyNames(selection ?? {}), selection ?? {})
     : predicate;
