@@ -68,15 +68,15 @@ export class GraphQLQueryResolver {
    * @param context
    * @param depth
    */
-  public createQuery(
+  public createQuery<T>(
     model: Function | string,
     selection: GraphQLEntityFields | null,
     connection: Connection,
-    queryBuilder: SelectQueryBuilder<{}>,
+    queryBuilder: SelectQueryBuilder<T>,
     alias: string,
     context: any,
     depth = 0
-  ): SelectQueryBuilder<{}> {
+  ): SelectQueryBuilder<T> {
     const meta = connection.getMetadata(model);
     if (selection) {
       queryBuilder = this._selectFields(
@@ -129,8 +129,8 @@ export class GraphQLQueryResolver {
    * @param context
    * @private
    */
-  private _selectEmbeddedFields(
-    queryBuilder: SelectQueryBuilder<{}>,
+  private _selectEmbeddedFields<T>(
+    queryBuilder: SelectQueryBuilder<T>,
     selection: GraphQLEntityFields,
     meta: EntityMetadata,
     alias: string,
@@ -199,13 +199,13 @@ export class GraphQLQueryResolver {
    * @param context
    * @private
    */
-  private _selectFields(
-    queryBuilder: SelectQueryBuilder<{}>,
+  private _selectFields<T>(
+    queryBuilder: SelectQueryBuilder<T>,
     selection: GraphQLEntityFields,
     meta: EntityMetadata,
     alias: string,
     context: any
-  ): SelectQueryBuilder<{}> {
+  ): SelectQueryBuilder<T> {
     const ignoredFields = getLoaderIgnoredFields(meta.target);
     const graphQLFieldNames = getGraphQLFieldNames(meta.target);
 
@@ -244,11 +244,11 @@ export class GraphQLQueryResolver {
    * @private
    * @deprecated The loader now uses the entity metadata to grab the primary key
    */
-  private _selectPrimaryKey(
-    qb: SelectQueryBuilder<{}>,
+  private _selectPrimaryKey<T>(
+    qb: SelectQueryBuilder<T>,
     fields: Array<ColumnMetadata>,
     alias: string
-  ): SelectQueryBuilder<{}> {
+  ): SelectQueryBuilder<T> {
     /**
      * The query builder will automatically include the primary key column
      * in it's selection. To avoid a breaking change, we'll still select a column
@@ -292,15 +292,15 @@ export class GraphQLQueryResolver {
    * @param depth
    * @private
    */
-  private _selectRelations(
-    queryBuilder: SelectQueryBuilder<{}>,
+  private _selectRelations<T>(
+    queryBuilder: SelectQueryBuilder<T>,
     selection: GraphQLEntityFields,
     meta: EntityMetadata,
     alias: string,
     context: any,
     connection: Connection,
     depth: number
-  ): SelectQueryBuilder<{}> {
+  ): SelectQueryBuilder<T> {
     const relations = meta.relations;
     const ignoredFields = getLoaderIgnoredFields(meta.target);
     const requiredFields = getLoaderRequiredFields(meta.target);
@@ -369,13 +369,13 @@ export class GraphQLQueryResolver {
    * @param context
    * @private
    */
-  private _selectRequiredFields(
-    queryBuilder: SelectQueryBuilder<{}>,
+  private _selectRequiredFields<T>(
+    queryBuilder: SelectQueryBuilder<T>,
     children: GraphQLEntityFields,
     alias: string,
     meta: EntityMetadata,
     context: any
-  ): SelectQueryBuilder<{}> {
+  ): SelectQueryBuilder<T> {
     const requiredFields = getLoaderRequiredFields(meta.target);
 
     // We will use columns to attach properties and relations
@@ -405,11 +405,11 @@ export class GraphQLQueryResolver {
    * @param alias
    * @private
    */
-  private _selectRequiredColumns(
-    queryBuilder: SelectQueryBuilder<{}>,
+  private _selectRequiredColumns<T>(
+    queryBuilder: SelectQueryBuilder<T>,
     columns: Array<ColumnMetadata>,
     alias: string
-  ): SelectQueryBuilder<{}> {
+  ): SelectQueryBuilder<T> {
     columns.forEach((col) => {
       const { propertyName, databaseName } = col;
       // If relation metadata is present, this is a joinable column
@@ -432,11 +432,11 @@ export class GraphQLQueryResolver {
    * @param alias
    * @private
    */
-  private _selectRequiredEmbeds(
-    queryBuilder: SelectQueryBuilder<{}>,
+  private _selectRequiredEmbeds<T>(
+    queryBuilder: SelectQueryBuilder<T>,
     embeds: Array<EmbeddedMetadata>,
     alias: string
-  ): SelectQueryBuilder<{}> {
+  ): SelectQueryBuilder<T> {
     embeds.forEach((embed) => {
       // Select embed
       const { propertyName: embedName, columns: embedColumns } = embed;

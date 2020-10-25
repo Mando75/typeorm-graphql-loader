@@ -1,6 +1,8 @@
 import {
+  BaseEntity,
   Brackets,
   ObjectLiteral,
+  ObjectType,
   OrderByCondition,
   SelectQueryBuilder,
 } from "typeorm";
@@ -229,6 +231,10 @@ export type EjectQueryCallback<T> = <T>(
  * MANGER/RESOLVER TYPES
  ****************************************************/
 
+export type TypeofBaseEntity = typeof BaseEntity;
+
+export interface QueueItemEntity extends TypeofBaseEntity {}
+
 /**
  * @hidden
  */
@@ -243,14 +249,14 @@ export interface QueryPredicates {
 /**
  * @hidden
  */
-export interface QueueItem {
+export interface QueueItem<T> {
   type: LoaderQueryType;
   key: string;
   fields: GraphQLEntityFields | null;
   predicates: QueryPredicates;
   resolve: (value?: any) => any;
   reject: (reason: any) => void;
-  entity: Function | string;
+  entity: ObjectType<T>;
   pagination?: QueryPagination;
   alias?: string;
   context?: any;
@@ -289,11 +295,12 @@ export type GraphQLEntityFields = {
  * RELAY TYPES
  *****************************************************/
 
-export interface ConnectionArgs {
+export interface ConnectionArgs<EntityInstance> {
   first?: number;
   last?: number;
   after?: string;
   before?: string;
+  paginationKeys?: Array<keyof EntityInstance>;
 }
 
 export interface PageInfo {}

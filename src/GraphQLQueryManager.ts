@@ -4,6 +4,7 @@ import {
   QueryMeta,
   QueryPagination,
   QueueItem,
+  QueueItemEntity,
   SearchOptions,
   WhereExpression,
 } from "./types";
@@ -20,6 +21,7 @@ import { GraphQLQueryResolver } from "./GraphQLQueryResolver";
 import { Formatter } from "./lib/Formatter";
 import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
 import { LoaderQueryType } from "./enums/LoaderQueryType";
+import { buildPaginator, PagingResult } from "typeorm-cursor-pagination";
 
 /**
  * The query manager for the loader. Is an internal class
@@ -27,7 +29,7 @@ import { LoaderQueryType } from "./enums/LoaderQueryType";
  * @hidden
  */
 export class GraphQLQueryManager {
-  private _queue: QueueItem[] = [];
+  private _queue: QueueItem<QueueItemEntity>[] = [];
   private _cache: Map<string, Promise<any>> = new Map();
   private _immediate?: NodeJS.Immediate;
   private readonly _defaultLoaderSearchMethod: LoaderSearchMethod;
@@ -51,13 +53,13 @@ export class GraphQLQueryManager {
    * @param name
    * @param alias
    */
-  private static createTypeORMQueryBuilder(
+  private static createTypeORMQueryBuilder<T>(
     entityManager: EntityManager,
     name: string,
     alias: string
-  ): SelectQueryBuilder<{}> {
+  ): SelectQueryBuilder<T> {
     return entityManager
-      .getRepository<{}>(name)
+      .getRepository<T>(name)
       .createQueryBuilder(alias)
       .select([]);
   }
@@ -124,7 +126,7 @@ export class GraphQLQueryManager {
    * Pushes a new item to the queue and sets a new immediate
    * @param item
    */
-  public addQueueItem(item: QueueItem) {
+  public addQueueItem<T>(item: QueueItem<T>) {
     this._queue.push(item);
     this._setImmediate();
   }
@@ -176,17 +178,13 @@ export class GraphQLQueryManager {
    * @param entityManager
    */
   private _resolveQueueItem(entityManager: EntityManager) {
-    return async (item: QueueItem) => {
-      const name =
-        typeof item.entity == "string" ? item.entity : item.entity.name;
-
+    return async <T>(item: QueueItem<T>) => {
+      const name = item.entity.name;
       const alias = item.alias ?? name;
 
-      let queryBuilder: SelectQueryBuilder<{}> = GraphQLQueryManager.createTypeORMQueryBuilder(
-        entityManager,
-        name,
-        alias
-      );
+      let queryBuilder: SelectQueryBuilder<T> = GraphQLQueryManager.createTypeORMQueryBuilder<
+        T
+      >(entityManager, name, alias);
       queryBuilder = this._resolver.createQuery(
         name,
         item.fields,
@@ -224,7 +222,9 @@ export class GraphQLQueryManager {
 
       queryBuilder = item.ejectQueryCallback(queryBuilder);
 
-      let promise;
+      let promise: Promise<
+        T[] | [T[], number] | PagingResult<T> | T | undefined
+      >;
       switch (item.type) {
         case LoaderQueryType.MANY:
           promise = queryBuilder.getMany();
@@ -236,9 +236,13 @@ export class GraphQLQueryManager {
           promise = queryBuilder.getOne();
           break;
         case LoaderQueryType.RELAY:
-          promise = Promise.resolve(undefined);
+          const paginator = buildPaginator({
+            entity: item.entity,
+          });
+          promise = paginator.paginate(queryBuilder);
           break;
       }
+
       return promise
         .then(item.resolve, item.reject)
         .finally(() => this._cache.delete(item.key));
@@ -253,10 +257,10 @@ export class GraphQLQueryManager {
    * @param conditions
    * @private
    */
-  private _addAndWhereConditions(
-    qb: SelectQueryBuilder<{}>,
+  private _addAndWhereConditions<T>(
+    qb: SelectQueryBuilder<T>,
     conditions: Array<WhereExpression>
-  ): SelectQueryBuilder<{}> {
+  ): SelectQueryBuilder<T> {
     const initialWhere = conditions.shift();
     if (!initialWhere) return qb;
 
@@ -281,10 +285,10 @@ export class GraphQLQueryManager {
    * @param conditions
    * @private
    */
-  private _addOrWhereConditions(
-    qb: SelectQueryBuilder<{}>,
+  private _addOrWhereConditions<T>(
+    qb: SelectQueryBuilder<T>,
     conditions: Array<WhereExpression>
-  ): SelectQueryBuilder<{}> {
+  ): SelectQueryBuilder<T> {
     conditions.forEach((condition) => {
       const { where, params } = GraphQLQueryManager._breakDownWhereExpression(
         condition
@@ -302,11 +306,11 @@ export class GraphQLQueryManager {
    * @param searchConditions
    * @private
    */
-  private _addSearchConditions(
-    qb: SelectQueryBuilder<{}>,
+  private _addSearchConditions<T>(
+    qb: SelectQueryBuilder<T>,
     alias: string,
     searchConditions: Array<SearchOptions>
-  ): SelectQueryBuilder<{}> {
+  ): SelectQueryBuilder<T> {
     // Add an andWhere for each formatted search condition
     this._formatSearchConditions(searchConditions, alias).forEach(
       ({ query, params }) => {
@@ -360,10 +364,10 @@ export class GraphQLQueryManager {
    * @param pagination
    * @private
    */
-  private _addPagination(
-    queryBuilder: SelectQueryBuilder<{}>,
+  private _addPagination<T>(
+    queryBuilder: SelectQueryBuilder<T>,
     pagination: QueryPagination | undefined
-  ): SelectQueryBuilder<{}> {
+  ): SelectQueryBuilder<T> {
     if (pagination) {
       queryBuilder = queryBuilder.offset(pagination.offset);
       queryBuilder = queryBuilder.limit(pagination.limit);
@@ -377,10 +381,10 @@ export class GraphQLQueryManager {
    * @param order
    * @private
    */
-  private _addOrderByCondition(
-    queryBuilder: SelectQueryBuilder<{}>,
+  private _addOrderByCondition<T>(
+    queryBuilder: SelectQueryBuilder<T>,
     order: OrderByCondition
-  ): SelectQueryBuilder<{}> {
+  ): SelectQueryBuilder<T> {
     return queryBuilder.orderBy(order);
   }
 
@@ -392,11 +396,11 @@ export class GraphQLQueryManager {
    * @param selectFields
    * @private
    */
-  private _addSelectFields(
-    queryBuilder: SelectQueryBuilder<{}>,
+  private _addSelectFields<T>(
+    queryBuilder: SelectQueryBuilder<T>,
     alias: string,
     selectFields: Array<string>
-  ): SelectQueryBuilder<{}> {
+  ): SelectQueryBuilder<T> {
     selectFields.forEach((field) => {
       queryBuilder = queryBuilder.addSelect(
         this._formatter.columnSelection(alias, field),

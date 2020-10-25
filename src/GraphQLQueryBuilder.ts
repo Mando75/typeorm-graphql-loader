@@ -10,7 +10,12 @@ import {
   WhereExpression,
 } from "./types";
 import { GraphQLQueryManager } from "./GraphQLQueryManager";
-import { BaseEntity, ObjectLiteral, OrderByCondition } from "typeorm";
+import {
+  BaseEntity,
+  ObjectLiteral,
+  ObjectType,
+  OrderByCondition,
+} from "typeorm";
 import { GraphQLInfoParser } from "./lib/GraphQLInfoParser";
 import { LoaderQueryType } from "./enums/LoaderQueryType";
 
@@ -25,11 +30,11 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   private _parser: GraphQLInfoParser = new GraphQLInfoParser();
   private _context: any;
   private _ejectQueryCallback: EjectQueryCallback<T> | null = null;
-  private _connectionArgs: ConnectionArgs | null = null;
+  private _connectionArgs: ConnectionArgs<T> | null = null;
 
   constructor(
     private _manager: GraphQLQueryManager,
-    private _entity: Function | string,
+    private _entity: ObjectType<T>,
     private _alias?: string
   ) {}
 
@@ -257,7 +262,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   }
 
   public createConnection(
-    connectionArgs: ConnectionArgs
+    connectionArgs: ConnectionArgs<T>
   ): GraphQLQueryBuilder<T> {
     const { first, last, before, after } = connectionArgs;
     if ((first && first < 0) || (last && last < 0)) {
