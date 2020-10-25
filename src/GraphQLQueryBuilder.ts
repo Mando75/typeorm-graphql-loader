@@ -12,6 +12,7 @@ import {
 import { GraphQLQueryManager } from "./GraphQLQueryManager";
 import { BaseEntity, ObjectLiteral, OrderByCondition } from "typeorm";
 import { GraphQLInfoParser } from "./lib/GraphQLInfoParser";
+import { LoaderQueryType } from "./enums/LoaderQueryType";
 
 export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   private _info: GraphQLEntityFields | null = null;
@@ -353,7 +354,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    * @throws Error Missing info argument
    */
   public async loadOne(): Promise<InstanceType<T> | undefined> {
-    return this._genericLoad<false, false>(false, false);
+    return this._genericLoad<LoaderQueryType.SINGLE>(LoaderQueryType.SINGLE);
   }
 
   /**
@@ -376,7 +377,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    * @throws Error Missing info argument
    */
   public async loadMany(): Promise<InstanceType<T>[]> {
-    return this._genericLoad<true, false>(true, false);
+    return this._genericLoad<LoaderQueryType.MANY>(LoaderQueryType.MANY);
   }
 
   /**
@@ -392,25 +393,39 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
         "Must provide pagination object before calling load paginated"
       );
     }
-    return this._genericLoad<true, true>(true, true);
+    return this._genericLoad<LoaderQueryType.PAGINATED>(
+      LoaderQueryType.PAGINATED
+    );
+  }
+
+  /**
+   * TODO
+   */
+  public async loadConnection(): Promise<undefined> {
+    if (!this._connectionArgs) {
+      throw new Error(
+        "Must provide connection arguments before calling load connection"
+      );
+    }
+    return this._genericLoad<LoaderQueryType.RELAY>(LoaderQueryType.RELAY);
   }
 
   /**
    * A generic loader to handle duplicate logic
    * from all the load methods.
    * Makes sure all the options are passed to the manager
-   * @param many
-   * @param paginate
+   * @param type
    */
-  private async _genericLoad<U extends boolean, V extends boolean>(
-    many: U,
-    paginate: V
+  private async _genericLoad<U extends LoaderQueryType>(
+    type: LoaderQueryType
   ): Promise<
-    V extends true
+    U extends LoaderQueryType.PAGINATED
       ? [InstanceType<T>[], number]
-      : U extends true
+      : U extends LoaderQueryType.MANY
       ? InstanceType<T>[]
-      : InstanceType<T> | undefined
+      : U extends LoaderQueryType.SINGLE
+      ? InstanceType<T> | undefined
+      : undefined
   > {
     // we need to validate an info object
     this._validateInfo(this._info);
@@ -431,14 +446,14 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
       reject: (reason?: any) => void
     ) => {
       this._manager.addQueueItem({
-        many,
+        type,
         key,
         fields,
         predicates: this._getQueryPredicates(),
         resolve,
         reject,
         entity: this._entity,
-        pagination: paginate ? this._pagination : undefined,
+        pagination: this._pagination,
         alias: this._alias,
         context: this._context,
         ejectQueryCallback: this._ejectQueryCallback ?? ((qb) => qb),

@@ -6,6 +6,7 @@ import {
 } from "typeorm";
 import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
 import { LoaderSearchMethod } from "./enums/LoaderSearchMethod";
+import { LoaderQueryType } from "./enums/LoaderQueryType";
 
 /*****************************************************
  * LOADER TYPES
@@ -243,7 +244,7 @@ export interface QueryPredicates {
  * @hidden
  */
 export interface QueueItem {
-  many: boolean;
+  type: LoaderQueryType;
   key: string;
   fields: GraphQLEntityFields | null;
   predicates: QueryPredicates;

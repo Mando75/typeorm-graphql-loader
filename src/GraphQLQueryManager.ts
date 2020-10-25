@@ -19,6 +19,7 @@ import {
 import { GraphQLQueryResolver } from "./GraphQLQueryResolver";
 import { Formatter } from "./lib/Formatter";
 import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
+import { LoaderQueryType } from "./enums/LoaderQueryType";
 
 /**
  * The query manager for the loader. Is an internal class
@@ -217,17 +218,26 @@ export class GraphQLQueryManager {
         item.predicates.order
       );
 
-      queryBuilder = this._addPagination(queryBuilder, item.pagination);
+      if (item.type === LoaderQueryType.PAGINATED) {
+        queryBuilder = this._addPagination(queryBuilder, item.pagination);
+      }
 
       queryBuilder = item.ejectQueryCallback(queryBuilder);
 
       let promise;
-      if (item.pagination) {
-        promise = queryBuilder.getManyAndCount();
-      } else if (item.many) {
-        promise = queryBuilder.getMany();
-      } else {
-        promise = queryBuilder.getOne();
+      switch (item.type) {
+        case LoaderQueryType.MANY:
+          promise = queryBuilder.getMany();
+          break;
+        case LoaderQueryType.PAGINATED:
+          promise = queryBuilder.getManyAndCount();
+          break;
+        case LoaderQueryType.SINGLE:
+          promise = queryBuilder.getOne();
+          break;
+        case LoaderQueryType.RELAY:
+          promise = Promise.resolve(undefined);
+          break;
       }
       return promise
         .then(item.resolve, item.reject)
