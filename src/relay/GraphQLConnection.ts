@@ -1,6 +1,5 @@
 import { GraphQLConnectionEdge } from "./GraphQLConnectionEdge";
-
-interface PageInfo {}
+import { PageInfo } from "../types";
 
 export class GraphQLConnection<T> {
   public pageInfo: PageInfo;

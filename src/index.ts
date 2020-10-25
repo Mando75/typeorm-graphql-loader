@@ -11,6 +11,7 @@ export {
   EjectQueryCallback,
   GraphQLEntityFields,
   GraphQLFieldArgs,
+  PageInfo,
 } from "./types";
 export { GraphQLQueryBuilder } from "./GraphQLQueryBuilder";
 export { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";

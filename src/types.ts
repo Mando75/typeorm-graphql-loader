@@ -7,20 +7,10 @@ import {
 import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
 import { LoaderSearchMethod } from "./enums/LoaderSearchMethod";
 
-export type WhereArgument = string | Brackets;
 
-/**
- * @hidden
- */
-export type WhereExpression = LoaderWhereExpression | Brackets;
-
-/**
- * @hidden
- */
-export interface LoaderWhereExpression {
-  condition: string;
-  params?: ObjectLiteral;
-}
+/*****************************************************
+ * LOADER TYPES
+ *****************************************************/
 
 export interface LoaderOptions {
   /**
@@ -45,6 +35,26 @@ export interface LoaderOptions {
    * Defaults to Infinity
    */
   maxQueryDepth?: number;
+}
+
+
+/****************************************************
+ * QUERY BUILDER TYPES
+ ****************************************************/
+
+export type WhereArgument = string | Brackets;
+
+/**
+ * @hidden
+ */
+export type WhereExpression = LoaderWhereExpression | Brackets;
+
+/**
+ * @hidden
+ */
+export interface LoaderWhereExpression {
+  condition: string;
+  params?: ObjectLiteral;
 }
 
 export interface SearchOptions {
@@ -81,6 +91,10 @@ export interface QueryPagination {
    */
   offset: number;
 }
+
+/**************************************************
+ * DECORATOR TYPES
+ **************************************************/
 
 /**
  * This function will be called for each field at query resolution. The function will receive
@@ -212,6 +226,10 @@ export type EjectQueryCallback<T> = <T>(
   qb: SelectQueryBuilder<T>
 ) => SelectQueryBuilder<T>;
 
+/****************************************************
+ * MANGER/RESOLVER TYPES
+ ****************************************************/
+
 /**
  * @hidden
  */
@@ -267,3 +285,11 @@ export type GraphQLEntityFields = {
     arguments?: GraphQLFieldArgs;
   };
 };
+
+/*****************************************************
+ * RELAY TYPES
+ *****************************************************/
+
+export interface PageInfo {
+
+}
