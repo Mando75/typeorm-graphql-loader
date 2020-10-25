@@ -1,5 +1,6 @@
 import { GraphQLResolveInfo } from "graphql";
 import {
+  ConnectionArgs,
   EjectQueryCallback,
   GraphQLEntityFields,
   QueryPagination,
@@ -23,6 +24,7 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   private _parser: GraphQLInfoParser = new GraphQLInfoParser();
   private _context: any;
   private _ejectQueryCallback: EjectQueryCallback<T> | null = null;
+  private _connectionArgs: ConnectionArgs | null = null;
 
   constructor(
     private _manager: GraphQLQueryManager,
@@ -250,6 +252,20 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
    */
   public paginate(pagination: QueryPagination): GraphQLQueryBuilder<T> {
     this._pagination = pagination;
+    return this;
+  }
+
+  public createConnection(
+    connectionArgs: ConnectionArgs
+  ): GraphQLQueryBuilder<T> {
+    const { first, last, before, after } = connectionArgs;
+    if ((first && first < 0) || (last && last < 0)) {
+      throw new Error("first and last must be greater than 0");
+    } else if (!before && !after) {
+      throw new Error("Must pass a before or after cursor");
+    }
+
+    this._connectionArgs = connectionArgs;
     return this;
   }
 

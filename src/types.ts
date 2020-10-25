@@ -7,7 +7,6 @@ import {
 import { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
 import { LoaderSearchMethod } from "./enums/LoaderSearchMethod";
 
-
 /*****************************************************
  * LOADER TYPES
  *****************************************************/
@@ -36,7 +35,6 @@ export interface LoaderOptions {
    */
   maxQueryDepth?: number;
 }
-
 
 /****************************************************
  * QUERY BUILDER TYPES
@@ -290,6 +288,11 @@ export type GraphQLEntityFields = {
  * RELAY TYPES
  *****************************************************/
 
-export interface PageInfo {
-
+export interface ConnectionArgs {
+  first?: number;
+  last?: number;
+  after?: string;
+  before?: string;
 }
+
+export interface PageInfo {}

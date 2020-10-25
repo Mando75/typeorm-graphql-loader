@@ -12,6 +12,7 @@ export {
   GraphQLEntityFields,
   GraphQLFieldArgs,
   PageInfo,
+  ConnectionArgs,
 } from "./types";
 export { GraphQLQueryBuilder } from "./GraphQLQueryBuilder";
 export { LoaderNamingStrategyEnum } from "./enums/LoaderNamingStrategy";
