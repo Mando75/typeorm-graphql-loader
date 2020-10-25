@@ -41,7 +41,8 @@
   },
   "homepage": "https://gql-loader.bmuller.net",
   "dependencies": {
-    "graphql-parse-resolve-info": "^4.9.0"
+    "graphql-parse-resolve-info": "^4.9.0",
+    "typeorm-cursor-pagination": "^0.4.1"
   },
   "devDependencies": {
     "@types/chai": "^4.2.3",

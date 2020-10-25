@@ -3242,6 +3242,11 @@ typedoc@^0.19.2:
     shelljs "^0.8.4"
     typedoc-default-themes "^0.11.4"
 
+typeorm-cursor-pagination@^0.4.1:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/typeorm-cursor-pagination/-/typeorm-cursor-pagination-0.4.1.tgz#2bc1cb258f45a065c87d21f9f4ab3eab1efdbcd8"
+  integrity sha512-E/ySil8sjt6tkKWQrCDO+JNQXQ+XM1rjZDv/bfD0U3o5XIIVR276b3f8hFR7IWVT1K92DLQvsxyurWMNqDDfhg==
+
 typeorm@^0.2.19:
   version "0.2.26"
   resolved "https://registry.yarnpkg.com/typeorm/-/typeorm-0.2.26.tgz#1027afa13f89ab98bc3d07675fe7268bbefa55a7"
