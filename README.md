@@ -118,12 +118,6 @@ Currently, the loader only supports offset pagination. I would like to add the a
 
 [Track Progress](https://gitlab.com/Mando75/typeorm-graphql-loader/-/issues/8)
 
-### Remap Field Names
-
-With the introduction of the `ConfigureLoader` decorator, I will soon be able to add the ability to remap GraphQL fields to entity fields. For example, say your TypeORM entity has a property called `computedTotal`, but you want that property to map to a field called `total` in your GraphQL schema. Currently, there is no way to accomplish that with the loader. I would like to add an option to the configuration decorator to perform such a mapping. 
-
-[Track Progress](https://gitlab.com/Mando75/typeorm-graphql-loader/-/issues/11)
-
 ## Contributing <a name="Contributing">
 
 This project is developed on [GitLab.com](https://gitlab.com/Mando75/typeorm-graphql-loader). However, I realize that many developers use GitHub as their primary development platform. If you do not use and do not wish to create a GitLab account, you can open an issue in the mirrored [GitHub Repository](https://github.com/Mando75/typeorm-graphql-loader). Please note that all merge requests must be done via GitLab as the GitHub repo is a read-only mirror. 
