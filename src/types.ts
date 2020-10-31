@@ -239,6 +239,9 @@ export interface LoaderFieldConfiguration {
   sqlJoinAlias?: string;
 }
 
+/**
+ * @hidden
+ */
 export type RequireOrIgnoreSettings = Map<
   string,
   boolean | FieldConfigurationPredicate | undefined

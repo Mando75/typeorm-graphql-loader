@@ -1,6 +1,12 @@
 # Change Log
 
-## [1.70]
+## [1.7.1]
+
+### Added
+
+Add `sqlJoinAlias` option to `ConfigureLoader` so users can specify the alias of a given table's join in the SQL query. 
+
+## [1.7.0]
 
 ### Fixed
 
