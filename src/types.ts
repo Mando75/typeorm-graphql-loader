@@ -207,7 +207,7 @@ export interface LoaderFieldConfiguration {
    * This is useful if you are wishing to add custom select/where logic
    * to an ejected query.
    */
-  sqlJoinAlias?: SQLJoinAliasCallback | string;
+  sqlJoinAlias?: string;
 }
 
 export type RequireOrIgnoreSettings = Map<
@@ -274,5 +274,3 @@ export type GraphQLEntityFields = {
     arguments?: GraphQLFieldArgs;
   };
 };
-
-export type SQLJoinAliasCallback = (parent: string) => string;

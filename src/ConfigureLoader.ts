@@ -4,7 +4,6 @@ import {
   GraphQLEntityFields,
   LoaderFieldConfiguration,
   RequireOrIgnoreSettings,
-  SQLJoinAliasCallback,
 } from "./types";
 
 /**
@@ -54,9 +53,7 @@ const defaultLoaderFieldConfiguration: LoaderFieldConfiguration = {
  *
  * @param options - See {@link LoaderFieldConfiguration}
  */
-export const ConfigureLoader = (
-  options: LoaderFieldConfiguration = defaultLoaderFieldConfiguration
-) => {
+export const ConfigureLoader = (options: LoaderFieldConfiguration) => {
   const { required, ignore, graphQLName, sqlJoinAlias } = {
     ...defaultLoaderFieldConfiguration,
     ...options,
@@ -92,7 +89,7 @@ export const ConfigureLoader = (
 
     const sqlJoinAliases: Map<
       string,
-      SQLJoinAliasCallback | string | undefined
+       string | undefined
     > =
       Reflect.getMetadata(keys.SQL_JOIN_ALIAS, target.constructor) ?? new Map();
     sqlJoinAliases.set(propertyKey, sqlJoinAlias);
@@ -129,16 +126,6 @@ export const getGraphQLFieldNames = (target: any): Map<string, string> =>
   Reflect.getMetadata(keys.GRAPHQL_NAME, target) ?? new Map();
 
 /**
- * Get the user-defined table aliases for a given entity
- * @hidden
- * @param target
- */
-export const getSQLJoinAliases = (
-  target: any
-): Map<string, SQLJoinAliasCallback | undefined> =>
-  Reflect.getMetadata(keys.SQL_JOIN_ALIAS, target) ?? new Map();
-
-/**
  * Determines if predicate needs to be called as a function and passes
  * the proper arguments if so
  * @hidden
@@ -158,3 +145,14 @@ export const resolvePredicate = (
         selection ?? {}
       )
     : predicate;
+
+/**
+ * Get the user-defined table aliases for a given entity
+ * @hidden
+ * @param target
+ */
+export const getSQLJoinAliases = (
+  target: any
+): Map<string, string | undefined> =>
+  Reflect.getMetadata(keys.SQL_JOIN_ALIAS, target) ?? new Map();
+

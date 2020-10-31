@@ -8,6 +8,7 @@ import {
   getGraphQLFieldNames,
   getLoaderIgnoredFields,
   getLoaderRequiredFields,
+  getSQLJoinAliases,
   resolvePredicate,
 } from "./ConfigureLoader";
 import * as crypto from "crypto";
@@ -305,6 +306,7 @@ export class GraphQLQueryResolver {
     const ignoredFields = getLoaderIgnoredFields(meta.target);
     const requiredFields = getLoaderRequiredFields(meta.target);
     const graphQLFieldNames = getGraphQLFieldNames(meta.target);
+    const sqlJoinAliases = getSQLJoinAliases(meta.target);
 
     relations
       .filter(
@@ -320,11 +322,16 @@ export class GraphQLQueryResolver {
         // Join each relation that was queried
         const relationGraphQLName =
           graphQLFieldNames.get(relation.propertyName) ?? relation.propertyName;
-        const childAlias = GraphQLQueryResolver._generateChildHash(
-          alias,
-          relation.propertyName,
-          10
-        );
+
+        const childAlias =
+          // Check if custom alias was given
+          sqlJoinAliases.get(relation.propertyName) ??
+          // fallback to auto generated hash
+          GraphQLQueryResolver._generateChildHash(
+            alias,
+            relation.propertyName,
+            10
+          );
 
         if (
           resolvePredicate(
