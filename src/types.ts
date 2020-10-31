@@ -205,7 +205,8 @@ export interface LoaderFieldConfiguration {
   /**
    * Manually specify the alias of a table during the SQL join.
    * This is useful if you are wishing to add custom select/where logic
-   * to an ejected query.
+   * to an ejected query. Please note that custom aliases will be applied to _relations only_,
+   * and will not affect how the loader selects columns or embedded entities.
    *
    * @example
    * ```typescript
