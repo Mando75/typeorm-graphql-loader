@@ -87,6 +87,22 @@ export class DecoratorTestResolver {
     return record;
   }
 
+  @Query((type) => DecoratorTest)
+  customSQLAlias(
+    @Arg("relationId", (type) => Int) relationId: number,
+    @Ctx("loader") loader: GraphQLDatabaseLoader,
+    @Info() info: GraphQLResolveInfo
+  ) {
+    return loader
+      .loadEntity(DecoratorTest, "dt")
+      .info(info)
+      .context({ requireRelation: true })
+      .ejectQueryBuilder((qb) =>
+        qb.where("user_named_alias.id = :relationId", { relationId })
+      )
+      .loadOne();
+  }
+
   @FieldResolver()
   remappedField(@Root() parent: DecoratorTest): string {
     return parent.testRemappedField;
