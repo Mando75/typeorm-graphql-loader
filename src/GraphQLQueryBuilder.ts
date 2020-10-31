@@ -18,6 +18,7 @@ import {
 } from "typeorm";
 import { GraphQLInfoParser } from "./lib/GraphQLInfoParser";
 import { LoaderQueryType } from "./enums/LoaderQueryType";
+import { PagingResult } from "typeorm-cursor-pagination";
 
 export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   private _info: GraphQLEntityFields | null = null;
@@ -406,13 +407,16 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   /**
    * TODO
    */
-  public async loadConnection(): Promise<undefined> {
+  public async loadConnection(): Promise<any> {
     if (!this._connectionArgs) {
       throw new Error(
         "Must provide connection arguments before calling load connection"
       );
     }
-    return this._genericLoad<LoaderQueryType.RELAY>(LoaderQueryType.RELAY);
+    const { data, cursor } = await this._genericLoad<LoaderQueryType.RELAY>(
+      LoaderQueryType.RELAY
+    );
+    return data;
   }
 
   /**
@@ -428,9 +432,9 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
       ? [InstanceType<T>[], number]
       : U extends LoaderQueryType.MANY
       ? InstanceType<T>[]
-      : U extends LoaderQueryType.SINGLE
-      ? InstanceType<T> | undefined
-      : undefined
+      : U extends LoaderQueryType.RELAY
+      ? PagingResult<T>
+      : InstanceType<T> | undefined
   > {
     // we need to validate an info object
     this._validateInfo(this._info);
