@@ -14,6 +14,7 @@ const keys = {
   IGNORE_FIELD: Symbol("gqlLoader:ignoreField"),
   REQUIRED_FIELD: Symbol("gqlLoader:requiredField"),
   GRAPHQL_NAME: Symbol("gqlLoader:graphQLName"),
+  SQL_JOIN_ALIAS: Symbol("gqlLoader:sqlJoinAlias"),
 };
 
 /**
@@ -52,10 +53,8 @@ const defaultLoaderFieldConfiguration: LoaderFieldConfiguration = {
  *
  * @param options - See {@link LoaderFieldConfiguration}
  */
-export const ConfigureLoader = (
-  options: LoaderFieldConfiguration = defaultLoaderFieldConfiguration
-) => {
-  const { required, ignore, graphQLName } = {
+export const ConfigureLoader = (options: LoaderFieldConfiguration) => {
+  const { required, ignore, graphQLName, sqlJoinAlias } = {
     ...defaultLoaderFieldConfiguration,
     ...options,
   };
@@ -87,6 +86,18 @@ export const ConfigureLoader = (
       graphQLFieldNames,
       target.constructor
     );
+
+    const sqlJoinAliases: Map<
+      string,
+       string | undefined
+    > =
+      Reflect.getMetadata(keys.SQL_JOIN_ALIAS, target.constructor) ?? new Map();
+    sqlJoinAliases.set(propertyKey, sqlJoinAlias);
+    Reflect.defineMetadata(
+      keys.SQL_JOIN_ALIAS,
+      sqlJoinAliases,
+      target.constructor
+    );
   };
 };
 
@@ -95,31 +106,24 @@ export const ConfigureLoader = (
  * @hidden
  * @param target
  */
-export const getLoaderRequiredFields = (
-  target: any
-): RequireOrIgnoreSettings => {
-  return Reflect.getMetadata(keys.REQUIRED_FIELD, target) ?? new Map();
-};
+export const getLoaderRequiredFields = (target: any): RequireOrIgnoreSettings =>
+  Reflect.getMetadata(keys.REQUIRED_FIELD, target) ?? new Map();
 
 /**
  * Fetch the ignored fields from entity metadata
  * @hidden
  * @param target
  */
-export const getLoaderIgnoredFields = (
-  target: any
-): RequireOrIgnoreSettings => {
-  return Reflect.getMetadata(keys.IGNORE_FIELD, target) ?? new Map();
-};
+export const getLoaderIgnoredFields = (target: any): RequireOrIgnoreSettings =>
+  Reflect.getMetadata(keys.IGNORE_FIELD, target) ?? new Map();
 
 /**
  * Returns mapping of TypeORM entity fields with their GraphQL schema names
  * @hidden
  * @param target
  */
-export const getGraphQLFieldNames = (target: any): Map<string, string> => {
-  return Reflect.getMetadata(keys.GRAPHQL_NAME, target) ?? new Map();
-};
+export const getGraphQLFieldNames = (target: any): Map<string, string> =>
+  Reflect.getMetadata(keys.GRAPHQL_NAME, target) ?? new Map();
 
 /**
  * Determines if predicate needs to be called as a function and passes
@@ -135,5 +139,20 @@ export const resolvePredicate = (
   selection: GraphQLEntityFields | undefined
 ): boolean | undefined =>
   typeof predicate === "function"
-    ? predicate(context, Object.getOwnPropertyNames(selection ?? {}), selection ?? {})
+    ? predicate(
+        context,
+        Object.getOwnPropertyNames(selection ?? {}),
+        selection ?? {}
+      )
     : predicate;
+
+/**
+ * Get the user-defined table aliases for a given entity
+ * @hidden
+ * @param target
+ */
+export const getSQLJoinAliases = (
+  target: any
+): Map<string, string | undefined> =>
+  Reflect.getMetadata(keys.SQL_JOIN_ALIAS, target) ?? new Map();
+

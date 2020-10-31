@@ -201,8 +201,47 @@ export interface LoaderFieldConfiguration {
    * ```
    */
   graphQLName?: string;
+
+  /**
+   * Manually specify the alias of a table during the SQL join.
+   * This is useful if you are wishing to add custom select/where logic
+   * to an ejected query.
+   *
+   * @example
+   * ```typescript
+   * // Entity Class
+   * @Entity()
+   * class User extends BaseEntity {
+   *
+   *   @OneToOne()
+   *   @JoinColumn()
+   *   @ConfigureLoader({ sqlJoinAlias: "user_group", required: context => context.requireGroup })
+   *   @Field(type => Group)
+   *   group: Group;
+   * }
+   *
+   * // Resolvers
+   *
+   * const resolvers = {
+   *   Query: {
+   *     userByGroupIdQuery (root, args, context, info) {
+   *       return context.loader
+   *         .loadEntity(User, 'user')
+   *         .info(info)
+   *         .context({ requireGroup: true })
+   *         .ejectQueryBuilder(qb => qb.where("user_group.id = :groupId", { groupId: args.groupId }))
+   *         .loadMany()
+   *     }
+   *   },
+   * }
+   * ```
+   */
+  sqlJoinAlias?: string;
 }
 
+/**
+ * @hidden
+ */
 export type RequireOrIgnoreSettings = Map<
   string,
   boolean | FieldConfigurationPredicate | undefined

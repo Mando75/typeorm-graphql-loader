@@ -55,6 +55,7 @@ export class DecoratorTest extends BaseEntity {
   @ConfigureLoader({
     ignore: (context: DecoratorContext) => context.ignoreRelation,
     required: (context: DecoratorContext) => context.requireRelation,
+    sqlJoinAlias: "user_named_alias",
   })
   testRelation!: Author;
 

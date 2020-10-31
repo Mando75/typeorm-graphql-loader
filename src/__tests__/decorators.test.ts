@@ -1,7 +1,7 @@
 import * as chai from "chai";
 import { startup, TestHelpers } from "./util/testStartup";
 import "reflect-metadata";
-import { DecoratorTest } from "./entity";
+import { Author, DecoratorTest } from "./entity";
 import { graphql } from "graphql";
 
 const { expect } = chai;
@@ -376,6 +376,47 @@ describe("ConfigureLoader", () => {
 
       expect(result.errors).to.be.undefined;
       expect(result.data?.decoratorTests).to.deep.equal(expected);
+    });
+  });
+
+  describe("user defined join alias", () => {
+    it("can successfully query on a user defined alias", async () => {
+      const { schema, loader, connection } = helpers;
+      const relation = await connection.getRepository(Author).findOne();
+      const entity = await connection
+        .getRepository(DecoratorTest)
+        .createQueryBuilder("dt")
+        .where("dt.testRelationId = :relationId", { relationId: relation?.id })
+        .getOne();
+
+      const query = `
+      query CustomSQLAlias($relationId: Int!) {
+        customSQLAlias(relationId: $relationId) {
+          id
+          createdAt
+          updatedAt
+          testRelation {
+            id
+          }
+        }
+      }
+    `;
+
+      const vars = { relationId: relation?.id };
+
+      const expected = {
+        id: entity?.id,
+        createdAt: entity?.createdAt.toISOString(),
+        updatedAt: entity?.updatedAt.toISOString(),
+        testRelation: {
+          id: relation?.id,
+        },
+      };
+
+      const result = await graphql(schema, query, {}, { loader }, vars);
+
+      expect(result.errors).to.be.undefined;
+      expect(result.data?.customSQLAlias).to.deep.equal(expected);
     });
   });
 });
