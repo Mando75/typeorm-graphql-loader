@@ -201,6 +201,13 @@ export interface LoaderFieldConfiguration {
    * ```
    */
   graphQLName?: string;
+
+  /**
+   * Manually specify the alias of a table during the SQL join.
+   * This is useful if you are wishing to add custom select/where logic
+   * to an ejected query.
+   */
+  sqlJoinAlias?: SQLJoinAliasCallback | string;
 }
 
 export type RequireOrIgnoreSettings = Map<
@@ -267,3 +274,6 @@ export type GraphQLEntityFields = {
     arguments?: GraphQLFieldArgs;
   };
 };
+
+
+export type SQLJoinAliasCallback = (parent: string) => string;
