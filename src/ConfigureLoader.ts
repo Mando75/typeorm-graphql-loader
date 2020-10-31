@@ -4,7 +4,7 @@ import {
   GraphQLEntityFields,
   LoaderFieldConfiguration,
   RequireOrIgnoreSettings,
-  SQLAliasCallback,
+  SQLJoinAliasCallback,
 } from "./types";
 
 /**
@@ -15,7 +15,7 @@ const keys = {
   IGNORE_FIELD: Symbol("gqlLoader:ignoreField"),
   REQUIRED_FIELD: Symbol("gqlLoader:requiredField"),
   GRAPHQL_NAME: Symbol("gqlLoader:graphQLName"),
-  SQL_ALIAS: Symbol("gqlLoader:sqlJoinAlias"),
+  SQL_JOIN_ALIAS: Symbol("gqlLoader:sqlJoinAlias"),
 };
 
 /**
@@ -57,7 +57,7 @@ const defaultLoaderFieldConfiguration: LoaderFieldConfiguration = {
 export const ConfigureLoader = (
   options: LoaderFieldConfiguration = defaultLoaderFieldConfiguration
 ) => {
-  const { required, ignore, graphQLName, sqlAlias } = {
+  const { required, ignore, graphQLName, sqlJoinAlias } = {
     ...defaultLoaderFieldConfiguration,
     ...options,
   };
@@ -90,12 +90,17 @@ export const ConfigureLoader = (
       target.constructor
     );
 
-    const sqlAliases: Map<
+    const sqlJoinAliases: Map<
       string,
-      SQLAliasCallback | string | undefined
-    > = Reflect.getMetadata(keys.SQL_ALIAS, target.constructor) ?? new Map();
-    sqlAliases.set(propertyKey, sqlAlias);
-    Reflect.defineMetadata(keys.SQL_ALIAS, sqlAliases, target.constructor);
+      SQLJoinAliasCallback | string | undefined
+    > =
+      Reflect.getMetadata(keys.SQL_JOIN_ALIAS, target.constructor) ?? new Map();
+    sqlJoinAliases.set(propertyKey, sqlJoinAlias);
+    Reflect.defineMetadata(
+      keys.SQL_JOIN_ALIAS,
+      sqlJoinAliases,
+      target.constructor
+    );
   };
 };
 
@@ -128,10 +133,10 @@ export const getGraphQLFieldNames = (target: any): Map<string, string> =>
  * @hidden
  * @param target
  */
-export const getSQLAliases = (
+export const getSQLJoinAliases = (
   target: any
-): Map<string, SQLAliasCallback | undefined> =>
-  Reflect.getMetadata(keys.SQL_ALIAS, target) ?? new Map();
+): Map<string, SQLJoinAliasCallback | undefined> =>
+  Reflect.getMetadata(keys.SQL_JOIN_ALIAS, target) ?? new Map();
 
 /**
  * Determines if predicate needs to be called as a function and passes
