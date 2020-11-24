@@ -93,7 +93,7 @@ export class GraphQLQueryManager {
 
     // Use the query parameters to generate a new hash for caching
     const key = hash
-      .update(JSON.stringify([where, fields]))
+      .update(JSON.stringify([where, fields, alias]))
       .digest()
       .toString("hex");
 
