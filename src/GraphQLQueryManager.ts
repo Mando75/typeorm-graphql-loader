@@ -81,10 +81,12 @@ export class GraphQLQueryManager {
    * the existing promise if found.
    * @param fields
    * @param where
+   * @param alias
    */
   public processQueryMeta(
     fields: GraphQLEntityFields | null,
-    where: Array<WhereExpression>
+    where: Array<WhereExpression>,
+    alias: string
   ): QueryMeta {
     // Create a new md5 hash function
     const hash = crypto.createHash("md5");
