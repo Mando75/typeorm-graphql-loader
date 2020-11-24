@@ -54,15 +54,12 @@ export class GraphQLInfoParser {
         result = this.recursiveInfoParser(childFields[path], false, fieldNames);
       } else {
         Object.entries(childFields).forEach(([fieldName, field]) => {
-          Object.defineProperty(result, fieldName, {
-            value: {
-              children: Object.keys(field).length
-                ? this.recursiveInfoParser(field, false, fieldNames)
-                : {},
-              arguments: field.args,
-            },
-            writable: false,
-          });
+          result[fieldName] = {
+            children: Object.keys(field).length
+              ? this.recursiveInfoParser(field, false, fieldNames)
+              : {},
+            arguments: field.args,
+          };
         });
       }
     });

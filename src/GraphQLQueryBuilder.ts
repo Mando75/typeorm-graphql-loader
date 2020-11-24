@@ -399,9 +399,15 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
     // we need to validate an info object
     this._validateInfo(this._info);
     // Check if this query is already in the cache
+
+    const cacheAlias =
+      this._alias ??
+      (typeof this._entity === "function" ? this._entity.name : this._entity);
+
     const { fields, found, key, item } = this._manager.processQueryMeta(
       this._info,
-      this._andWhereExpressions
+      this._andWhereExpressions,
+      cacheAlias
     );
 
     // if it is we can just return it
