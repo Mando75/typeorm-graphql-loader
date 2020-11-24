@@ -1,5 +1,12 @@
 # Change Log
 
+## [1.7.2]
+
+### Fixed
+
+Bug where different queries can have the same cache key due to identical field sets.
+Can now be avoided by using different table aliases in your resolver.
+
 ## [1.7.1]
 
 ### Added
