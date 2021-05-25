@@ -84,7 +84,7 @@ export class Seeder {
         summary: faker.lorem.paragraph(2),
         publishedDate: faker.date.past(),
         author: authors[i % this.NUM_AUTHORS],
-        isPublished: faker.random.number(10) <= 5,
+        isPublished: faker.datatype.number(10) <= 5,
         publisher: publishers[i % this.NUM_PUBLISHERS],
       };
       books.push(book);
@@ -106,7 +106,7 @@ export class Seeder {
         title: faker.lorem.words(3),
         body: faker.lorem.paragraph(5),
         reviewDate: faker.date.past(),
-        rating: faker.random.number({ min: 0, max: 10 }),
+        rating: faker.datatype.number({ min: 0, max: 10 }),
         reviewerName: faker.name.firstName() + " " + faker.name.lastName(),
         book: books[i % this.NUM_BOOKS],
       };
