@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.7.3]
+
+### Fixed
+
+Updated package dependencies to include security fixes for lodash
+
 ## [1.7.2]
 
 ### Fixed

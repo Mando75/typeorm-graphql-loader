@@ -1,6 +1,6 @@
 {
   "name": "@mando75/typeorm-graphql-loader",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "description": "A dataloader which intelligently selects/joins the fields/relations from your TypeORM entities needed to resolve a GraphQL query",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -79,7 +79,8 @@
     "type-graphql": "^1.0.0",
     "typedoc": "^0.19.2",
     "typeorm": "^0.2.19",
-    "typescript": "^4.0.3"
+    "typescript": "^4.0.3",
+    "yarn-audit-fix": "^5.0.1"
   },
   "peerDependencies": {
     "graphql": ">=15.0.0",
