@@ -33,7 +33,7 @@ export async function startup(
   const connection = await createConnection({
     name: testName,
     type: "sqlite",
-    database: `test_${testName}.sqlite3`,
+    database: `:memory:`,
     synchronize: true,
     dropSchema: true,
     entities: [Author, Book, Publisher, Review, DecoratorTest],
