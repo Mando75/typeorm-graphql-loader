@@ -6,7 +6,7 @@ cache:
 
 before_script:
   - apt-get update -qq && apt-get install
-  - curl -f https://get.pnpm.io/v6.25.js | node - add --global pnpm@6
+  - curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm@6
   - pnpm config set store-dir .pnpm-store
   - pnpm prune
   - pnpm install --frozen-lockfile
