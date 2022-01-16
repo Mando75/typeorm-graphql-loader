@@ -24,6 +24,13 @@ export class GraphQLQueryBuilder<T extends typeof BaseEntity> {
   private _context: any;
   private _ejectQueryCallback: EjectQueryCallback<T> | null = null;
 
+  /**
+   * Internal Constructor
+   * @hidden
+   * @param _manager
+   * @param _entity
+   * @param _alias
+   */
   constructor(
     private _manager: GraphQLQueryManager,
     private _entity: Function | string,

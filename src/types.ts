@@ -290,9 +290,6 @@ export interface QueryMeta {
   item?: Promise<any>;
 }
 
-/**
- * @hidden
- */
 export interface GraphQLFieldArgs {
   [key: string]: any;
 }
