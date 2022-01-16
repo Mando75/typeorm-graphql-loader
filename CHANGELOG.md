@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.7.5]
+
+### Fixed
+
+Update package dependencies to include security fixes for several dev dependencies
+
 ## [1.7.4]
 
 ### Fixed

@@ -1,10 +1,6 @@
 {
-  "inputFiles": ["./src/", "./md/"],
-  "mode": "file",
+  "entryPoints": ["./src/index.ts"],
   "out": "public",
-  "exclude": ["**/*+(index|.spec|.e2e).ts", "**/__tests__/**/*.ts"],
-  "excludeExternals": true,
-  "includeDeclarations": true,
-  "excludePrivate": true,
-  "excludeProtected": true
+  "excludeInternal": true,
+  "excludePrivate": true
 }
