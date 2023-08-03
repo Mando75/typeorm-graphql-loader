@@ -60,7 +60,7 @@
     "chai-spies": "^1.0.0",
     "chai-things": "^0.2.0",
     "chance": "^1.1.8",
-    "class-validator": "^0.13.2",
+    "class-validator": "^0.14.0",
     "deep-equal-in-any-order": "^1.1.15",
     "eslint": "^8.6.0",
     "eslint-plugin-prettier": "^4.0.0",
